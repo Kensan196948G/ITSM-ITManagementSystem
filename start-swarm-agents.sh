@@ -25,35 +25,38 @@ echo ""
 # ClaudeCodeを起動（ruv-swarm MCPを使用）
 claude code --dangerously-skip-permissions << 'EOF'
 # スウォーム初期化
-mcp__ruv-swarm__swarm_init --topology hierarchical --maxAgents 6 --strategy specialized
+mcp__ruv-swarm__swarm_init topology=hierarchical maxAgents=6 strategy=specialized
 
-# DAA (Decentralized Autonomous Agents) 初期化
-mcp__ruv-swarm__daa_init --enableCoordination true --enableLearning true --persistenceMode auto
+# 基本エージェント作成（ruv-swarm標準）
+mcp__ruv-swarm__agent_spawn type=coordinator name="itsm-cto" capabilities=["architecture","security","design"]
 
-# 6つのエージェントを作成
-mcp__ruv-swarm__daa_agent_create --id "itsm-cto" --cognitivePattern "systems" --capabilities '["architecture", "security", "design"]' --enableMemory true
+mcp__ruv-swarm__agent_spawn type=coder name="itsm-devapi" capabilities=["backend","api","database"]
 
-mcp__ruv-swarm__daa_agent_create --id "itsm-devapi" --cognitivePattern "convergent" --capabilities '["backend", "api", "database"]' --enableMemory true
+mcp__ruv-swarm__agent_spawn type=coder name="itsm-devui" capabilities=["frontend","ui","ux"]
 
-mcp__ruv-swarm__daa_agent_create --id "itsm-devui" --cognitivePattern "divergent" --capabilities '["frontend", "ui", "ux"]' --enableMemory true
+mcp__ruv-swarm__agent_spawn type=analyst name="itsm-qa" capabilities=["quality","testing","validation"]
 
-mcp__ruv-swarm__daa_agent_create --id "itsm-qa" --cognitivePattern "critical" --capabilities '["quality", "testing", "validation"]' --enableMemory true
+mcp__ruv-swarm__agent_spawn type=researcher name="itsm-tester" capabilities=["automation","testing","ci"]
 
-mcp__ruv-swarm__daa_agent_create --id "itsm-tester" --cognitivePattern "convergent" --capabilities '["automation", "testing", "ci"]' --enableMemory true
+mcp__ruv-swarm__agent_spawn type=optimizer name="itsm-manager" capabilities=["coordination","monitoring","management"]
 
-mcp__ruv-swarm__daa_agent_create --id "itsm-manager" --cognitivePattern "adaptive" --capabilities '["coordination", "monitoring", "management"]' --enableMemory true
+# エージェント一覧確認
+mcp__ruv-swarm__agent_list filter=all
 
 # スウォーム状態確認
-mcp__ruv-swarm__swarm_status --verbose true
+mcp__ruv-swarm__swarm_status verbose=true
 
 # 開発タスクオーケストレーション開始
-mcp__ruv-swarm__task_orchestrate --task "ITSM準拠のIT運用ツール自動開発を6エージェント並列で実行" --strategy adaptive --priority high
+mcp__ruv-swarm__task_orchestrate task="ITSM準拠のIT運用ツール自動開発を6エージェント並列で実行" strategy=adaptive priority=high maxAgents=6
 
-# DAA学習状況確認
-mcp__ruv-swarm__daa_learning_status --detailed true
+# タスク進行状況確認
+mcp__ruv-swarm__task_status detailed=true
+
+# エージェントメトリクス確認
+mcp__ruv-swarm__agent_metrics metric=all
 
 # 24時間監視開始
-mcp__ruv-swarm__swarm_monitor --duration 86400 --interval 60
+mcp__ruv-swarm__swarm_monitor duration=86400 interval=60
 EOF
 
 echo ""
