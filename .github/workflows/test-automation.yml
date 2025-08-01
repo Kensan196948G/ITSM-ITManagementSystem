@@ -164,10 +164,10 @@ jobs:
     
     - name: Install Playwright
       run: |
-        playwright install chromium
+        python -m playwright install chromium
         sudo apt-get update
         sudo apt-get install -y libasound2t64 libatk-bridge2.0-0 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libxss1 libasound2-dev
-        playwright install-deps chromium
+        python -m playwright install-deps chromium
     
     - name: Create test environment
       run: |
