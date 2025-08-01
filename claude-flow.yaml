@@ -1,0 +1,13 @@
+swarm:
+  id: swarm-itsm-dev
+  name: ITSM-ITmanagementSystem
+  objective: ITSM準拠のIT運用ツールを並列・自動開発する
+  queen_type: strategic
+  consensus: majority
+  agents:
+    - file: .claude/agents/ITSM-CTO.md
+    - file: .claude/agents/ITSM-Manager.md
+    - file: .claude/agents/ITSM-DevAPI.md
+    - file: .claude/agents/ITSM-DevUI.md
+    - file: .claude/agents/ITSM-QA.md
+    - file: .claude/agents/ITSM-Tester.md

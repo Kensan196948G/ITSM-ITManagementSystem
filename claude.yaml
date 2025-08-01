@@ -1,0 +1,45 @@
+swarm:
+  id: swarm-itsm-dev
+  objective: "ITSMシステムの自動化開発と検証ループ構築"
+  topology: hierarchical
+  strategy: parallel
+  queen:
+    type: strategic
+  consensus: majority
+  agents:
+    - name: "@cto"
+      file: "docs/ITSM-CTO.md"
+      hooks:
+        pre-task: "npx claude-flow hooks pre-task --description 'CTO設計開始'"
+        post-edit: "npx claude-flow hooks post-edit --file 'docs/ITSM-CTO.md'"
+        post-task: "npx claude-flow hooks post-task --task-id 'cto-design'"
+    - name: "@devapi"
+      file: "docs/ITSM-DevAPI.md"
+      hooks:
+        pre-task: "npx claude-flow hooks pre-task --description 'API実装開始'"
+        post-edit: "npx claude-flow hooks post-edit --file 'docs/ITSM-DevAPI.md'"
+        post-task: "npx claude-flow hooks post-task --task-id 'devapi-impl'"
+    - name: "@devui"
+      file: "docs/ITSM-DevUI.md"
+      hooks:
+        pre-task: "npx claude-flow hooks pre-task --description 'UI設計・実装開始'"
+        post-edit: "npx claude-flow hooks post-edit --file 'docs/ITSM-DevUI.md'"
+        post-task: "npx claude-flow hooks post-task --task-id 'devui-design'"
+    - name: "@qa"
+      file: "docs/ITSM-QA.md"
+      hooks:
+        pre-task: "npx claude-flow hooks pre-task --description 'QAレビュー開始'"
+        post-edit: "npx claude-flow hooks post-edit --file 'docs/ITSM-QA.md'"
+        post-task: "npx claude-flow hooks post-task --task-id 'qa-check'"
+    - name: "@tester"
+      file: "docs/ITSM-Tester.md"
+      hooks:
+        pre-task: "npx claude-flow hooks pre-task --description '自動テスト開始'"
+        post-edit: "npx claude-flow hooks post-edit --file 'docs/ITSM-Tester.md'"
+        post-task: "npx claude-flow hooks post-task --task-id 'tester-run'"
+    - name: "@manager"
+      file: "docs/ITSM-Manager.md"
+      hooks:
+        pre-task: "npx claude-flow hooks pre-task --description '開発監視と制御開始'"
+        post-edit: "npx claude-flow hooks post-edit --file 'docs/ITSM-Manager.md'"
+        post-task: "npx claude-flow hooks post-task --task-id 'manager-control'"
