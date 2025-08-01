@@ -1,10 +1,10 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles/index.js';
 import Header from '../components/layout/Header';
 import Sidebar from '../components/layout/Sidebar';
-// import ErrorBoundary from '../components/common/ErrorBoundary';
+import ErrorBoundary from '../components/common/ErrorBoundary';
 import { theme } from '../theme/theme';
 
 // Test wrapper
@@ -102,11 +102,12 @@ describe('Sidebar Component', () => {
 describe('ErrorBoundary Component', () => {
   // Mock console.error to avoid noise in tests
   const originalError = console.error;
-  beforeAll(() => {
+  
+  beforeEach(() => {
     console.error = vi.fn();
   });
 
-  afterAll(() => {
+  afterEach(() => {
     console.error = originalError;
   });
 
