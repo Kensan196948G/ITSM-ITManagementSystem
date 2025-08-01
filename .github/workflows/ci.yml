@@ -170,13 +170,13 @@ jobs:
           DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/itsm_test
         run: |
           python -c "
-import sys
-import os
-sys.path.append('/media/kensan/LinuxHDD/ITSM-ITmanagementSystem')
-sys.path.append('/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/backend')
-os.chdir('/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/backend')
-from app.db.init_db import init_db
-init_db()
+          import sys
+          import os
+          sys.path.append('/media/kensan/LinuxHDD/ITSM-ITmanagementSystem')
+          sys.path.append('/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/backend')
+          os.chdir('/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/backend')
+          from app.db.init_db import init_db
+          init_db()
           "
 
       - name: Run API tests
