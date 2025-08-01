@@ -181,9 +181,28 @@ jobs:
         cd backend
         alembic upgrade head
     
+    - name: Build and start frontend server
+      run: |
+        cd frontend
+        npm run build
+        npm run preview &
+        sleep 10
+        echo "FRONTEND_PID=$!" >> $GITHUB_ENV
+    
+    - name: Wait for servers to be ready
+      run: |
+        timeout 60 bash -c 'until curl -s http://localhost:8000/health; do sleep 2; done'
+        timeout 60 bash -c 'until curl -s http://localhost:3000; do sleep 2; done'
+    
     - name: Run E2E tests
       run: |
         npx playwright test
+    
+    - name: Stop servers
+      if: always()
+      run: |
+        if [ -n "$FRONTEND_PID" ]; then kill $FRONTEND_PID || true; fi
+        pkill -f "uvicorn.*8000" || true
     
     - name: Upload Playwright report
       uses: actions/upload-artifact@v4
