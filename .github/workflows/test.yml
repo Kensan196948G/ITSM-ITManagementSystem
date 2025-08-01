@@ -57,7 +57,7 @@ jobs:
         ACCESS_TOKEN_EXPIRE_MINUTES: 30
       run: |
         cd backend
-        pytest --cov=backend/app --cov-report=xml --cov-report=html --html=../tests/reports/pytest_report.html --self-contained-html
+        pytest --cov=app --cov-report=xml --cov-report=html
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
