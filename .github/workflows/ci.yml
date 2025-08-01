@@ -106,7 +106,7 @@ jobs:
             --tb=short \
             --html=../tests/reports/backend-unit-report.html \
             --self-contained-html \
-            --cov=backend/app \
+            --cov=app \
             --cov-report=html:../tests/reports/backend-coverage-html \
             --cov-report=json:../tests/reports/backend-coverage.json \
             --cov-report=term-missing \
