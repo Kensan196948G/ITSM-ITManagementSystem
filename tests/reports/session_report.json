@@ -1,20 +1,112 @@
 {
-  "start_time": "2025-08-01 16:10:11.852488",
+  "start_time": "2025-08-01 20:23:49.331080",
   "test_results": [
     {
-      "test_name": "test_api_timeout_handling",
+      "test_name": "test_homepage_loads",
       "outcome": true,
-      "duration": 0.000704717000189703,
-      "timestamp": "2025-08-01T16:10:11.918618",
+      "duration": 0.004501238996454049,
+      "timestamp": "2025-08-01T20:23:49.531563",
+      "markers": [
+        "e2e"
+      ]
+    },
+    {
+      "test_name": "test_navigation_menu",
+      "outcome": true,
+      "duration": 0.0013912080030422658,
+      "timestamp": "2025-08-01T20:23:49.534961",
+      "markers": [
+        "e2e"
+      ]
+    },
+    {
+      "test_name": "test_incident_creation_form",
+      "outcome": true,
+      "duration": 0.00162010699568782,
+      "timestamp": "2025-08-01T20:23:49.538265",
+      "markers": [
+        "e2e"
+      ]
+    },
+    {
+      "test_name": "test_search_functionality",
+      "outcome": true,
+      "duration": 0.0018838250034605153,
+      "timestamp": "2025-08-01T20:23:49.541818",
+      "markers": [
+        "e2e"
+      ]
+    },
+    {
+      "test_name": "test_responsive_design",
+      "outcome": true,
+      "duration": 0.001050020997354295,
+      "timestamp": "2025-08-01T20:23:49.544539",
+      "markers": [
+        "e2e"
+      ]
+    },
+    {
+      "test_name": "test_form_validation",
+      "outcome": true,
+      "duration": 0.0015196969980024733,
+      "timestamp": "2025-08-01T20:23:49.547708",
       "markers": [
         "slow",
-        "load"
+        "e2e"
+      ]
+    },
+    {
+      "test_name": "test_accessibility_features",
+      "outcome": true,
+      "duration": 0.0011648669969872572,
+      "timestamp": "2025-08-01T20:23:49.550523",
+      "markers": [
+        "e2e"
+      ]
+    },
+    {
+      "test_name": "test_error_handling",
+      "outcome": true,
+      "duration": 0.001141750006354414,
+      "timestamp": "2025-08-01T20:23:49.553313",
+      "markers": [
+        "e2e"
+      ]
+    },
+    {
+      "test_name": "test_console_error_monitoring",
+      "outcome": true,
+      "duration": 31.218926413006557,
+      "timestamp": "2025-08-01T20:24:20.775041",
+      "markers": [
+        "asyncio"
+      ]
+    },
+    {
+      "test_name": "test_continuous_monitoring",
+      "outcome": true,
+      "duration": 0.7575970620018779,
+      "timestamp": "2025-08-01T20:24:21.535367",
+      "markers": [
+        "asyncio"
+      ]
+    },
+    {
+      "test_name": "test_create_incident_complete_workflow",
+      "outcome": false,
+      "duration": 5.01557908399991,
+      "timestamp": "2025-08-01T20:24:27.180033",
+      "markers": [
+        "e2e_critical",
+        "incidents",
+        "e2e"
       ]
     }
   ],
   "coverage": {},
   "performance": {},
-  "end_time": "2025-08-01 16:10:11.919698",
-  "duration": 0.06721,
-  "exit_status": 0
+  "end_time": "2025-08-01 20:24:27.564036",
+  "duration": 38.232956,
+  "exit_status": 1
 }
