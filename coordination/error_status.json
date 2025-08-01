@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-08-01T16:49:29.808232",
+  "frontend_errors": 10,
+  "backend_errors": 9,
+  "api_errors": 8,
+  "network_errors": 10,
+  "total_errors": 19,
+  "pages_checked": 10,
+  "api_endpoints_checked": 8,
+  "last_check_duration": 9.125600814819336,
+  "status": "critical",
+  "consecutive_clean_checks": 0,
+  "required_clean_checks": 3,
+  "completion_status": "in_progress"
+}
