@@ -1,0 +1,49 @@
+{
+  "test_execution_summary": {
+    "generated_at": "2025-08-01T13:46:38.667760",
+    "overall_status": "FAIL",
+    "quality_gate_result": {
+      "passed": false,
+      "success_rate": 92.98,
+      "threshold": 95.0
+    },
+    "metrics": {
+      "total_tests": 57,
+      "passed_tests": 53,
+      "failed_tests": 4,
+      "skipped_tests": 0,
+      "success_rate": 92.98,
+      "total_duration": 30.3
+    },
+    "suite_results": {
+      "all-tests": {
+        "total": 19,
+        "passed": 16,
+        "failed": 3,
+        "skipped": 0,
+        "duration": 10.372995138168335,
+        "success_rate": 84.21052631578947
+      },
+      "fixed-tests": {
+        "total": 19,
+        "passed": 18,
+        "failed": 1,
+        "skipped": 0,
+        "duration": 9.412453651428223,
+        "success_rate": 94.73684210526315
+      },
+      "final-tests": {
+        "total": 19,
+        "passed": 19,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 10.519169569015503,
+        "success_rate": 100.0
+      }
+    },
+    "recommendations": [
+      "テスト成功率が95%を下回っています。失敗したテストを確認し修正してください。",
+      "4件のテストが失敗しています。詳細なログを確認してください。"
+    ]
+  }
+}

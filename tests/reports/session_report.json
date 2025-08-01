@@ -1,11 +1,11 @@
 {
-  "start_time": "2025-08-01 13:41:04.093018",
+  "start_time": "2025-08-01 13:46:03.005006",
   "test_results": [
     {
       "test_name": "test_health_endpoint_success",
       "outcome": true,
-      "duration": 0.0010136789969692472,
-      "timestamp": "2025-08-01T13:41:04.176321",
+      "duration": 0.001005481000902364,
+      "timestamp": "2025-08-01T13:46:03.066263",
       "markers": [
         "api"
       ]
@@ -13,8 +13,8 @@
     {
       "test_name": "test_version_endpoint_success",
       "outcome": true,
-      "duration": 0.0006887559975439217,
-      "timestamp": "2025-08-01T13:41:04.178529",
+      "duration": 0.0008317700012412388,
+      "timestamp": "2025-08-01T13:46:03.068674",
       "markers": [
         "api"
       ]
@@ -22,8 +22,8 @@
     {
       "test_name": "test_health_endpoint_performance",
       "outcome": true,
-      "duration": 1.2002438489980705,
-      "timestamp": "2025-08-01T13:41:05.380410",
+      "duration": 1.1854030219983542,
+      "timestamp": "2025-08-01T13:46:04.255386",
       "markers": [
         "benchmark",
         "api"
@@ -32,8 +32,8 @@
     {
       "test_name": "test_concurrent_health_requests",
       "outcome": true,
-      "duration": 0.00814027399974293,
-      "timestamp": "2025-08-01T13:41:05.390530",
+      "duration": 0.005812441999296425,
+      "timestamp": "2025-08-01T13:46:04.262627",
       "markers": [
         "benchmark",
         "api"
@@ -42,8 +42,8 @@
     {
       "test_name": "test_homepage_loads",
       "outcome": true,
-      "duration": 0.0007109420002961997,
-      "timestamp": "2025-08-01T13:41:05.392444",
+      "duration": 0.0009143429997493513,
+      "timestamp": "2025-08-01T13:46:04.264848",
       "markers": [
         "e2e"
       ]
@@ -51,8 +51,8 @@
     {
       "test_name": "test_navigation_menu",
       "outcome": true,
-      "duration": 0.0008510010011377744,
-      "timestamp": "2025-08-01T13:41:05.394314",
+      "duration": 0.0007313349997275509,
+      "timestamp": "2025-08-01T13:46:04.266675",
       "markers": [
         "e2e"
       ]
@@ -60,8 +60,8 @@
     {
       "test_name": "test_incident_creation_form",
       "outcome": true,
-      "duration": 0.0010055399980046786,
-      "timestamp": "2025-08-01T13:41:05.396341",
+      "duration": 0.0010414270000183024,
+      "timestamp": "2025-08-01T13:46:04.268753",
       "markers": [
         "e2e"
       ]
@@ -69,8 +69,8 @@
     {
       "test_name": "test_search_functionality",
       "outcome": true,
-      "duration": 0.001251612000487512,
-      "timestamp": "2025-08-01T13:41:05.398627",
+      "duration": 0.001218939996761037,
+      "timestamp": "2025-08-01T13:46:04.270998",
       "markers": [
         "e2e"
       ]
@@ -78,17 +78,17 @@
     {
       "test_name": "test_responsive_design",
       "outcome": true,
-      "duration": 0.0007426509982906282,
-      "timestamp": "2025-08-01T13:41:05.400466",
+      "duration": 0.0007194919999164995,
+      "timestamp": "2025-08-01T13:46:04.272780",
       "markers": [
         "e2e"
       ]
     },
     {
       "test_name": "test_form_validation",
-      "outcome": false,
-      "duration": 0.0010113360003742855,
-      "timestamp": "2025-08-01T13:41:05.402659",
+      "outcome": true,
+      "duration": 0.0009754099992278498,
+      "timestamp": "2025-08-01T13:46:04.274941",
       "markers": [
         "slow",
         "e2e"
@@ -97,8 +97,8 @@
     {
       "test_name": "test_accessibility_features",
       "outcome": true,
-      "duration": 0.0007085930010362063,
-      "timestamp": "2025-08-01T13:41:05.466046",
+      "duration": 0.0006894719990668818,
+      "timestamp": "2025-08-01T13:46:04.276714",
       "markers": [
         "e2e"
       ]
@@ -106,17 +106,17 @@
     {
       "test_name": "test_error_handling",
       "outcome": true,
-      "duration": 0.000846179998916341,
-      "timestamp": "2025-08-01T13:41:05.467926",
+      "duration": 0.0007840910002414603,
+      "timestamp": "2025-08-01T13:46:04.278507",
       "markers": [
         "e2e"
       ]
     },
     {
       "test_name": "test_api_concurrent_requests",
-      "outcome": false,
-      "duration": 0.4310765560003347,
-      "timestamp": "2025-08-01T13:41:05.900173",
+      "outcome": true,
+      "duration": 1.0129570579993015,
+      "timestamp": "2025-08-01T13:46:05.292569",
       "markers": [
         "load"
       ]
@@ -124,8 +124,8 @@
     {
       "test_name": "test_api_sustained_load",
       "outcome": true,
-      "duration": 5.048019346999354,
-      "timestamp": "2025-08-01T13:41:11.201699",
+      "duration": 5.0719016319999355,
+      "timestamp": "2025-08-01T13:46:10.366007",
       "markers": [
         "load"
       ]
@@ -133,17 +133,17 @@
     {
       "test_name": "test_database_connection_pool",
       "outcome": true,
-      "duration": 0.10272712799996953,
-      "timestamp": "2025-08-01T13:41:11.308675",
+      "duration": 0.10449103199789533,
+      "timestamp": "2025-08-01T13:46:10.476294",
       "markers": [
         "load"
       ]
     },
     {
       "test_name": "test_memory_usage_under_load",
-      "outcome": false,
-      "duration": 0.035280840998893837,
-      "timestamp": "2025-08-01T13:41:11.345902",
+      "outcome": true,
+      "duration": 0.0025277739987359382,
+      "timestamp": "2025-08-01T13:46:10.480863",
       "markers": [
         "slow",
         "load"
@@ -152,8 +152,8 @@
     {
       "test_name": "test_response_time_under_load",
       "outcome": true,
-      "duration": 0.012113967000914272,
-      "timestamp": "2025-08-01T13:41:11.367534",
+      "duration": 0.019767155001318315,
+      "timestamp": "2025-08-01T13:46:10.502560",
       "markers": [
         "load"
       ]
@@ -161,8 +161,8 @@
     {
       "test_name": "test_json_serialization_benchmark",
       "outcome": true,
-      "duration": 1.0386397910006053,
-      "timestamp": "2025-08-01T13:41:12.407556",
+      "duration": 0.9520865209997282,
+      "timestamp": "2025-08-01T13:46:11.456072",
       "markers": [
         "benchmark",
         "load"
@@ -171,8 +171,8 @@
     {
       "test_name": "test_data_processing_benchmark",
       "outcome": true,
-      "duration": 0.7676313709998794,
-      "timestamp": "2025-08-01T13:41:13.176464",
+      "duration": 0.8189546690009593,
+      "timestamp": "2025-08-01T13:46:12.276324",
       "markers": [
         "benchmark",
         "load"
@@ -181,7 +181,7 @@
   ],
   "coverage": {},
   "performance": {},
-  "end_time": "2025-08-01 13:41:14.467372",
-  "duration": 10.374354,
-  "exit_status": 1
+  "end_time": "2025-08-01 13:46:13.525731",
+  "duration": 10.520725,
+  "exit_status": 0
 }
