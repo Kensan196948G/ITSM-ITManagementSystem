@@ -6,7 +6,6 @@ from .team import Team, TeamMember
 from .incident import Incident, IncidentHistory, IncidentWorkNote, IncidentAttachment, IncidentStatus, Priority, Impact
 from .problem import Problem, ProblemIncident, KnownError, ProblemStatus
 from .change import Change, ChangeApproval, ChangeTask, ChangeType, ChangeStatus, RiskLevel
-from .category import Category
 from .common import AuditLog
 
 __all__ = [
