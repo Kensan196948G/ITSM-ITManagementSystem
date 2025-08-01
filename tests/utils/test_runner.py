@@ -90,7 +90,7 @@ class ITSMTestRunner:
         start_time = time.time()
         
         # Build pytest command
-        cmd = ["python", "-m", "pytest", suite_config["path"], "-v", "--tb=short"]
+        cmd = ["python3", "-m", "pytest", suite_config["path"], "-v", "--tb=short"]
         
         # Add markers
         if "markers" in suite_config:
@@ -380,7 +380,7 @@ class ITSMTestRunner:
                 for violation in qg["violations"]:
                     print(f"    • {violation}")
         
-        overall_status = "SUCCESS" if summary["overall_success"] else "FAILURE"
+        overall_status = "SUCCESS" if summary.get("overall_success", False) else "FAILURE"
         print(f"\n🎯 Overall Result: {overall_status}")
         print("="*60)
 
@@ -447,7 +447,10 @@ def main():
         runner.print_summary()
         
         # Exit with appropriate code
-        if results["summary"]["overall_success"] and results.get("quality_gates", {}).get("passed", True):
+        overall_success = results["summary"].get("overall_success", False)
+        quality_gates_passed = results.get("quality_gates", {}).get("passed", True)
+        
+        if overall_success and quality_gates_passed:
             sys.exit(0)
         else:
             sys.exit(1)

@@ -146,11 +146,15 @@ class TestBasicUI:
             page.click('[data-testid="submit-incident"]')
             
             # Mock validation state change - title filled, description still empty
-            mock_page.is_visible.side_effect = lambda selector: (
-                False if selector == '[data-testid="title-error"]' else
-                True if selector == '[data-testid="description-error"]' else
-                True
-            )
+            def mock_visibility(selector):
+                if selector == '[data-testid="title-error"]':
+                    return False  # Title error should be hidden after filling
+                elif selector == '[data-testid="description-error"]':
+                    return True   # Description error should still be visible
+                else:
+                    return False  # Default to not visible
+            
+            mock_page.is_visible.side_effect = mock_visibility
             
             # Title error should be gone but description error remains
             assert not page.is_visible('[data-testid="title-error"]')

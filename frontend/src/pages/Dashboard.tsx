@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Box,
   Grid,
@@ -16,6 +16,9 @@ import {
   Chip,
   LinearProgress,
   useTheme,
+  Tabs,
+  Tab,
+  Button,
 } from '@mui/material'
 import {
   ConfirmationNumber as TicketIcon,
@@ -27,13 +30,18 @@ import {
   MoreVert as MoreVertIcon,
   PriorityHigh as PriorityHighIcon,
   Assignment as AssignmentIcon,
+  Analytics as AnalyticsIcon,
+  Dashboard as DashboardIcon,
 } from '@mui/icons-material'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Area, AreaChart } from 'recharts'
 import { priorityColors, statusColors } from '../theme/theme'
+import AdvancedAnalytics from '../components/common/AdvancedAnalytics'
 import type { DashboardMetrics, Ticket, ChartDataPoint, TimeSeriesData } from '../types'
 
 const Dashboard: React.FC = () => {
   const theme = useTheme()
+  const [currentTab, setCurrentTab] = useState(0)
+  const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month' | 'quarter'>('week')
 
   // Mock data - 実際の実装ではAPIから取得
   const mockMetrics: DashboardMetrics = {
@@ -204,22 +212,53 @@ const Dashboard: React.FC = () => {
     )
   }
 
+  const handleRefresh = () => {
+    // Simulate data refresh
+    if (window.notifications) {
+      window.notifications.success('データを更新しました')
+    }
+  }
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" sx={{ fontWeight: 600 }}>
           ダッシュボード
         </Typography>
-        <IconButton
-          sx={{
-            bgcolor: 'primary.main',
-            color: 'primary.contrastText',
-            '&:hover': { bgcolor: 'primary.dark' },
-          }}
+        <Button
+          variant="contained"
+          startIcon={<RefreshIcon />}
+          onClick={handleRefresh}
         >
-          <RefreshIcon />
-        </IconButton>
+          更新
+        </Button>
       </Box>
+
+      {/* Dashboard Navigation Tabs */}
+      <Paper sx={{ mb: 3 }}>
+        <Tabs
+          value={currentTab}
+          onChange={(_, newValue) => setCurrentTab(newValue)}
+          variant="fullWidth"
+          indicatorColor="primary"
+          textColor="primary"
+        >
+          <Tab
+            icon={<DashboardIcon />}
+            label="概要"
+            iconPosition="start"
+          />
+          <Tab
+            icon={<AnalyticsIcon />}
+            label="詳細分析"
+            iconPosition="start"
+          />
+        </Tabs>
+      </Paper>
+
+      {/* Tab Content */}
+      {currentTab === 0 ? (
+        <Box>
 
       {/* メトリクスカード */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
@@ -467,6 +506,14 @@ const Dashboard: React.FC = () => {
           </List>
         </CardContent>
       </Card>
+        </Box>
+      ) : (
+        <AdvancedAnalytics
+          metrics={mockMetrics}
+          timeRange={timeRange}
+          onTimeRangeChange={setTimeRange}
+        />
+      )}
     </Box>
   )
 }

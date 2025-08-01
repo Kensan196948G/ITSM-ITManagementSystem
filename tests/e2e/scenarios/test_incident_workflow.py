@@ -3,7 +3,7 @@ E2E tests for incident management workflow
 """
 import pytest
 from playwright.sync_api import Page
-from ..pages.incident_page import IncidentListPage, IncidentCreatePage, IncidentDetailPage
+from tests.e2e.pages.incident_page import IncidentListPage, IncidentCreatePage, IncidentDetailPage
 
 
 @pytest.mark.e2e

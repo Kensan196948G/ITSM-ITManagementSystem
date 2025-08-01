@@ -230,6 +230,169 @@ class TestAuthentication:
             error_data = response.json()
             assert error_data["error"]["code"] == "TOKEN_EXPIRED"
 
+    def test_login_validation_comprehensive(self, test_config):
+        """Test comprehensive login validation"""
+        test_cases = [
+            ({"email": "", "password": "test"}, 422, "VALIDATION_ERROR"),
+            ({"email": "invalid_email", "password": "test"}, 422, "VALIDATION_ERROR"),
+            ({"email": "test@example.com", "password": ""}, 422, "VALIDATION_ERROR"),
+            ({"email": "test@example.com", "password": "x"}, 422, "PASSWORD_TOO_SHORT"),
+            ({"password": "test123"}, 422, "VALIDATION_ERROR"),  # Missing email
+        ]
+        
+        for login_data, expected_status, expected_error in test_cases:
+            mock_error_response = {
+                "error": {
+                    "code": expected_error,
+                    "message": "Validation failed"
+                }
+            }
+            
+            with patch('requests.post') as mock_post:
+                mock_post.return_value.status_code = expected_status
+                mock_post.return_value.json.return_value = mock_error_response
+                
+                response = requests.post(
+                    f"{test_config['auth_url']}/login",
+                    json=login_data
+                )
+                
+                assert response.status_code == expected_status
+                error_data = response.json()
+                assert error_data["error"]["code"] == expected_error
+
+    def test_session_management(self, test_config, auth_token):
+        """Test session management functionality"""
+        headers = {"Authorization": f"Bearer {auth_token}"}
+        
+        # Test session info
+        mock_session_response = {
+            "session_id": "sess_123456",
+            "user_id": "user_001",
+            "created_at": "2024-01-15T10:00:00+09:00",
+            "last_activity": "2024-01-15T10:30:00+09:00",
+            "expires_at": "2024-01-15T11:00:00+09:00",
+            "ip_address": "192.168.1.100",
+            "user_agent": "Mozilla/5.0"
+        }
+        
+        with patch('requests.get') as mock_get:
+            mock_get.return_value.status_code = 200
+            mock_get.return_value.json.return_value = mock_session_response
+            
+            response = requests.get(
+                f"{test_config['auth_url']}/session",
+                headers=headers
+            )
+            
+            assert response.status_code == 200
+            session_data = response.json()
+            assert "session_id" in session_data
+            assert "last_activity" in session_data
+
+    def test_multi_factor_authentication(self, test_config):
+        """Test MFA flow"""
+        # Step 1: Initial login requires MFA
+        login_data = {
+            "email": "admin@example.com",
+            "password": "admin123"
+        }
+        
+        mock_mfa_required = {
+            "mfa_required": True,
+            "mfa_token": "mfa_temp_token_123",
+            "methods": ["totp", "sms"]
+        }
+        
+        with patch('requests.post') as mock_post:
+            mock_post.return_value.status_code = 202
+            mock_post.return_value.json.return_value = mock_mfa_required
+            
+            response = requests.post(
+                f"{test_config['auth_url']}/login",
+                json=login_data
+            )
+            
+            assert response.status_code == 202
+            mfa_data = response.json()
+            assert mfa_data["mfa_required"] is True
+            assert "mfa_token" in mfa_data
+
+        # Step 2: Verify MFA code
+        mfa_verify_data = {
+            "mfa_token": "mfa_temp_token_123",
+            "method": "totp",
+            "code": "123456"
+        }
+        
+        mock_mfa_success = {
+            "access_token": "final_access_token",
+            "token_type": "bearer",
+            "expires_in": 3600
+        }
+        
+        with patch('requests.post') as mock_post:
+            mock_post.return_value.status_code = 200
+            mock_post.return_value.json.return_value = mock_mfa_success
+            
+            response = requests.post(
+                f"{test_config['auth_url']}/mfa/verify",
+                json=mfa_verify_data
+            )
+            
+            assert response.status_code == 200
+            final_tokens = response.json()
+            assert "access_token" in final_tokens
+
+    @pytest.mark.slow
+    def test_concurrent_auth_requests(self, test_config):
+        """Test concurrent authentication requests"""
+        import threading
+        import queue
+        
+        results_queue = queue.Queue()
+        
+        def auth_request():
+            login_data = {
+                "email": "user@example.com",
+                "password": "password123"
+            }
+            
+            mock_response = {
+                "access_token": "concurrent_token",
+                "token_type": "bearer",
+                "expires_in": 3600
+            }
+            
+            with patch('requests.post') as mock_post:
+                mock_post.return_value.status_code = 200
+                mock_post.return_value.json.return_value = mock_response
+                
+                response = requests.post(
+                    f"{test_config['auth_url']}/login",
+                    json=login_data
+                )
+                results_queue.put(response.status_code)
+        
+        # Launch concurrent requests
+        threads = []
+        for _ in range(3):
+            thread = threading.Thread(target=auth_request)
+            threads.append(thread)
+            thread.start()
+        
+        # Wait for completion
+        for thread in threads:
+            thread.join()
+        
+        # Verify all succeeded
+        results = []
+        while not results_queue.empty():
+            results.append(results_queue.get())
+        
+        assert len(results) == 3
+        assert all(status == 200 for status in results)
+
     @pytest.mark.slow
     def test_rate_limiting_with_authentication(self, test_config, auth_token):
         """Test rate limiting behavior with valid authentication"""

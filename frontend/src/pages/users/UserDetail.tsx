@@ -45,6 +45,7 @@ import {
   Security as SecurityIcon,
   Block as BlockIcon,
   CheckCircle as ActiveIcon,
+  CheckCircle,
   History as HistoryIcon,
   Assignment as TicketIcon,
   Notifications as NotificationIcon,

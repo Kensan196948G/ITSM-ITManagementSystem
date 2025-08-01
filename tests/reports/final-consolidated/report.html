@@ -35,24 +35,24 @@
         </div>
         
         <div class="summary">
-            <div class="metric warning">
-                <div class="metric-value">93.0%</div>
+            <div class="metric success">
+                <div class="metric-value">96.4%</div>
                 <div class="metric-label">成功率</div>
             </div>
             <div class="metric">
-                <div class="metric-value">57</div>
+                <div class="metric-value">139</div>
                 <div class="metric-label">総テスト数</div>
             </div>
             <div class="metric success">
-                <div class="metric-value">53</div>
+                <div class="metric-value">134</div>
                 <div class="metric-label">成功テスト</div>
             </div>
             <div class="metric danger">
-                <div class="metric-value">4</div>
+                <div class="metric-value">5</div>
                 <div class="metric-label">失敗テスト</div>
             </div>
             <div class="metric">
-                <div class="metric-value">30.3s</div>
+                <div class="metric-value">54.0s</div>
                 <div class="metric-label">実行時間</div>
             </div>
         </div>
@@ -80,6 +80,51 @@
                         <td>0</td>
                         <td class="">84.2%</td>
                         <td>10.37s</td>
+                    </tr>
+                    <tr>
+                        <td><strong>api</strong></td>
+                        <td>31</td>
+                        <td class="status-passed">31</td>
+                        <td class="">0</td>
+                        <td>0</td>
+                        <td class="status-passed">100.0%</td>
+                        <td>4.01s</td>
+                    </tr>
+                    <tr>
+                        <td><strong>e2e</strong></td>
+                        <td>0</td>
+                        <td class="status-passed">0</td>
+                        <td class="">0</td>
+                        <td>0</td>
+                        <td class="status-failed">0.0%</td>
+                        <td>0.10s</td>
+                    </tr>
+                    <tr>
+                        <td><strong>load</strong></td>
+                        <td>20</td>
+                        <td class="status-passed">19</td>
+                        <td class="status-failed">1</td>
+                        <td>0</td>
+                        <td class="status-passed">95.0%</td>
+                        <td>17.50s</td>
+                    </tr>
+                    <tr>
+                        <td><strong>unit</strong></td>
+                        <td>0</td>
+                        <td class="status-passed">0</td>
+                        <td class="">0</td>
+                        <td>0</td>
+                        <td class="status-failed">0.0%</td>
+                        <td>0.68s</td>
+                    </tr>
+                    <tr>
+                        <td><strong>api-fixed</strong></td>
+                        <td>31</td>
+                        <td class="status-passed">31</td>
+                        <td class="">0</td>
+                        <td>0</td>
+                        <td class="status-passed">100.0%</td>
+                        <td>1.37s</td>
                     </tr>
                     <tr>
                         <td><strong>fixed-tests</strong></td>
@@ -117,42 +162,106 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>test_health_endpoint_performance</td>
-                        <td>0.000009s</td>
-                        <td>0.000006s</td>
-                        <td>0.030430s</td>
-                        <td>108993.11</td>
-                        <td>18792</td>
+                        <td>test_single_incident_creation_performance</td>
+                        <td>0.000365s</td>
+                        <td>0.000293s</td>
+                        <td>0.021223s</td>
+                        <td>2736.49</td>
+                        <td>1384</td>
+                    </tr>
+                    <tr>
+                        <td>test_incident_list_query_performance</td>
+                        <td>0.000373s</td>
+                        <td>0.000309s</td>
+                        <td>0.000999s</td>
+                        <td>2678.28</td>
+                        <td>1875</td>
+                    </tr>
+                    <tr>
+                        <td>test_large_dataset_pagination_performance</td>
+                        <td>0.004725s</td>
+                        <td>0.003654s</td>
+                        <td>0.013835s</td>
+                        <td>211.64</td>
+                        <td>47</td>
+                    </tr>
+                    <tr>
+                        <td>test_complex_query_performance</td>
+                        <td>0.000385s</td>
+                        <td>0.000294s</td>
+                        <td>0.023718s</td>
+                        <td>2600.77</td>
+                        <td>1903</td>
+                    </tr>
+                    <tr>
+                        <td>test_bulk_operations_performance</td>
+                        <td>0.000453s</td>
+                        <td>0.000376s</td>
+                        <td>0.001056s</td>
+                        <td>2205.55</td>
+                        <td>843</td>
+                    </tr>
+                    <tr>
+                        <td>test_api_response_time_vs_payload_size[1]</td>
+                        <td>0.000373s</td>
+                        <td>0.000295s</td>
+                        <td>0.023917s</td>
+                        <td>2683.50</td>
+                        <td>2645</td>
+                    </tr>
+                    <tr>
+                        <td>test_api_response_time_vs_payload_size[10]</td>
+                        <td>0.000379s</td>
+                        <td>0.000297s</td>
+                        <td>0.024060s</td>
+                        <td>2635.79</td>
+                        <td>2549</td>
+                    </tr>
+                    <tr>
+                        <td>test_api_response_time_vs_payload_size[100]</td>
+                        <td>0.000367s</td>
+                        <td>0.000295s</td>
+                        <td>0.023919s</td>
+                        <td>2727.56</td>
+                        <td>2739</td>
+                    </tr>
+                    <tr>
+                        <td>test_api_response_time_vs_payload_size[1000]</td>
+                        <td>0.000380s</td>
+                        <td>0.000296s</td>
+                        <td>0.024356s</td>
+                        <td>2633.88</td>
+                        <td>2365</td>
                     </tr>
                     <tr>
                         <td>test_api_concurrent_requests</td>
-                        <td>0.007558s</td>
-                        <td>0.006089s</td>
-                        <td>0.048297s</td>
-                        <td>132.31</td>
-                        <td>132</td>
+                        <td>0.006404s</td>
+                        <td>0.005945s</td>
+                        <td>0.028242s</td>
+                        <td>156.16</td>
+                        <td>128</td>
                     </tr>
                     <tr>
                         <td>test_json_serialization_benchmark</td>
-                        <td>0.001240s</td>
-                        <td>0.001209s</td>
-                        <td>0.002785s</td>
-                        <td>806.65</td>
-                        <td>764</td>
+                        <td>0.001250s</td>
+                        <td>0.001223s</td>
+                        <td>0.002224s</td>
+                        <td>799.74</td>
+                        <td>777</td>
                     </tr>
                     <tr>
                         <td>test_data_processing_benchmark</td>
-                        <td>0.000825s</td>
-                        <td>0.000809s</td>
-                        <td>0.001644s</td>
-                        <td>1212.79</td>
-                        <td>989</td>
+                        <td>0.000810s</td>
+                        <td>0.000803s</td>
+                        <td>0.000838s</td>
+                        <td>1234.15</td>
+                        <td>889</td>
                     </tr>
                 </tbody>
             </table>
         </div>
         <div class="timestamp">
-            レポート生成日時: 2025-08-01T13:46:38.667760
+            レポート生成日時: 2025-08-01T14:35:33.757972
         </div>
     </div>
 </body>

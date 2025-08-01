@@ -15,12 +15,7 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Timeline,
-  TimelineItem,
-  TimelineSeparator,
-  TimelineConnector,
-  TimelineContent,
-  TimelineDot,
+  // Timeline components removed - use alternative layout
   Alert,
   Dialog,
   DialogTitle,
@@ -47,11 +42,11 @@ import {
   PlayArrow as PlayIcon,
 } from '@mui/icons-material'
 import { priorityColors, statusColors } from '../../theme/theme'
-import type { Ticket, Comment, Priority, TicketStatus } from '../../types'
+import type { Ticket, Priority, TicketStatus } from '../../types'
 
 const TicketDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
+  // const navigate = useNavigate() // Commented out temporarily
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [commentText, setCommentText] = useState('')
   const [moreAnchor, setMoreAnchor] = useState<null | HTMLElement>(null)
@@ -308,38 +303,35 @@ const TicketDetail: React.FC = () => {
             </Typography>
             <Divider sx={{ mb: 2 }} />
             
-            <Timeline>
+            <Box>
               {timelineItems.map((item, index) => (
-                <TimelineItem key={index}>
-                  <TimelineSeparator>
-                    <TimelineDot color={item.color as any}>
+                <Box key={index} sx={{ display: 'flex', mb: 3 }}>
+                  <Box sx={{ mr: 2, mt: 0.5 }}>
+                    <Avatar sx={{ width: 32, height: 32, bgcolor: `${item.color}.light` }}>
                       {item.icon}
-                    </TimelineDot>
-                    {index < timelineItems.length - 1 && <TimelineConnector />}
-                  </TimelineSeparator>
-                  <TimelineContent>
-                    <Box sx={{ mb: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                          {item.author}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {item.action}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {formatDate(item.time)}
-                        </Typography>
-                      </Box>
-                      {item.content && (
-                        <Typography variant="body2" sx={{ ml: 2, whiteSpace: 'pre-wrap' }}>
-                          {item.content}
-                        </Typography>
-                      )}
+                    </Avatar>
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                        {item.author}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {item.action}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {formatDate(item.time)}
+                      </Typography>
                     </Box>
-                  </TimelineContent>
-                </TimelineItem>
+                    {('content' in item) && item.content && (
+                      <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                        {item.content}
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
               ))}
-            </Timeline>
+            </Box>
 
             {/* Add comment */}
             <Box sx={{ mt: 3 }}>

@@ -30,7 +30,7 @@ import {
   Add as AddIcon,
   MoreVert as MoreVertIcon,
   Refresh as RefreshIcon,
-  Export as ExportIcon,
+  FileDownload as ExportIcon,
   ViewList as ViewListIcon,
   ViewModule as ViewModuleIcon,
   Assignment as AssignmentIcon,
@@ -484,11 +484,15 @@ const TicketList: React.FC = () => {
           <DataGrid
             rows={filteredTickets}
             columns={columns}
-            pageSize={pageSize}
-            rowsPerPageOptions={[5, 10, 25, 50]}
-            onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: pageSize },
+              },
+            }}
+            pageSizeOptions={[5, 10, 25, 50]}
+            onPaginationModelChange={(model) => setPageSize(model.pageSize)}
             checkboxSelection
-            disableSelectionOnClick
+            disableRowSelectionOnClick
             onRowClick={(params) => navigate(`/tickets/${params.id}`)}
             sx={{
               '& .MuiDataGrid-row:hover': {

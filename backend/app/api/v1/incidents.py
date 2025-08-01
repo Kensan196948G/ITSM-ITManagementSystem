@@ -13,14 +13,9 @@ from app.schemas.incident import (
     IncidentWorkNoteCreate, IncidentWorkNoteResponse, IncidentHistoryResponse
 )
 from app.schemas.common import SuccessResponse, APIError
+from app.api.v1.auth import get_current_user_id
 
 router = APIRouter()
-
-
-def get_current_user_id() -> UUID:
-    """現在のユーザーIDを取得する（仮実装）"""
-    # 実際の実装では、JWTトークンから取得
-    return UUID("12345678-1234-1234-1234-123456789012")
 
 
 @router.post(

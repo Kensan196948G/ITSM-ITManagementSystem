@@ -33,30 +33,35 @@ pip install -r requirements.txt
 
 ### 2. 環境変数の設定
 
-`.env.example`をコピーして`.env`ファイルを作成し、必要な設定を行います：
+`.env`ファイルが既に作成されており、SQLite用の設定が含まれています。
+本番環境では、PostgreSQL用に設定を変更してください。
+
+### 3. データベースの初期化
+
+SQLiteデータベースとテーブルを初期化します：
 
 ```bash
-cp .env.example .env
-```
-
-### 3. データベースのセットアップ
-
-PostgreSQLデータベースを作成し、接続情報を`.env`ファイルに設定します：
-
-```env
-DATABASE_URL=postgresql://itsm_user:password@localhost:5432/itsm_db
-ASYNC_DATABASE_URL=postgresql+asyncpg://itsm_user:password@localhost:5432/itsm_db
+# データベース初期化（テーブル作成と初期データ投入）
+python init_sqlite_db.py
 ```
 
 ### 4. アプリケーションの起動
 
 ```bash
-# 開発環境での起動
-python run.py
+# 開発環境での起動（自動的にデータベースを初期化）
+python start_server.py
 
-# または
+# または手動起動
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
+
+### 5. 初期ログイン情報
+
+デフォルトの管理者アカウント：
+- **ユーザー名**: `admin`
+- **パスワード**: `secret`
+
+**注意**: 本番環境では必ずパスワードを変更してください。
 
 ## API ドキュメント
 

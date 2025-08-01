@@ -12,8 +12,8 @@ from unittest.mock import Mock
 
 # Configuration
 TEST_CONFIG = {
-    "base_url": os.getenv("ITSM_BASE_URL", "https://api.itsm-system.com/v1"),
-    "auth_url": os.getenv("ITSM_AUTH_URL", "https://api.itsm-system.com/auth"),
+    "base_url": os.getenv("ITSM_BASE_URL", "http://localhost:8000/api/v1"),
+    "auth_url": os.getenv("ITSM_AUTH_URL", "http://localhost:8000/auth"),
     "test_user": os.getenv("ITSM_TEST_USER", "test@example.com"),
     "test_password": os.getenv("ITSM_TEST_PASSWORD", "test_password"),
     "client_id": os.getenv("ITSM_CLIENT_ID", "test_client"),
@@ -203,9 +203,12 @@ def pytest_sessionfinish(session, exitstatus):
 @pytest.fixture(scope="session")
 def playwright_config():
     """Playwright configuration for E2E tests"""
+    # Force localhost for testing environment
+    base_url = "http://localhost:3000"
+    print(f"DEBUG: Using base_url: {base_url}")
     return {
         "headless": os.getenv("HEADLESS", "true").lower() == "true",
-        "base_url": os.getenv("ITSM_WEB_URL", "https://itsm-system.com"),
+        "base_url": base_url,
         "timeout": int(os.getenv("PLAYWRIGHT_TIMEOUT", "30000")),
         "viewport": {"width": 1920, "height": 1080},
         "user_agent": "ITSM-Test-Agent/1.0"

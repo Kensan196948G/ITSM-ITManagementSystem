@@ -1,19 +1,19 @@
 {
   "test_execution_summary": {
-    "generated_at": "2025-08-01T13:42:11.898372",
+    "generated_at": "2025-08-01T15:04:48.143593",
     "overall_status": "FAIL",
     "quality_gate_result": {
       "passed": false,
-      "success_rate": 84.21,
+      "success_rate": 93.51,
       "threshold": 95.0
     },
     "metrics": {
-      "total_tests": 19,
-      "passed_tests": 16,
-      "failed_tests": 3,
+      "total_tests": 154,
+      "passed_tests": 144,
+      "failed_tests": 5,
       "skipped_tests": 0,
-      "success_rate": 84.21,
-      "total_duration": 10.37
+      "success_rate": 93.51,
+      "total_duration": 57.41
     },
     "suite_results": {
       "all-tests": {
@@ -23,11 +23,69 @@
         "skipped": 0,
         "duration": 10.372995138168335,
         "success_rate": 84.21052631578947
+      },
+      "api": {
+        "total": 34,
+        "passed": 34,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 4.007659912109375,
+        "success_rate": 100.0
+      },
+      "e2e": {
+        "total": 12,
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 2.9546759128570557,
+        "success_rate": 58.333333333333336
+      },
+      "load": {
+        "total": 20,
+        "passed": 19,
+        "failed": 1,
+        "skipped": 0,
+        "duration": 18.16344976425171,
+        "success_rate": 95.0
+      },
+      "unit": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 0.6062519550323486,
+        "success_rate": 0.0
+      },
+      "api-fixed": {
+        "total": 31,
+        "passed": 31,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 1.3734114170074463,
+        "success_rate": 100.0
+      },
+      "fixed-tests": {
+        "total": 19,
+        "passed": 18,
+        "failed": 1,
+        "skipped": 0,
+        "duration": 9.412453651428223,
+        "success_rate": 94.73684210526315
+      },
+      "final-tests": {
+        "total": 19,
+        "passed": 19,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 10.519169569015503,
+        "success_rate": 100.0
       }
     },
     "recommendations": [
       "テスト成功率が95%を下回っています。失敗したテストを確認し修正してください。",
-      "3件のテストが失敗しています。詳細なログを確認してください。"
+      "5件のテストが失敗しています。詳細なログを確認してください。",
+      "e2eスイートの成功率が低下しています。優先的に修正してください。",
+      "unitスイートの成功率が低下しています。優先的に修正してください。"
     ]
   }
 }

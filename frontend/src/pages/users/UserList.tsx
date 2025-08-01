@@ -29,7 +29,7 @@ import {
   Add as AddIcon,
   MoreVert as MoreVertIcon,
   Refresh as RefreshIcon,
-  Export as ExportIcon,
+  FileDownload as ExportIcon,
   ViewList as ViewListIcon,
   ViewModule as ViewModuleIcon,
   Edit as EditIcon,
@@ -553,10 +553,14 @@ const UserList: React.FC = () => {
           <DataGrid
             rows={filteredUsers}
             columns={columns}
-            pageSize={10}
-            rowsPerPageOptions={[5, 10, 25, 50]}
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 10 },
+              },
+            }}
+            pageSizeOptions={[5, 10, 25, 50]}
             checkboxSelection
-            disableSelectionOnClick
+            disableRowSelectionOnClick
             onRowClick={(params) => navigate(`/users/${params.id}`)}
             sx={{
               '& .MuiDataGrid-row:hover': {

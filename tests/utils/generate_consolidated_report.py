@@ -388,23 +388,83 @@ class TestReportGenerator:
         return json.dumps(summary, indent=2, ensure_ascii=False)
     
     def _generate_recommendations(self, data: Dict[str, Any]) -> List[str]:
-        """Generate recommendations based on test results"""
+        """Generate comprehensive recommendations based on test results"""
         recommendations = []
         
         success_rate = data["summary"]["success_rate"]
+        total_duration = data["summary"]["total_duration"]
+        
+        # Test success rate recommendations
         if success_rate < 95:
-            recommendations.append("テスト成功率が95%を下回っています。失敗したテストを確認し修正してください。")
+            if success_rate < 50:
+                recommendations.append("🚨 CRITICAL: テスト成功率が50%を下回っています。即座に修正が必要です。")
+            elif success_rate < 80:
+                recommendations.append("⚠️ テスト成功率が80%を下回っています。品質ゲート不合格です。")
+            else:
+                recommendations.append("📈 テスト成功率が95%を下回っています。安定性向上のため修正推奨です。")
         
-        if data["summary"]["failed_tests"] > 0:
-            recommendations.append(f"{data['summary']['failed_tests']}件のテストが失敗しています。詳細なログを確認してください。")
+        # Failed tests
+        failed_count = data["summary"]["failed_tests"]
+        if failed_count > 0:
+            if failed_count > 10:
+                recommendations.append(f"🔥 {failed_count}件の大量のテスト失敗が発生しています。優先度高で対応してください。")
+            else:
+                recommendations.append(f"🐛 {failed_count}件のテストが失敗しています。詳細なログを確認してください。")
         
-        # Check individual suites
+        # Performance recommendations
+        if total_duration > 300:  # 5 minutes
+            recommendations.append("⏰ テスト実行時間が5分を超えています。テストの並列化や最適化を検討してください。")
+        elif total_duration > 600:  # 10 minutes
+            recommendations.append("🐌 テスト実行時間が10分を超えています。CI/CDパイプラインの効率化が必要です。")
+        
+        # Suite-specific recommendations
+        critical_suites = ["api", "unit", "e2e"]
         for suite_name, suite_data in data["suites"].items():
-            if suite_data.get("success_rate", 0) < 80:
-                recommendations.append(f"{suite_name}スイートの成功率が低下しています。優先的に修正してください。")
+            suite_success_rate = suite_data.get("success_rate", 0)
+            suite_duration = suite_data.get("duration", 0)
+            
+            if suite_success_rate < 80:
+                if suite_name in critical_suites:
+                    recommendations.append(f"🚫 {suite_name}スイート（クリティカル）の成功率が{suite_success_rate:.1f}%です。即座に修正してください。")
+                else:
+                    recommendations.append(f"⚠️ {suite_name}スイートの成功率が{suite_success_rate:.1f}%です。優先的に修正してください。")
+            
+            # Suite performance
+            if suite_name == "unit" and suite_duration > 60:
+                recommendations.append(f"⚡ ユニットテストの実行時間が{suite_duration:.1f}秒です。1分以内を目標に最適化してください。")
+            elif suite_name == "e2e" and suite_duration > 300:
+                recommendations.append(f"🎭 E2Eテストの実行時間が{suite_duration:.1f}秒です。並列実行や選択的実行を検討してください。")
         
+        # Coverage recommendations (if available)
+        if data.get("coverage"):
+            coverage_percent = data["coverage"].get("percent_covered", 0)
+            if coverage_percent < 60:
+                recommendations.append(f"📊 コードカバレッジが{coverage_percent:.1f}%です。最低60%を目標にテストを追加してください。")
+            elif coverage_percent < 80:
+                recommendations.append(f"📈 コードカバレッジが{coverage_percent:.1f}%です。80%を目標にカバレッジを向上させてください。")
+        
+        # Performance benchmark recommendations
+        if "benchmarks" in data.get("performance", {}):
+            slow_benchmarks = []
+            for bench in data["performance"]["benchmarks"]["benchmarks"]:
+                if bench.get("mean", 0) > 1.0:  # Slower than 1 second
+                    slow_benchmarks.append(f"{bench['name']} ({bench['mean']:.3f}s)")
+            
+            if slow_benchmarks:
+                recommendations.append(f"🐌 実行時間の長いベンチマーク: {', '.join(slow_benchmarks[:3])}{'...' if len(slow_benchmarks) > 3 else ''}")
+        
+        # Overall health assessment
         if not recommendations:
-            recommendations.append("全てのテストが正常に完了しました。品質基準を満たしています。")
+            if success_rate == 100:
+                recommendations.append("🎉 完璧！全てのテストが成功し、品質基準を満たしています。")
+            elif success_rate >= 98:
+                recommendations.append("✨ 優秀！高品質を維持しています。現在の水準を継続してください。")
+            else:
+                recommendations.append("✅ 良好！全ての品質基準を満たしています。")
+        
+        # Add proactive suggestions
+        if success_rate >= 95:
+            recommendations.append("💡 提案: テスト自動化の拡張やパフォーマンステストの追加を検討してください。")
         
         return recommendations
     

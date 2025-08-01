@@ -1,6 +1,7 @@
 import React from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { Box } from '@mui/material'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { ThemeProvider, CssBaseline } from '@mui/material'
+import { theme } from './theme/theme'
 import Layout from './components/layout/Layout'
 import Dashboard from './pages/Dashboard'
 import TicketList from './pages/tickets/TicketList'
@@ -9,34 +10,45 @@ import CreateTicket from './pages/tickets/CreateTicket'
 import UserList from './pages/users/UserList'
 import UserDetail from './pages/users/UserDetail'
 import CreateUser from './pages/users/CreateUser'
-import { ErrorBoundary } from './components/common/ErrorBoundary'
+import NotificationSystem from './components/common/NotificationSystem'
 
 const App: React.FC = () => {
   return (
-    <ErrorBoundary>
-      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
         <Layout>
           <Routes>
-            {/* Dashboard */}
+            {/* デフォルトリダイレクト */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            
+            {/* ダッシュボード */}
             <Route path="/dashboard" element={<Dashboard />} />
             
-            {/* Tickets */}
+            {/* チケット管理 */}
             <Route path="/tickets" element={<TicketList />} />
             <Route path="/tickets/create" element={<CreateTicket />} />
             <Route path="/tickets/:id" element={<TicketDetail />} />
             
-            {/* Users */}
+            {/* ユーザー管理 */}
             <Route path="/users" element={<UserList />} />
             <Route path="/users/create" element={<CreateUser />} />
             <Route path="/users/:id" element={<UserDetail />} />
             
-            {/* Fallback */}
+            {/* その他のページ */}
+            <Route path="/reports" element={<div>レポート機能は開発中です</div>} />
+            <Route path="/knowledge" element={<div>ナレッジベース機能は開発中です</div>} />
+            <Route path="/settings" element={<div>設定機能は開発中です</div>} />
+            
+            {/* 404エラーページ */}
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
+          
+          {/* 通知システム */}
+          <NotificationSystem />
         </Layout>
-      </Box>
-    </ErrorBoundary>
+      </Router>
+    </ThemeProvider>
   )
 }
 
