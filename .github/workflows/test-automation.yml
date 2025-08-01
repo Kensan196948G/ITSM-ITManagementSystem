@@ -79,7 +79,7 @@ jobs:
               -m "api and not slow"
             ;;
           unit)
-            pytest tests/ -v --tb=short \
+            pytest backend/tests/unit/ -v --tb=short \
               --html=tests/reports/unit-report.html \
               --json-report --json-report-file=tests/reports/unit-report.json \
               --cov=backend/app --cov-report=json:tests/reports/unit-coverage.json \
