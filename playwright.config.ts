@@ -6,7 +6,7 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   // Test directory
-  testDir: './tests/e2e',
+  testDir: '../tests/e2e',
   
   // Run tests in files in parallel
   fullyParallel: true,
@@ -88,25 +88,12 @@ export default defineConfig({
     },
   ],
 
-  // Run your local dev server before starting the tests
-  webServer: [
-    {
-      command: 'cd frontend && npm run dev',
-      url: 'http://localhost:3000',
-      reuseExistingServer: !process.env.CI,
-      timeout: 120 * 1000,
-    },
-    {
-      command: 'cd backend && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000',
-      url: 'http://localhost:8000',
-      reuseExistingServer: !process.env.CI,
-      timeout: 120 * 1000,
-    }
-  ],
+  // Disable web server for basic testing
+  // webServer: [],
 
-  // Global setup and teardown
-  globalSetup: require.resolve('./tests/e2e/global-setup.ts'),
-  globalTeardown: require.resolve('./tests/e2e/global-teardown.ts'),
+  // Disable global setup/teardown for basic testing
+  // globalSetup: require.resolve('./tests/e2e/global-setup.ts'),
+  // globalTeardown: require.resolve('./tests/e2e/global-teardown.ts'),
 
   // Test timeout
   timeout: 30 * 1000,
