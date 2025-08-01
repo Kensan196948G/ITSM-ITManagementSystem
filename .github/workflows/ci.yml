@@ -92,6 +92,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest pytest-cov pytest-xdist pytest-html
+          pip install psycopg2-binary asyncpg
           # Install project in development mode
           pip install -e ..
 
@@ -170,6 +171,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest pytest-asyncio pytest-html pytest-json-report pytest-benchmark
+          pip install psycopg2-binary asyncpg
 
       - name: Setup test database
         working-directory: ./backend
