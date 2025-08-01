@@ -249,12 +249,14 @@ jobs:
     
     - name: Run Bandit security scan
       run: |
-        bandit -r src/ -f json -o tests/reports/bandit-report.json || true
-        bandit -r src/ -f txt
+        mkdir -p tests/reports
+        bandit -r backend/app/ -f json -o tests/reports/bandit-report.json || true
+        bandit -r backend/app/ -f txt
     
-    - name: Check dependencies for vulnerabilities
+    - name: Check dependencies for vulnerabilities  
       run: |
-        safety check --json --output tests/reports/safety-report.json || true
+        mkdir -p tests/reports
+        safety check --json > tests/reports/safety-report.json || true
         safety check
     
     - name: Upload security reports
