@@ -3,7 +3,8 @@
 from typing import List, Optional, Dict, Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import status as http_status
 from sqlalchemy.orm import Session
 
 from app.db.base import get_db
@@ -30,7 +31,7 @@ def get_user_tenant_id(user_id: UUID) -> UUID:
 @router.post(
     "/",
     response_model=ProblemResponse,
-    status_code=status.HTTP_201_CREATED,
+    status_code=http_status.HTTP_201_CREATED,
     summary="問題作成",
     description="新しい問題を作成します",
     responses={
@@ -105,7 +106,7 @@ async def create_problem(
     except Exception as e:
         db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="問題の作成中にエラーが発生しました"
         )
 
@@ -119,7 +120,7 @@ async def create_problem(
 async def list_problems(
     page: int = Query(1, ge=1, description="ページ番号"),
     per_page: int = Query(20, ge=1, le=100, description="1ページあたりの件数"),
-    status: Optional[List[str]] = Query(None, description="ステータスフィルター"),
+    status_filter: Optional[List[str]] = Query(None, description="ステータスフィルター"),
     priority: Optional[List[str]] = Query(None, description="優先度フィルター"),
     assignee_id: Optional[UUID] = Query(None, description="担当者IDフィルター"),
     db: Session = Depends(get_db),
@@ -132,8 +133,8 @@ async def list_problems(
         )
         
         # フィルター適用
-        if status:
-            query = query.filter(Problem.status.in_(status))
+        if status_filter:
+            query = query.filter(Problem.status.in_(status_filter))
         
         if priority:
             query = query.filter(Problem.priority.in_(priority))
@@ -186,7 +187,7 @@ async def list_problems(
         
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="問題一覧の取得中にエラーが発生しました"
         )
 
@@ -210,7 +211,7 @@ async def get_problem(
     
     if not problem:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=http_status.HTTP_404_NOT_FOUND,
             detail="指定された問題が見つかりません"
         )
     
@@ -255,7 +256,7 @@ async def update_problem(
         
         if not problem:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=http_status.HTTP_404_NOT_FOUND,
                 detail="指定された問題が見つかりません"
             )
         
@@ -292,7 +293,7 @@ async def update_problem(
     except Exception as e:
         db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="問題の更新中にエラーが発生しました"
         )
 
@@ -318,7 +319,7 @@ async def update_rca(
         
         if not problem:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=http_status.HTTP_404_NOT_FOUND,
                 detail="指定された問題が見つかりません"
             )
         
@@ -339,7 +340,7 @@ async def update_rca(
     except Exception as e:
         db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="根本原因分析の更新中にエラーが発生しました"
         )
 
@@ -347,7 +348,7 @@ async def update_rca(
 @router.post(
     "/{problem_id}/known-errors",
     response_model=KnownErrorResponse,
-    status_code=status.HTTP_201_CREATED,
+    status_code=http_status.HTTP_201_CREATED,
     summary="既知のエラー作成",
     description="指定された問題に既知のエラーを追加します",
 )
@@ -367,7 +368,7 @@ async def create_known_error(
         
         if not problem:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=http_status.HTTP_404_NOT_FOUND,
                 detail="指定された問題が見つかりません"
             )
         
@@ -404,6 +405,6 @@ async def create_known_error(
     except Exception as e:
         db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="既知のエラーの作成中にエラーが発生しました"
         )

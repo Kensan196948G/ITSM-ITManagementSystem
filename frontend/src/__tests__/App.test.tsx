@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles/index.js';
 import CssBaseline from '@mui/material/CssBaseline';
 import App from '../App';
 import { theme } from '../theme/theme';

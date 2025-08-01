@@ -2,8 +2,10 @@
 
 from typing import List, Optional, Dict, Any
 from uuid import UUID
+from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import status
 from sqlalchemy.orm import Session
 
 from app.db.base import get_db
@@ -14,6 +16,8 @@ from app.schemas.incident import (
 )
 from app.schemas.common import SuccessResponse, APIError
 from app.api.v1.auth import get_current_user_id
+from app.core.cache import incidents_list_cache_key, cache_manager, CacheInvalidator
+from app.core.performance import measure_time, compress_response, optimize_json_response
 
 router = APIRouter()
 
@@ -30,6 +34,7 @@ router = APIRouter()
         500: {"model": APIError, "description": "サーバーエラーが発生しました"}
     }
 )
+@measure_time("create_incident")
 async def create_incident(
     incident_data: IncidentCreate,
     db: Session = Depends(get_db),
@@ -37,7 +42,13 @@ async def create_incident(
 ) -> IncidentResponse:
     """インシデントを作成する"""
     service = IncidentService(db)
-    return service.create_incident(incident_data, current_user_id)
+    result = service.create_incident(incident_data, current_user_id)
+    
+    # インシデント関連キャッシュを無効化
+    CacheInvalidator.invalidate_incident_cache()
+    CacheInvalidator.invalidate_dashboard_cache()
+    
+    return result
 
 
 @router.get(
@@ -50,31 +61,87 @@ async def create_incident(
         500: {"model": APIError, "description": "サーバーエラーが発生しました"}
     }
 )
+@measure_time("list_incidents")
+@compress_response(min_size=1500)
 async def list_incidents(
     page: int = Query(1, ge=1, description="ページ番号"),
     per_page: int = Query(20, ge=1, le=100, description="1ページあたりの件数"),
+    # 基本フィルター
     status: Optional[List[str]] = Query(None, description="ステータスフィルター"),
     priority: Optional[List[str]] = Query(None, description="優先度フィルター"),
+    impact: Optional[List[str]] = Query(None, description="影響度フィルター"),
+    urgency: Optional[List[str]] = Query(None, description="緊急度フィルター"),
     assignee_id: Optional[UUID] = Query(None, description="担当者IDフィルター"),
+    reporter_id: Optional[UUID] = Query(None, description="報告者IDフィルター"),
+    team_id: Optional[UUID] = Query(None, description="チームIDフィルター"),
     category_id: Optional[UUID] = Query(None, description="カテゴリIDフィルター"),
+    # 高度フィルター
+    date_from: Optional[datetime] = Query(None, description="作成日時（開始）"),
+    date_to: Optional[datetime] = Query(None, description="作成日時（終了）"),
+    due_date_from: Optional[datetime] = Query(None, description="期限（開始）"),
+    due_date_to: Optional[datetime] = Query(None, description="期限（終了）"),
+    sla_status: Optional[str] = Query(None, pattern="^(compliant|at_risk|violated)$", description="SLAステータス"),
+    has_attachments: Optional[bool] = Query(None, description="添付ファイル有無"),
+    last_updated_days: Optional[int] = Query(None, ge=1, description="最終更新日（〜日以内）"),
+    # 検索
     q: Optional[str] = Query(None, description="フリーワード検索"),
+    search_fields: Optional[List[str]] = Query(None, description="検索対象フィールド"),
     sort: Optional[str] = Query(None, description="ソート順（例: -created_at）"),
     db: Session = Depends(get_db),
     current_user_id: UUID = Depends(get_current_user_id)
 ) -> Dict[str, Any]:
     """インシデント一覧を取得する"""
+    
+    # キャッシュキーを生成（検索クエリがない場合のみキャッシュを使用）
+    cache_key = None
+    if not q and not search_fields:  # 検索クエリがない場合のみキャッシュ
+        filters = {
+            "status": status, "priority": priority, "impact": impact, "urgency": urgency,
+            "assignee_id": assignee_id, "reporter_id": reporter_id, "team_id": team_id,
+            "category_id": category_id, "date_from": date_from, "date_to": date_to,
+            "due_date_from": due_date_from, "due_date_to": due_date_to,
+            "sla_status": sla_status, "has_attachments": has_attachments,
+            "last_updated_days": last_updated_days, "sort": sort
+        }
+        cache_key = incidents_list_cache_key(
+            str(current_user_id), page, per_page, **filters
+        )
+        
+        # キャッシュから取得を試行
+        cached_result = cache_manager.get(cache_key)
+        if cached_result is not None:
+            return optimize_json_response(cached_result)
+    
     service = IncidentService(db)
-    return service.list_incidents(
+    result = service.list_incidents(
         current_user_id=current_user_id,
         page=page,
         per_page=per_page,
         status=status,
         priority=priority,
+        impact=impact,
+        urgency=urgency,
         assignee_id=assignee_id,
+        reporter_id=reporter_id,
+        team_id=team_id,
         category_id=category_id,
+        date_from=date_from,
+        date_to=date_to,
+        due_date_from=due_date_from,
+        due_date_to=due_date_to,
+        sla_status=sla_status,
+        has_attachments=has_attachments,
+        last_updated_days=last_updated_days,
         q=q,
+        search_fields=search_fields,
         sort=sort
     )
+    
+    # キャッシュに保存（検索クエリがない場合のみ、2分間）
+    if cache_key:
+        cache_manager.set(cache_key, result, expire=120)
+    
+    return optimize_json_response(result)
 
 
 @router.get(
@@ -162,8 +229,81 @@ async def get_incident_history(
     current_user_id: UUID = Depends(get_current_user_id)
 ) -> List[IncidentHistoryResponse]:
     """インシデントの履歴を取得する"""
-    # 実装は簡略化
-    return []
+    service = IncidentService(db)
+    return service.get_incident_history(incident_id, current_user_id)
+
+
+@router.get(
+    "/{incident_id}/work-notes",
+    response_model=List[IncidentWorkNoteResponse],
+    summary="作業ノート一覧取得",
+    description="指定されたインシデントの作業ノート一覧を取得します",
+    responses={
+        200: {"description": "作業ノート一覧を正常に取得しました"},
+        404: {"model": APIError, "description": "指定されたインシデントが見つかりません"},
+        500: {"model": APIError, "description": "サーバーエラーが発生しました"}
+    }
+)
+async def get_work_notes(
+    incident_id: UUID,
+    include_private: bool = Query(False, description="プライベートノートも含むか"),
+    db: Session = Depends(get_db),
+    current_user_id: UUID = Depends(get_current_user_id)
+) -> List[IncidentWorkNoteResponse]:
+    """インシデントの作業ノート一覧を取得する"""
+    service = IncidentService(db)
+    return service.get_work_notes(incident_id, current_user_id, include_private)
+
+
+@router.put(
+    "/{incident_id}/work-notes/{note_id}",
+    response_model=IncidentWorkNoteResponse,
+    summary="作業ノート更新",
+    description="指定された作業ノートを更新します",
+    responses={
+        200: {"description": "作業ノートが正常に更新されました"},
+        404: {"model": APIError, "description": "指定された作業ノートが見つかりません"},
+        403: {"model": APIError, "description": "作業ノートの更新権限がありません"},
+        500: {"model": APIError, "description": "サーバーエラーが発生しました"}
+    }
+)
+async def update_work_note(
+    incident_id: UUID,
+    note_id: UUID,
+    note_data: IncidentWorkNoteCreate,
+    db: Session = Depends(get_db),
+    current_user_id: UUID = Depends(get_current_user_id)
+) -> IncidentWorkNoteResponse:
+    """作業ノートを更新する"""
+    service = IncidentService(db)
+    return service.update_work_note(incident_id, note_id, note_data, current_user_id)
+
+
+@router.delete(
+    "/{incident_id}/work-notes/{note_id}",
+    response_model=SuccessResponse,
+    summary="作業ノート削除",
+    description="指定された作業ノートを削除します",
+    responses={
+        200: {"description": "作業ノートが正常に削除されました"},
+        404: {"model": APIError, "description": "指定された作業ノートが見つかりません"},
+        403: {"model": APIError, "description": "作業ノートの削除権限がありません"},
+        500: {"model": APIError, "description": "サーバーエラーが発生しました"}
+    }
+)
+async def delete_work_note(
+    incident_id: UUID,
+    note_id: UUID,
+    db: Session = Depends(get_db),
+    current_user_id: UUID = Depends(get_current_user_id)
+) -> SuccessResponse:
+    """作業ノートを削除する"""
+    service = IncidentService(db)
+    service.delete_work_note(incident_id, note_id, current_user_id)
+    return SuccessResponse(
+        message="作業ノートが正常に削除されました",
+        data={"incident_id": incident_id, "note_id": note_id}
+    )
 
 
 @router.post(

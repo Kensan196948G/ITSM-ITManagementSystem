@@ -18,17 +18,42 @@ import {
   OutlinedInput,
   FormControlLabel,
   Checkbox,
-  // DatePicker, // Not available in this version
   IconButton,
   Tooltip,
+  Tabs,
+  Tab,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
 } from '@mui/material'
 import {
   Close as CloseIcon,
   Refresh as RefreshIcon,
   FilterAlt as FilterIcon,
+  Delete as DeleteIcon,
+  Star as StarIcon,
+  Bookmark as BookmarkIcon,
 } from '@mui/icons-material'
-// import { DatePicker as MuiDatePicker } from '@mui/x-date-pickers/DatePicker' // Not available
 import type { TicketFilters, UserFilters, Priority, TicketStatus, UserRole } from '../../types'
+
+// 拡張フィルター型
+interface ExtendedTicketFilters extends TicketFilters {
+  slaStatus?: 'compliant' | 'at_risk' | 'violated'
+  hasAttachments?: boolean
+  lastUpdatedDays?: number
+  dueDateFrom?: string
+  dueDateTo?: string
+  searchFields?: ('title' | 'description' | 'comments')[]
+}
+
+interface SavedFilter {
+  id: string
+  name: string
+  filters: TicketFilters | UserFilters
+  type: 'ticket' | 'user'
+  createdAt: string
+}
 
 interface AdvancedFiltersProps {
   open: boolean
@@ -36,6 +61,10 @@ interface AdvancedFiltersProps {
   onApply: (filters: TicketFilters | UserFilters) => void
   filterType: 'ticket' | 'user'
   initialFilters?: TicketFilters | UserFilters
+  savedFilters?: SavedFilter[]
+  onSaveFilter?: (name: string, filters: TicketFilters | UserFilters) => void
+  onLoadFilter?: (filterId: string) => void
+  onDeleteFilter?: (filterId: string) => void
 }
 
 const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
@@ -44,8 +73,15 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
   onApply,
   filterType,
   initialFilters = {},
+  savedFilters = [],
+  onSaveFilter,
+  onLoadFilter,
+  onDeleteFilter,
 }) => {
   const [filters, setFilters] = useState<TicketFilters | UserFilters>(initialFilters)
+  const [showSaveDialog, setShowSaveDialog] = useState(false)
+  const [filterName, setFilterName] = useState('')
+  const [activeTab, setActiveTab] = useState(0) // 0: 基本, 1: 高度, 2: 保存済み
 
   const handleApply = () => {
     onApply(filters)
@@ -61,7 +97,7 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
     onClose()
   }
 
-  const renderTicketFilters = () => {
+  const renderBasicTicketFilters = () => {
     const ticketFilters = filters as TicketFilters
 
     return (
@@ -178,31 +214,199 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
           />
         </Grid>
 
-        <Grid item xs={12}>
-          <Divider sx={{ my: 2 }} />
-          <Typography variant="subtitle1" gutterBottom>
-            日付範囲
-          </Typography>
-        </Grid>
-
         <Grid item xs={12} sm={6}>
-          <MuiDatePicker
+          <TextField
+            fullWidth
             label="作成開始日"
-            value={ticketFilters.dateFrom ? new Date(ticketFilters.dateFrom) : null}
-            onChange={(date) => setFilters(prev => ({ ...prev, dateFrom: date?.toISOString() }))}
-            renderInput={(params) => <TextField {...params} fullWidth />}
+            type="date"
+            value={ticketFilters.dateFrom ? ticketFilters.dateFrom.split('T')[0] : ''}
+            onChange={(e) => setFilters(prev => ({ ...prev, dateFrom: e.target.value ? new Date(e.target.value).toISOString() : undefined }))}
+            InputLabelProps={{
+              shrink: true,
+            }}
           />
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <MuiDatePicker
+          <TextField
+            fullWidth
             label="作成終了日"
-            value={ticketFilters.dateTo ? new Date(ticketFilters.dateTo) : null}
-            onChange={(date) => setFilters(prev => ({ ...prev, dateTo: date?.toISOString() }))}
-            renderInput={(params) => <TextField {...params} fullWidth />}
+            type="date"
+            value={ticketFilters.dateTo ? ticketFilters.dateTo.split('T')[0] : ''}
+            onChange={(e) => setFilters(prev => ({ ...prev, dateTo: e.target.value ? new Date(e.target.value).toISOString() : undefined }))}
+            InputLabelProps={{
+              shrink: true,
+            }}
           />
         </Grid>
       </>
+    )
+  }
+
+  const renderAdvancedTicketFilters = () => {
+    const ticketFilters = filters as ExtendedTicketFilters
+
+    return (
+      <>
+        <Grid item xs={12}>
+          <FormControl component="fieldset">
+            <Typography variant="subtitle2" gutterBottom>
+              検索対象フィールド
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              {['title', 'description', 'comments'].map((field) => {
+                const fieldLabels = {
+                  title: 'タイトル',
+                  description: '説明',
+                  comments: 'コメント'
+                }
+                return (
+                  <FormControlLabel
+                    key={field}
+                    control={
+                      <Checkbox
+                        checked={ticketFilters.searchFields?.includes(field as any) ?? true}
+                        onChange={(e) => {
+                          const currentFields = ticketFilters.searchFields || ['title', 'description', 'comments']
+                          const newFields = e.target.checked
+                            ? [...currentFields, field as any]
+                            : currentFields.filter(f => f !== field)
+                          setFilters(prev => ({ ...prev, searchFields: newFields } as ExtendedTicketFilters))
+                        }}
+                        size="small"
+                      />
+                    }
+                    label={fieldLabels[field as keyof typeof fieldLabels]}
+                  />
+                )
+              })}
+            </Box>
+          </FormControl>
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="期限開始日"
+            type="date"
+            value={ticketFilters.dueDateFrom ? ticketFilters.dueDateFrom.split('T')[0] : ''}
+            onChange={(e) => setFilters(prev => ({ ...prev, dueDateFrom: e.target.value ? new Date(e.target.value).toISOString() : undefined } as ExtendedTicketFilters))}
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="期限終了日"
+            type="date"
+            value={ticketFilters.dueDateTo ? ticketFilters.dueDateTo.split('T')[0] : ''}
+            onChange={(e) => setFilters(prev => ({ ...prev, dueDateTo: e.target.value ? new Date(e.target.value).toISOString() : undefined } as ExtendedTicketFilters))}
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <FormControl fullWidth>
+            <InputLabel>SLAステータス</InputLabel>
+            <Select
+              value={ticketFilters.slaStatus || ''}
+              onChange={(e) => setFilters(prev => ({ ...prev, slaStatus: e.target.value || undefined } as ExtendedTicketFilters))}
+              label="SLAステータス"
+            >
+              <MenuItem value="">すべて</MenuItem>
+              <MenuItem value="compliant">遵守</MenuItem>
+              <MenuItem value="at_risk">リスク</MenuItem>
+              <MenuItem value="violated">違反</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="最終更新日数（以内）"
+            type="number"
+            value={ticketFilters.lastUpdatedDays || ''}
+            onChange={(e) => setFilters(prev => ({ ...prev, lastUpdatedDays: e.target.value ? parseInt(e.target.value) : undefined } as ExtendedTicketFilters))}
+            placeholder="例: 7（7日以内）"
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={ticketFilters.hasAttachments ?? false}
+                onChange={(e) => setFilters(prev => ({ ...prev, hasAttachments: e.target.checked || undefined } as ExtendedTicketFilters))}
+              />
+            }
+            label="添付ファイルがあるチケットのみ"
+          />
+        </Grid>
+      </>
+    )
+  }
+
+  const renderSavedFilters = () => {
+    return (
+      <Box>
+        <Typography variant="h6" gutterBottom>
+          保存済みフィルター
+        </Typography>
+        <List>
+          {savedFilters.map((savedFilter) => (
+            <ListItem
+              key={savedFilter.id}
+              button
+              onClick={() => {
+                if (onLoadFilter) {
+                  onLoadFilter(savedFilter.id)
+                  setFilters(savedFilter.filters)
+                }
+              }}
+              sx={{
+                border: 1,
+                borderColor: 'divider',
+                borderRadius: 1,
+                mb: 1,
+                '&:hover': {
+                  bgcolor: 'action.hover',
+                },
+              }}
+            >
+              <BookmarkIcon sx={{ mr: 2, color: 'primary.main' }} />
+              <ListItemText
+                primary={savedFilter.name}
+                secondary={`${savedFilter.type === 'ticket' ? 'チケット' : 'ユーザー'}フィルター - ${new Date(savedFilter.createdAt).toLocaleDateString('ja-JP')}`}
+              />
+              <ListItemSecondaryAction>
+                {onDeleteFilter && (
+                  <IconButton
+                    edge="end"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onDeleteFilter(savedFilter.id)
+                    }}
+                    size="small"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                )}
+              </ListItemSecondaryAction>
+            </ListItem>
+          ))}
+        </List>
+        {savedFilters.length === 0 && (
+          <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ py: 4 }}>
+            保存されたフィルターはありません
+          </Typography>
+        )}
+      </Box>
     )
   }
 
@@ -316,30 +520,100 @@ const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
       </DialogTitle>
       
       <DialogContent>
-        <Grid container spacing={2} sx={{ mt: 1 }}>
-          {filterType === 'ticket' ? renderTicketFilters() : renderUserFilters()}
-        </Grid>
+        <Tabs
+          value={activeTab}
+          onChange={(_, newValue) => setActiveTab(newValue)}
+          sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
+        >
+          <Tab label="基本フィルター" />
+          <Tab label="高度フィルター" disabled={filterType !== 'ticket'} />
+          <Tab label="保存済みフィルター" disabled={!savedFilters.length} />
+        </Tabs>
+
+        {activeTab === 0 && (
+          <Grid container spacing={2}>
+            {filterType === 'ticket' ? renderBasicTicketFilters() : renderUserFilters()}
+          </Grid>
+        )}
+
+        {activeTab === 1 && filterType === 'ticket' && (
+          <Grid container spacing={2}>
+            {renderAdvancedTicketFilters()}
+          </Grid>
+        )}
+
+        {activeTab === 2 && (
+          <Box>
+            {renderSavedFilters()}
+          </Box>
+        )}
       </DialogContent>
       
       <DialogActions sx={{ px: 3, pb: 3 }}>
-        <Button
-          onClick={handleReset}
-          startIcon={<RefreshIcon />}
-          color="inherit"
-        >
-          リセット
-        </Button>
-        <Button onClick={handleClose} color="inherit">
-          キャンセル
-        </Button>
-        <Button
-          onClick={handleApply}
-          variant="contained"
-          startIcon={<FilterIcon />}
-        >
-          フィルターを適用
-        </Button>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+          <Box>
+            {onSaveFilter && (
+              <Button
+                onClick={() => setShowSaveDialog(true)}
+                color="primary"
+                variant="outlined"
+              >
+                フィルターを保存
+              </Button>
+            )}
+          </Box>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              onClick={handleReset}
+              startIcon={<RefreshIcon />}
+              color="inherit"
+            >
+              リセット
+            </Button>
+            <Button onClick={handleClose} color="inherit">
+              キャンセル
+            </Button>
+            <Button
+              onClick={handleApply}
+              variant="contained"
+              startIcon={<FilterIcon />}
+            >
+              フィルターを適用
+            </Button>
+          </Box>
+        </Box>
       </DialogActions>
+
+      {/* 保存ダイアログ */}
+      <Dialog open={showSaveDialog} onClose={() => setShowSaveDialog(false)}>
+        <DialogTitle>フィルターを保存</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            label="フィルター名"
+            value={filterName}
+            onChange={(e) => setFilterName(e.target.value)}
+            placeholder="例: 緊急チケット用フィルター"
+            sx={{ mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowSaveDialog(false)}>キャンセル</Button>
+          <Button
+            onClick={() => {
+              if (filterName.trim() && onSaveFilter) {
+                onSaveFilter(filterName.trim(), filters)
+                setFilterName('')
+                setShowSaveDialog(false)
+              }
+            }}
+            variant="contained"
+            disabled={!filterName.trim()}
+          >
+            保存
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Dialog>
   )
 }

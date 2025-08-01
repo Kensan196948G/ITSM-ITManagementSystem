@@ -46,7 +46,7 @@ def create_initial_data(db: Session) -> None:
             id=admin_user_id,
             tenant_id=tenant_id,
             employee_id="ADMIN001",
-            email="admin@itsm.local",
+            email="admin@company.com",
             username="admin",
             first_name="System",
             last_name="Administrator",
@@ -55,7 +55,7 @@ def create_initial_data(db: Session) -> None:
             timezone="Asia/Tokyo",
             locale="ja_JP",
             is_active=True,
-            password_hash="$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW"  # secret
+            password_hash="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewfNNdSUhZwXLqaW"  # admin123
         )
         db.add(admin_user)
         logger.info("管理者ユーザーを作成しました")

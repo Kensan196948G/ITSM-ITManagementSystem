@@ -36,14 +36,20 @@ export interface Ticket extends BaseEntity {
 
 // User interface
 export interface User extends BaseEntity {
-  firstName: string
-  lastName: string
+  username: string
+  firstName?: string
+  lastName?: string
+  name?: string // フルネーム（firstName + lastName）
+  full_name?: string // バックエンド互換性
+  display_name?: string // 表示名
   email: string
   phone?: string
-  role: UserRole
+  role: UserRole | string
+  roles?: UserRole[] // 複数ロール対応
   department: string
   manager?: string
-  isActive: boolean
+  isActive?: boolean
+  is_active?: boolean // バックエンド互換性
   lastLogin?: string
   permissions?: string[]
 }
@@ -186,4 +192,32 @@ export interface ThemeColors {
   warning: string
   error: string
   info: string
+}
+
+// Authentication interfaces
+export interface LoginCredentials {
+  email: string
+  password: string
+}
+
+export interface AuthResponse {
+  user: User
+  token: string
+  refreshToken: string
+}
+
+export interface AuthState {
+  isAuthenticated: boolean
+  user: User | null
+  token: string | null
+  loading: boolean
+  error: string | null
+}
+
+export interface AuthContextType {
+  authState: AuthState
+  login: (credentials: LoginCredentials) => Promise<void>
+  logout: () => Promise<void>
+  refreshToken: () => Promise<void>
+  clearError: () => void
 }

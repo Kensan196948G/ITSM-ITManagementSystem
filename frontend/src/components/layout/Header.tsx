@@ -10,6 +10,12 @@ import {
   Badge,
   Tooltip,
   Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  CircularProgress,
 } from '@mui/material'
 import {
   Menu as MenuIcon,
@@ -19,6 +25,8 @@ import {
   Logout as LogoutIcon,
   Person as PersonIcon,
 } from '@mui/icons-material'
+import { useAuth } from '../../contexts/AuthContext'
+import { useNavigate } from 'react-router-dom'
 
 interface HeaderProps {
   onMenuClick: () => void
@@ -26,8 +34,13 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onMenuClick, showMenuButton }) => {
+  const { authState, logout } = useAuth()
+  const navigate = useNavigate()
+  
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const [notificationAnchor, setNotificationAnchor] = React.useState<null | HTMLElement>(null)
+  const [logoutDialogOpen, setLogoutDialogOpen] = React.useState(false)
+  const [loggingOut, setLoggingOut] = React.useState(false)
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
@@ -45,11 +58,100 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, showMenuButton }) => {
     setNotificationAnchor(null)
   }
 
-  const mockUser = {
-    name: '山田 太郎',
-    email: 'yamada@example.com',
-    role: 'システム管理者',
-    avatar: '/avatars/user1.jpg', // プレースホルダー
+  const handleLogoutClick = () => {
+    setAnchorEl(null)
+    setLogoutDialogOpen(true)
+  }
+
+  const handleLogoutConfirm = async () => {
+    setLoggingOut(true)
+    try {
+      await logout()
+      navigate('/login', { replace: true })
+    } catch (error) {
+      console.error('Logout error:', error)
+    } finally {
+      setLoggingOut(false)
+      setLogoutDialogOpen(false)
+    }
+  }
+
+  const handleLogoutCancel = () => {
+    setLogoutDialogOpen(false)
+  }
+
+  const getRoleDisplayName = (role: string | undefined): string => {
+    if (!role) return ''
+    const roleMap: Record<string, string> = {
+      admin: 'システム管理者',
+      ADMIN: 'システム管理者',
+      manager: 'マネージャー', 
+      MANAGER: 'マネージャー',
+      operator: 'オペレーター',
+      OPERATOR: 'オペレーター',
+      viewer: 'ビューアー',
+      VIEWER: 'ビューアー',
+    }
+    return roleMap[role] || role
+  }
+
+  const getUserDisplayName = (): string => {
+    if (authState.user) {
+      // Check display_name
+      if (authState.user.display_name && typeof authState.user.display_name === 'string' && authState.user.display_name.trim()) {
+        return authState.user.display_name
+      }
+      // Check full_name
+      if (authState.user.full_name && typeof authState.user.full_name === 'string' && authState.user.full_name.trim()) {
+        return authState.user.full_name
+      }
+      // Check lastName and firstName
+      if (authState.user.lastName && authState.user.firstName && 
+          typeof authState.user.lastName === 'string' && typeof authState.user.firstName === 'string' &&
+          authState.user.lastName.trim() && authState.user.firstName.trim()) {
+        return `${authState.user.lastName} ${authState.user.firstName}`
+      }
+      // Check name
+      if (authState.user.name && typeof authState.user.name === 'string' && authState.user.name.trim()) {
+        return authState.user.name
+      }
+      // Check username
+      if (authState.user.username && typeof authState.user.username === 'string' && authState.user.username.trim()) {
+        return authState.user.username
+      }
+      // Check email
+      if (authState.user.email && typeof authState.user.email === 'string' && authState.user.email.trim()) {
+        return authState.user.email
+      }
+      return 'ユーザー'
+    }
+    return 'ユーザー'
+  }
+
+  const getUserInitial = (): string => {
+    if (authState.user) {
+      // Check lastName and ensure it's a string with length > 0
+      if (authState.user.lastName && typeof authState.user.lastName === 'string' && authState.user.lastName.length > 0) {
+        return authState.user.lastName.charAt(0).toUpperCase()
+      }
+      // Check display_name and ensure it's a string with length > 0
+      if (authState.user.display_name && typeof authState.user.display_name === 'string' && authState.user.display_name.length > 0) {
+        return authState.user.display_name.charAt(0).toUpperCase()
+      }
+      // Check full_name and ensure it's a string with length > 0
+      if (authState.user.full_name && typeof authState.user.full_name === 'string' && authState.user.full_name.length > 0) {
+        return authState.user.full_name.charAt(0).toUpperCase()
+      }
+      // Check username and ensure it's a string with length > 0
+      if (authState.user.username && typeof authState.user.username === 'string' && authState.user.username.length > 0) {
+        return authState.user.username.charAt(0).toUpperCase()
+      }
+      // Check email and ensure it's a string with length > 0
+      if (authState.user.email && typeof authState.user.email === 'string' && authState.user.email.length > 0) {
+        return authState.user.email.charAt(0).toUpperCase()
+      }
+    }
+    return 'U'
   }
 
   const mockNotifications = [
@@ -114,9 +216,23 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, showMenuButton }) => {
           >
             <Avatar 
               sx={{ width: 32, height: 32 }}
-              alt={mockUser.name}
+              alt={(() => {
+                try {
+                  return getUserDisplayName()
+                } catch (error) {
+                  console.error('Error getting user display name for alt:', error)
+                  return 'ユーザー'
+                }
+              })()}
             >
-              {mockUser.name.charAt(0)}
+              {(() => {
+                try {
+                  return authState.user ? getUserInitial() : 'U'
+                } catch (error) {
+                  console.error('Error getting user initial:', error)
+                  return 'U'
+                }
+              })()}
             </Avatar>
           </IconButton>
         </Tooltip>
@@ -134,13 +250,27 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, showMenuButton }) => {
       >
         <Box sx={{ px: 2, py: 1, minWidth: 200 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-            {mockUser.name}
+            {(() => {
+              try {
+                return getUserDisplayName()
+              } catch (error) {
+                console.error('Error getting user display name:', error)
+                return 'ユーザー'
+              }
+            })()}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {mockUser.email}
+            {authState.user?.email || ''}
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            {mockUser.role}
+            {(() => {
+              try {
+                return authState.user ? getRoleDisplayName(authState.user.role) : ''
+              } catch (error) {
+                console.error('Error getting role display name:', error)
+                return ''
+              }
+            })()}
           </Typography>
         </Box>
         <Divider />
@@ -153,7 +283,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, showMenuButton }) => {
           設定
         </MenuItem>
         <Divider />
-        <MenuItem onClick={handleProfileMenuClose}>
+        <MenuItem onClick={handleLogoutClick}>
           <LogoutIcon sx={{ mr: 2 }} />
           ログアウト
         </MenuItem>
@@ -196,6 +326,40 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, showMenuButton }) => {
           </Typography>
         </MenuItem>
       </Menu>
+
+      {/* Logout Confirmation Dialog */}
+      <Dialog
+        open={logoutDialogOpen}
+        onClose={handleLogoutCancel}
+        aria-labelledby="logout-dialog-title"
+        aria-describedby="logout-dialog-description"
+      >
+        <DialogTitle id="logout-dialog-title">
+          ログアウト確認
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            本当にログアウトしますか？
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={handleLogoutCancel}
+            disabled={loggingOut}
+          >
+            キャンセル
+          </Button>
+          <Button
+            onClick={handleLogoutConfirm}
+            variant="contained"
+            color="primary"
+            disabled={loggingOut}
+            startIcon={loggingOut ? <CircularProgress size={16} /> : <LogoutIcon />}
+          >
+            {loggingOut ? 'ログアウト中...' : 'ログアウト'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Toolbar>
   )
 }

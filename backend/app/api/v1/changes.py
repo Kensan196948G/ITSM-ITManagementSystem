@@ -4,7 +4,8 @@ from datetime import datetime, date
 from typing import List, Optional, Dict, Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import status as http_status
 from sqlalchemy.orm import Session
 
 from app.db.base import get_db
@@ -32,7 +33,7 @@ def get_user_tenant_id(user_id: UUID) -> UUID:
 @router.post(
     "/",
     response_model=ChangeResponse,
-    status_code=status.HTTP_201_CREATED,
+    status_code=http_status.HTTP_201_CREATED,
     summary="RFC（変更要求）作成",
     description="新しい変更要求を作成します",
     responses={
@@ -122,7 +123,7 @@ async def create_change(
     except Exception as e:
         db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="変更要求の作成中にエラーが発生しました"
         )
 
@@ -210,7 +211,7 @@ async def list_changes(
         
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="変更要求一覧の取得中にエラーが発生しました"
         )
 
@@ -234,7 +235,7 @@ async def get_change(
     
     if not change:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=http_status.HTTP_404_NOT_FOUND,
             detail="指定された変更要求が見つかりません"
         )
     
@@ -286,7 +287,7 @@ async def update_change(
         
         if not change:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=http_status.HTTP_404_NOT_FOUND,
                 detail="指定された変更要求が見つかりません"
             )
         
@@ -330,7 +331,7 @@ async def update_change(
     except Exception as e:
         db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="変更要求の更新中にエラーが発生しました"
         )
 
@@ -357,7 +358,7 @@ async def approve_change(
         
         if not change:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=http_status.HTTP_404_NOT_FOUND,
                 detail="指定された変更要求が見つかりません"
             )
         
@@ -398,7 +399,7 @@ async def approve_change(
     except Exception as e:
         db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="承認処理中にエラーが発生しました"
         )
 
@@ -450,6 +451,6 @@ async def get_change_calendar(
         
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="変更カレンダーの取得中にエラーが発生しました"
         )

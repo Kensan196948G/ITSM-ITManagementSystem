@@ -1,0 +1,13 @@
+{
+  "timestamp": "2025-08-01T20:10:49.626275",
+  "config": {
+    "check_interval": 30,
+    "max_repair_cycles": 10,
+    "error_threshold": 0,
+    "consecutive_clean_required": 3,
+    "repair_timeout": 1800,
+    "success_notification": true,
+    "failure_notification": true
+  },
+  "state": {
+    "start_time": 

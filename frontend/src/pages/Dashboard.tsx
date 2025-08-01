@@ -19,6 +19,9 @@ import {
   Tabs,
   Tab,
   Button,
+  useMediaQuery,
+  Collapse,
+  Stack,
 } from '@mui/material'
 import {
   ConfirmationNumber as TicketIcon,
@@ -36,12 +39,21 @@ import {
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Area, AreaChart } from 'recharts'
 import { priorityColors, statusColors } from '../theme/theme'
 import AdvancedAnalytics from '../components/common/AdvancedAnalytics'
+import { useResponsive, ResponsiveContainer as CustomResponsiveContainer, MobileCard } from '../components/common/ResponsiveContainer'
+import ContentArea from '../components/layout/ContentArea'
 import type { DashboardMetrics, Ticket, ChartDataPoint, TimeSeriesData } from '../types'
 
 const Dashboard: React.FC = () => {
   const theme = useTheme()
+  const { isMobile, isTablet, isXsScreen } = useResponsive()
   const [currentTab, setCurrentTab] = useState(0)
   const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month' | 'quarter'>('week')
+  const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({
+    metrics: true,
+    sla: true,
+    charts: isMobile ? false : true,
+    tickets: true,
+  })
 
   // Mock data - 実際の実装ではAPIから取得
   const mockMetrics: DashboardMetrics = {
@@ -142,30 +154,62 @@ const Dashboard: React.FC = () => {
     trend?: string
     subtitle?: string
   }> = ({ title, value, icon, color, trend, subtitle }) => (
-    <Card sx={{ height: '100%' }}>
-      <CardContent sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Box>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
+    <Card sx={{ 
+      height: '100%',
+      boxShadow: isMobile ? 1 : 3,
+    }}>
+      <CardContent sx={{ 
+        p: isMobile ? 2 : 3,
+        pb: isMobile ? '16px !important' : 3,
+      }}>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: isMobile ? 'flex-start' : 'center', 
+          justifyContent: 'space-between',
+          flexDirection: isMobile ? 'column' : 'row',
+          gap: isMobile ? 1 : 0,
+        }}>
+          <Box sx={{ flex: 1 }}>
+            <Typography 
+              variant={isMobile ? 'caption' : 'body2'} 
+              color="text.secondary" 
+              gutterBottom
+            >
               {title}
             </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 600, color }}>
+            <Typography 
+              variant={isMobile ? 'h5' : 'h4'} 
+              sx={{ 
+                fontWeight: 600, 
+                color,
+                fontSize: isMobile ? '1.5rem' : '2.125rem',
+              }}
+            >
               {value}
             </Typography>
             {subtitle && (
-              <Typography variant="body2" color="text.secondary">
+              <Typography 
+                variant={isMobile ? 'caption' : 'body2'} 
+                color="text.secondary"
+              >
                 {subtitle}
               </Typography>
             )}
           </Box>
-          <Avatar sx={{ bgcolor: `${color}20`, color, width: 56, height: 56 }}>
+          <Avatar sx={{ 
+            bgcolor: `${color}20`, 
+            color, 
+            width: isMobile ? 40 : 56, 
+            height: isMobile ? 40 : 56,
+            alignSelf: isMobile ? 'flex-end' : 'center',
+          }}>
             {icon}
           </Avatar>
         </Box>
         {trend && (
-          <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-            <TrendingUpIcon sx={{ fontSize: 16, color: 'success.main', mr: 0.5 }} />
-            <Typography variant="caption" color="success.main">
+          <Box sx={{ display: 'flex', alignItems: 'center', mt: isMobile ? 1 : 2 }}>
+            <TrendingUpIcon sx={{ fontSize: 14, color: 'success.main', mr: 0.5 }} />
+            <Typography variant="caption" color="success.main" fontSize={isMobile ? '0.65rem' : '0.75rem'}>
               {trend}
             </Typography>
           </Box>
@@ -219,23 +263,59 @@ const Dashboard: React.FC = () => {
     }
   }
 
+  const pageActions = (
+    <Stack direction="row" spacing={2}>
+      <Button
+        variant="outlined"
+        startIcon={<RefreshIcon />}
+        onClick={handleRefresh}
+        size={isMobile ? 'small' : 'medium'}
+      >
+        更新
+      </Button>
+      <Button
+        variant="contained"
+        startIcon={<AnalyticsIcon />}
+        onClick={() => setCurrentTab(1)}
+        size={isMobile ? 'small' : 'medium'}
+      >
+        詳細分析
+      </Button>
+    </Stack>
+  )
+
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 600 }}>
-          ダッシュボード
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<RefreshIcon />}
-          onClick={handleRefresh}
+    <ContentArea
+      pageTitle="ダッシュボード"
+      pageDescription="ITSMシステムの全体的な状況と主要メトリクス"
+      actions={pageActions}
+      showBreadcrumbs={false}
+    >
+      <Box sx={{ mb: 3 }}>
+        {/* タブメニュー */}
+        <Tabs
+          value={currentTab}
+          onChange={(_, newValue) => setCurrentTab(newValue)}
+          sx={{ borderBottom: 1, borderColor: 'divider' }}
         >
-          更新
-        </Button>
+          <Tab 
+            icon={<DashboardIcon />} 
+            label="概要ダッシュボード" 
+            iconPosition="start"
+          />
+          <Tab 
+            icon={<AnalyticsIcon />} 
+            label="詳細分析" 
+            iconPosition="start"
+          />
+        </Tabs>
       </Box>
 
       {/* Dashboard Navigation Tabs */}
-      <Paper sx={{ mb: 3 }}>
+      <Paper sx={{ 
+        mb: isMobile ? 2 : 3,
+        boxShadow: isMobile ? 1 : 3,
+      }}>
         <Tabs
           value={currentTab}
           onChange={(_, newValue) => setCurrentTab(newValue)}
@@ -244,14 +324,22 @@ const Dashboard: React.FC = () => {
           textColor="primary"
         >
           <Tab
-            icon={<DashboardIcon />}
+            icon={!isMobile ? <DashboardIcon /> : undefined}
             label="概要"
-            iconPosition="start"
+            iconPosition={isMobile ? "top" : "start"}
+            sx={{ 
+              minHeight: isMobile ? 48 : 64,
+              fontSize: isMobile ? '0.875rem' : '0.9375rem',
+            }}
           />
           <Tab
-            icon={<AnalyticsIcon />}
+            icon={!isMobile ? <AnalyticsIcon /> : undefined}
             label="詳細分析"
-            iconPosition="start"
+            iconPosition={isMobile ? "top" : "start"}
+            sx={{ 
+              minHeight: isMobile ? 48 : 64,
+              fontSize: isMobile ? '0.875rem' : '0.9375rem',
+            }}
           />
         </Tabs>
       </Paper>
@@ -261,44 +349,51 @@ const Dashboard: React.FC = () => {
         <Box>
 
       {/* メトリクスカード */}
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <MetricCard
-            title="総チケット数"
-            value={mockMetrics.totalTickets.toLocaleString()}
-            icon={<TicketIcon />}
-            color={theme.palette.primary.main}
-            trend="+5.2% from last month"
-          />
+      <MobileCard 
+        title={isMobile ? "主要指標" : undefined} 
+        collapsible={isMobile} 
+        defaultExpanded={expandedCards.metrics}
+        dense={isMobile}
+      >
+        <Grid container spacing={isMobile ? 2 : 3} sx={{ mb: isMobile ? 2 : 3 }}>
+          <Grid item xs={6} sm={6} md={3}>
+            <MetricCard
+              title="総チケット数"
+              value={mockMetrics.totalTickets.toLocaleString()}
+              icon={<TicketIcon />}
+              color={theme.palette.primary.main}
+              trend={!isMobile ? "+5.2% from last month" : undefined}
+            />
+          </Grid>
+          <Grid item xs={6} sm={6} md={3}>
+            <MetricCard
+              title="未対応チケット"
+              value={mockMetrics.openTickets}
+              icon={<WarningIcon />}
+              color={theme.palette.warning.main}
+              subtitle={!isMobile ? "緊急対応が必要" : undefined}
+            />
+          </Grid>
+          <Grid item xs={6} sm={6} md={3}>
+            <MetricCard
+              title="解決済みチケット"
+              value={mockMetrics.resolvedTickets.toLocaleString()}
+              icon={<CheckCircleIcon />}
+              color={theme.palette.success.main}
+              trend={!isMobile ? "+12.8% this week" : undefined}
+            />
+          </Grid>
+          <Grid item xs={6} sm={6} md={3}>
+            <MetricCard
+              title="期限超過"
+              value={mockMetrics.overdueTickets}
+              icon={<ScheduleIcon />}
+              color={theme.palette.error.main}
+              subtitle={!isMobile ? "SLA違反リスク" : undefined}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <MetricCard
-            title="未対応チケット"
-            value={mockMetrics.openTickets}
-            icon={<WarningIcon />}
-            color={theme.palette.warning.main}
-            subtitle="緊急対応が必要"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <MetricCard
-            title="解決済みチケット"
-            value={mockMetrics.resolvedTickets.toLocaleString()}
-            icon={<CheckCircleIcon />}
-            color={theme.palette.success.main}
-            trend="+12.8% this week"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <MetricCard
-            title="期限超過"
-            value={mockMetrics.overdueTickets}
-            icon={<ScheduleIcon />}
-            color={theme.palette.error.main}
-            subtitle="SLA違反リスク"
-          />
-        </Grid>
-      </Grid>
+      </MobileCard>
 
       {/* SLA指標 */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
@@ -413,7 +508,7 @@ const Dashboard: React.FC = () => {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="value" fill={(entry) => entry.color} radius={4}>
+                  <Bar dataKey="value" fill="#8884d8" radius={4}>
                     {statusData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
@@ -462,29 +557,23 @@ const Dashboard: React.FC = () => {
                       <AssignmentIcon />
                     </Avatar>
                   </ListItemIcon>
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                          {ticket.title}
-                        </Typography>
-                        {getPriorityChip(ticket.priority)}
-                        {getStatusChip(ticket.status)}
-                      </Box>
-                    }
-                    secondary={
-                      <Box>
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                          {ticket.description}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          報告者: {ticket.reporterName} | 
-                          {ticket.assigneeName && ` 担当者: ${ticket.assigneeName} | `}
-                          作成: {new Date(ticket.createdAt).toLocaleString('ja-JP')}
-                        </Typography>
-                      </Box>
-                    }
-                  />
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                      <Typography variant="subtitle1" component="div" sx={{ fontWeight: 600 }}>
+                        {ticket.title}
+                      </Typography>
+                      {getPriorityChip(ticket.priority)}
+                      {getStatusChip(ticket.status)}
+                    </Box>
+                    <Typography variant="body2" component="div" color="text.secondary" gutterBottom>
+                      {ticket.description}
+                    </Typography>
+                    <Typography variant="caption" component="div" color="text.secondary">
+                      報告者: {ticket.reporterName} | 
+                      {ticket.assigneeName && ` 担当者: ${ticket.assigneeName} | `}
+                      作成: {new Date(ticket.createdAt).toLocaleString('ja-JP')}
+                    </Typography>
+                  </Box>
                   {ticket.slaDeadline && (
                     <Box sx={{ textAlign: 'right' }}>
                       <Chip
@@ -514,7 +603,7 @@ const Dashboard: React.FC = () => {
           onTimeRangeChange={setTimeRange}
         />
       )}
-    </Box>
+    </ContentArea>
   )
 }
 

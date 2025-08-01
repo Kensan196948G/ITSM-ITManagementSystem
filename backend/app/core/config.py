@@ -47,6 +47,14 @@ class Settings(BaseSettings):
     # ログ
     LOG_LEVEL: str = Field("INFO", env="LOG_LEVEL")
     
+    # 添付ファイル設定
+    MAX_FILE_SIZE: int = Field(50 * 1024 * 1024, env="MAX_FILE_SIZE")  # 50MB
+    MAX_FILES_PER_UPLOAD: int = Field(10, env="MAX_FILES_PER_UPLOAD")
+    MAX_TOTAL_UPLOAD_SIZE: int = Field(200 * 1024 * 1024, env="MAX_TOTAL_UPLOAD_SIZE")  # 200MB
+    MAX_ATTACHMENTS_PER_RESOURCE: int = Field(50, env="MAX_ATTACHMENTS_PER_RESOURCE")
+    MAX_STORAGE_PER_TENANT: int = Field(10 * 1024 * 1024 * 1024, env="MAX_STORAGE_PER_TENANT")  # 10GB
+    ATTACHMENT_STORAGE_PATH: str = Field("./storage/attachments", env="ATTACHMENT_STORAGE_PATH")
+    
     class Config:
         env_file = ".env"
         case_sensitive = True

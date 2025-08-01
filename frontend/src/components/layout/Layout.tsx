@@ -12,6 +12,7 @@ import {
 import MenuIcon from '@mui/icons-material/Menu'
 import Sidebar from './Sidebar'
 import Header from './Header'
+import { ErrorBoundary } from '../common/ErrorBoundary'
 
 const DRAWER_WIDTH = 280
 
@@ -39,10 +40,26 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           zIndex: theme.zIndex.drawer + 1,
         }}
       >
-        <Header 
-          onMenuClick={handleDrawerToggle} 
-          showMenuButton={isMobile} 
-        />
+        <ErrorBoundary
+          fallback={({ error, resetError }) => (
+            <Toolbar>
+              <Typography variant="h6" color="inherit" sx={{ flexGrow: 1 }}>
+                ITSM Management System
+              </Typography>
+              <Typography variant="body2" color="inherit" sx={{ mr: 2 }}>
+                Header Error: {error.message}
+              </Typography>
+              <IconButton color="inherit" onClick={resetError}>
+                <MenuIcon />
+              </IconButton>
+            </Toolbar>
+          )}
+        >
+          <Header 
+            onMenuClick={handleDrawerToggle} 
+            showMenuButton={isMobile} 
+          />
+        </ErrorBoundary>
       </AppBar>
 
       {/* Navigation Drawer */}

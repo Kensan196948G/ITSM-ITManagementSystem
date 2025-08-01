@@ -1,11 +1,14 @@
 """変更管理モデル"""
 
-from sqlalchemy import Column, String, Text, DateTime, UUID, ForeignKey, Enum as SQLEnum, Integer
+from sqlalchemy import Column, String, Text, DateTime, ForeignKey, Enum as SQLEnum, Integer
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 import enum
 
+import uuid
+
 from app.db.base import Base
+from app.models.common import UUID
 
 
 class ChangeType(str, enum.Enum):
@@ -40,9 +43,9 @@ class Change(Base):
     """変更要求モデル"""
     __tablename__ = "changes"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
+    id = Column(UUID(), primary_key=True, default=uuid.uuid4)
     change_number = Column(String(20), unique=True, nullable=False)
-    tenant_id = Column(UUID(as_uuid=True), nullable=False)
+    tenant_id = Column(UUID(), nullable=False)
     title = Column(String(500), nullable=False)
     type = Column(SQLEnum(ChangeType), default=ChangeType.NORMAL, nullable=False)
     description = Column(Text)
@@ -60,8 +63,8 @@ class Change(Base):
     actual_end = Column(DateTime(timezone=True))
     
     # 担当者
-    requester_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    implementer_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    requester_id = Column(UUID(), ForeignKey("users.id"), nullable=False)
+    implementer_id = Column(UUID(), ForeignKey("users.id"))
     
     # CAB（Change Advisory Board）
     cab_required = Column(String(1), default="N")  # Y/N
@@ -81,9 +84,9 @@ class ChangeApproval(Base):
     """変更承認モデル"""
     __tablename__ = "change_approvals"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
-    change_id = Column(UUID(as_uuid=True), ForeignKey("changes.id"), nullable=False)
-    approver_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    id = Column(UUID(), primary_key=True, default=uuid.uuid4)
+    change_id = Column(UUID(), ForeignKey("changes.id"), nullable=False)
+    approver_id = Column(UUID(), ForeignKey("users.id"), nullable=False)
     decision = Column(String(20))  # approved, rejected, pending
     comments = Column(Text)
     decided_at = Column(DateTime(timezone=True))
@@ -98,11 +101,11 @@ class ChangeTask(Base):
     """変更タスクモデル"""
     __tablename__ = "change_tasks"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
-    change_id = Column(UUID(as_uuid=True), ForeignKey("changes.id"), nullable=False)
+    id = Column(UUID(), primary_key=True, default=uuid.uuid4)
+    change_id = Column(UUID(), ForeignKey("changes.id"), nullable=False)
     task_name = Column(String(500), nullable=False)
     description = Column(Text)
-    assignee_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    assignee_id = Column(UUID(), ForeignKey("users.id"))
     status = Column(String(20), default="pending")  # pending, in_progress, completed
     scheduled_start = Column(DateTime(timezone=True))
     scheduled_end = Column(DateTime(timezone=True))

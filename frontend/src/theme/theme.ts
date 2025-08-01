@@ -1,5 +1,5 @@
-import { createTheme } from '@mui/material/styles'
-import type { Theme } from '@mui/material/styles'
+import { createTheme } from '@mui/material/styles/index.js'
+import type { Theme } from '@mui/material/styles/index.js'
 
 declare module '@mui/material/styles' {
   interface Palette {
@@ -307,4 +307,57 @@ export const statusColors = {
   resolved: theme.palette.success.main,
   closed: theme.palette.grey[500],
   on_hold: theme.palette.grey[600],
+}
+
+// グラフィカル強化用のグラデーション定義
+export const gradients = {
+  performance: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  warning: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+  success: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+  info: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+  primary: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  secondary: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+  tertiary: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+  critical: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)',
+  glass: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
+}
+
+// アニメーション設定
+export const animations = {
+  entrance: { duration: 1000, easing: 'ease-out' },
+  update: { duration: 500, easing: 'ease-in-out' },
+  hover: { duration: 200, easing: 'ease' },
+  pulse: { duration: 2000, easing: 'ease-in-out' },
+}
+
+// チャート用カラーパレット
+export const chartColors = {
+  primary: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#84CC16', '#F97316'],
+  pastel: ['#A7C7E7', '#B8E6B8', '#FFE4B5', '#FFB6C1', '#E6E6FA', '#AFEEEE', '#F0E68C', '#DDA0DD'],
+  dark: ['#1E40AF', '#059669', '#D97706', '#DC2626', '#7C3AED', '#0891B2', '#65A30D', '#EA580C'],
+  gradient: [
+    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+    'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+    'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+    'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+    'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+    'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+    'linear-gradient(135deg, #ffc3a0 0%, #ffafbd 100%)'
+  ]
+}
+
+// ガラスモーフィズム効果
+export const glassEffect = {
+  background: 'rgba(255, 255, 255, 0.25)',
+  backdropFilter: 'blur(10px)',
+  border: '1px solid rgba(255, 255, 255, 0.18)',
+  boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+}
+
+// 3D効果
+export const threeDEffect = {
+  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1), 0 5px 10px rgba(0, 0, 0, 0.05)',
+  transform: 'perspective(1000px) rotateX(5deg)',
+  transition: 'all 0.3s ease',
 }

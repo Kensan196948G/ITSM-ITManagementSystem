@@ -53,6 +53,7 @@ import {
   Delete as DeleteIcon,
 } from '@mui/icons-material'
 import type { User, UserRole, Ticket } from '../../types'
+import RBACManager from '../../components/users/RBACManager'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -462,44 +463,18 @@ const UserDetail: React.FC = () => {
 
       {/* 権限設定タブ */}
       <TabPanel value={tabValue} index={2}>
-        <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            権限設定
-          </Typography>
-          <Divider sx={{ mb: 3 }} />
-          
-          <Grid container spacing={3}>
-            {Object.entries(getPermissionGroups()).map(([groupKey, group]) => (
-              <Grid item xs={12} sm={6} key={groupKey}>
-                <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-                      {group.label}
-                    </Typography>
-                    <List dense>
-                      {group.permissions.map((permission) => (
-                        <ListItem key={permission}>
-                          <ListItemIcon>
-                            <CheckCircle color="success" />
-                          </ListItemIcon>
-                          <ListItemText primary={permission} />
-                        </ListItem>
-                      ))}
-                      {group.permissions.length === 0 && (
-                        <ListItem>
-                          <ListItemText
-                            primary="権限なし"
-                            primaryTypographyProps={{ color: 'text.secondary' }}
-                          />
-                        </ListItem>
-                      )}
-                    </List>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Paper>
+        <RBACManager
+          userId={mockUser.id}
+          currentUserRole="admin"
+          onPermissionChange={(userId, permissions) => {
+            console.log('Permissions changed for user', userId, permissions)
+            // 実際の実装では API を呼び出してユーザーの権限を更新
+          }}
+          onRoleChange={(userId, roleId) => {
+            console.log('Role changed for user', userId, roleId)
+            // 実際の実装では API を呼び出してユーザーの役割を更新
+          }}
+        />
       </TabPanel>
 
       {/* ログイン履歴タブ */}

@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from app.core.config import settings
 from app.db.init_db import init_db
+from app.core.init_performance import initialize_performance_system
 
 
 def setup_logging():
@@ -41,6 +42,13 @@ def main():
     
     # データベース初期化
     initialize_database()
+    
+    # パフォーマンス最適化システム初期化
+    print("🔧 パフォーマンス最適化システムを初期化しています...")
+    if initialize_performance_system():
+        print("✅ パフォーマンス最適化システム初期化完了")
+    else:
+        print("⚠️ パフォーマンス最適化システムの初期化に問題がありましたが、続行します")
     
     # サーバー設定
     host = "0.0.0.0"

@@ -1,0 +1,25 @@
+{
+  "github_repo": {
+    "owner": "Kensan196948G",
+    "name": "ITSM-ITManagementSystem"
+  },
+  "monitoring": {
+    "check_interval": 30,
+    "max_repair_cycles": 10,
+    "error_threshold": 0,
+    "consecutive_clean_required": 3,
+    "repair_timeout": 1800
+  },
+  "notifications": {
+    "success_notification": true,
+    "failure_notification": true
+  },
+  "repair_categories": [
+    "dependency",
+    "config", 
+    "database",
+    "linting",
+    "build",
+    "test"
+  ]
+}

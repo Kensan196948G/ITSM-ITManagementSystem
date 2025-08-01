@@ -272,14 +272,14 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({
                       <ListItemText
                         primary={category.category}
                         secondary={
-                          <Box>
-                            <Typography variant="body2" color="text.secondary">
+                          <Box component="div">
+                            <Box component="div" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
                               {category.tickets}件 | 平均{category.avgResolution}h
-                            </Typography>
+                            </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                              <Typography variant="caption">
+                              <Box component="span" sx={{ fontSize: '0.75rem' }}>
                                 SLA遵守率:
-                              </Typography>
+                              </Box>
                               <LinearProgress
                                 variant="determinate"
                                 value={category.slaCompliance}
@@ -292,9 +292,9 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({
                                   },
                                 }}
                               />
-                              <Typography variant="caption" sx={{ minWidth: 35 }}>
+                              <Box component="span" sx={{ minWidth: 35, fontSize: '0.75rem' }}>
                                 {category.slaCompliance}%
-                              </Typography>
+                              </Box>
                             </Box>
                           </Box>
                         }

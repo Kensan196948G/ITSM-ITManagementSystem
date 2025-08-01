@@ -1,6 +1,6 @@
 """インシデント管理サービス"""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Optional, Dict, Any
 from uuid import UUID
 import logging
@@ -12,7 +12,7 @@ from fastapi import HTTPException, status
 from app.models.incident import Incident, IncidentHistory, IncidentWorkNote, IncidentStatus
 from app.schemas.incident import (
     IncidentCreate, IncidentUpdate, IncidentResponse, 
-    IncidentWorkNoteCreate, IncidentWorkNoteResponse
+    IncidentWorkNoteCreate, IncidentWorkNoteResponse, IncidentHistoryResponse
 )
 from app.schemas.common import PaginationMeta, PaginationLinks
 
@@ -134,7 +134,20 @@ class IncidentService:
         assignee_id: Optional[UUID] = None,
         category_id: Optional[UUID] = None,
         q: Optional[str] = None,
-        sort: Optional[str] = None
+        sort: Optional[str] = None,
+        # 高度フィルタリング用パラメータ
+        date_from: Optional[datetime] = None,
+        date_to: Optional[datetime] = None,
+        due_date_from: Optional[datetime] = None,
+        due_date_to: Optional[datetime] = None,
+        sla_status: Optional[str] = None,
+        has_attachments: Optional[bool] = None,
+        last_updated_days: Optional[int] = None,
+        search_fields: Optional[List[str]] = None,
+        reporter_id: Optional[UUID] = None,
+        team_id: Optional[UUID] = None,
+        impact: Optional[List[str]] = None,
+        urgency: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """インシデント一覧を取得する"""
         try:
@@ -146,28 +159,133 @@ class IncidentService:
                 )
             )
             
-            # フィルター適用
+            # 基本フィルター適用
             if status:
                 query = query.filter(Incident.status.in_(status))
             
             if priority:
                 query = query.filter(Incident.priority.in_(priority))
+                
+            if impact:
+                query = query.filter(Incident.impact.in_(impact))
+                
+            if urgency:
+                query = query.filter(Incident.urgency.in_(urgency))
             
             if assignee_id:
                 query = query.filter(Incident.assignee_id == assignee_id)
+                
+            if reporter_id:
+                query = query.filter(Incident.reporter_id == reporter_id)
+                
+            if team_id:
+                query = query.filter(Incident.team_id == team_id)
             
             if category_id:
                 query = query.filter(Incident.category_id == category_id)
             
+            # 日時フィルター
+            if date_from:
+                query = query.filter(Incident.created_at >= date_from)
+                
+            if date_to:
+                query = query.filter(Incident.created_at <= date_to)
+                
+            if due_date_from:
+                query = query.filter(Incident.resolution_due_at >= due_date_from)
+                
+            if due_date_to:
+                query = query.filter(Incident.resolution_due_at <= due_date_to)
+                
+            # 最終更新日フィルター
+            if last_updated_days:
+                cutoff_date = datetime.utcnow() - timedelta(days=last_updated_days)
+                query = query.filter(Incident.updated_at >= cutoff_date)
+            
+            # SLAステータスフィルター
+            if sla_status:
+                current_time = datetime.utcnow()
+                if sla_status == "compliant":
+                    # 期限内で解決済み、または期限まで余裕がある未解決
+                    query = query.filter(
+                        or_(
+                            and_(
+                                Incident.status == IncidentStatus.RESOLVED,
+                                Incident.resolved_at <= Incident.resolution_due_at
+                            ),
+                            and_(
+                                Incident.status.in_([IncidentStatus.NEW, IncidentStatus.ASSIGNED, IncidentStatus.IN_PROGRESS]),
+                                Incident.resolution_due_at > current_time
+                            )
+                        )
+                    )
+                elif sla_status == "at_risk":
+                    # 期限まで24時間未満の未解決
+                    risk_threshold = current_time + timedelta(hours=24)
+                    query = query.filter(
+                        and_(
+                            Incident.status.in_([IncidentStatus.NEW, IncidentStatus.ASSIGNED, IncidentStatus.IN_PROGRESS]),
+                            Incident.resolution_due_at <= risk_threshold,
+                            Incident.resolution_due_at > current_time
+                        )
+                    )
+                elif sla_status == "violated":
+                    # 期限超過の未解決、または期限超過後に解決
+                    query = query.filter(
+                        or_(
+                            and_(
+                                Incident.status.in_([IncidentStatus.NEW, IncidentStatus.ASSIGNED, IncidentStatus.IN_PROGRESS]),
+                                Incident.resolution_due_at < current_time
+                            ),
+                            and_(
+                                Incident.status == IncidentStatus.RESOLVED,
+                                Incident.resolved_at > Incident.resolution_due_at
+                            )
+                        )
+                    )
+            
+            # 添付ファイルフィルター
+            if has_attachments is not None:
+                from app.models.incident import IncidentAttachment
+                if has_attachments:
+                    query = query.join(IncidentAttachment).filter(IncidentAttachment.incident_id == Incident.id)
+                else:
+                    subquery = self.db.query(IncidentAttachment.incident_id).filter(
+                        IncidentAttachment.incident_id == Incident.id
+                    ).exists()
+                    query = query.filter(~subquery)
+            
+            # 高度検索
             if q:
                 search_term = f"%{q}%"
-                query = query.filter(
-                    or_(
-                        Incident.title.ilike(search_term),
-                        Incident.description.ilike(search_term),
-                        Incident.incident_number.ilike(search_term)
-                    )
-                )
+                search_conditions = []
+                
+                # 検索対象フィールドを決定
+                if not search_fields:
+                    search_fields = ["title", "description", "incident_number"]
+                
+                if "title" in search_fields:
+                    search_conditions.append(Incident.title.ilike(search_term))
+                if "description" in search_fields:
+                    search_conditions.append(Incident.description.ilike(search_term))
+                if "incident_number" in search_fields:
+                    search_conditions.append(Incident.incident_number.ilike(search_term))
+                if "resolution" in search_fields:
+                    search_conditions.append(Incident.resolution.ilike(search_term))
+                
+                # 作業ノートも検索対象に含める
+                if "comments" in search_fields:
+                    from app.models.incident import IncidentWorkNote
+                    work_note_subquery = self.db.query(IncidentWorkNote.incident_id).filter(
+                        and_(
+                            IncidentWorkNote.incident_id == Incident.id,
+                            IncidentWorkNote.content.ilike(search_term)
+                        )
+                    ).exists()
+                    search_conditions.append(work_note_subquery)
+                
+                if search_conditions:
+                    query = query.filter(or_(*search_conditions))
             
             # ソート
             if sort:
@@ -267,6 +385,195 @@ class IncidentService:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="作業ノートの追加中にエラーが発生しました"
+            )
+
+    def get_incident_history(self, incident_id: UUID, current_user_id: UUID) -> List[IncidentHistoryResponse]:
+        """インシデント履歴を取得する"""
+        try:
+            # インシデントの存在確認
+            incident = self._get_incident_by_id(incident_id, current_user_id)
+            
+            # 履歴を取得
+            histories = self.db.query(IncidentHistory).filter(
+                IncidentHistory.incident_id == incident_id
+            ).order_by(desc(IncidentHistory.changed_at)).all()
+            
+            history_list = []
+            for history in histories:
+                history_list.append(IncidentHistoryResponse(
+                    id=history.id,
+                    incident_id=history.incident_id,
+                    field_name=history.field_name,
+                    old_value=history.old_value,
+                    new_value=history.new_value,
+                    changed_by=history.changed_by,
+                    changed_at=history.changed_at,
+                    user={"id": history.changed_by, "display_name": "User Name", "email": "user@example.com"}
+                ))
+            
+            return history_list
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error retrieving incident history {incident_id}: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="インシデント履歴の取得中にエラーが発生しました"
+            )
+
+    def get_work_notes(
+        self, 
+        incident_id: UUID, 
+        current_user_id: UUID, 
+        include_private: bool = False
+    ) -> List[IncidentWorkNoteResponse]:
+        """作業ノート一覧を取得する"""
+        try:
+            # インシデントの存在確認
+            incident = self._get_incident_by_id(incident_id, current_user_id)
+            
+            # 作業ノートを取得
+            query = self.db.query(IncidentWorkNote).filter(
+                IncidentWorkNote.incident_id == incident_id
+            )
+            
+            # プライベートノートのフィルタリング
+            if not include_private:
+                query = query.filter(IncidentWorkNote.is_public == "Y")
+            
+            work_notes = query.order_by(desc(IncidentWorkNote.created_at)).all()
+            
+            note_list = []
+            for note in work_notes:
+                note_list.append(IncidentWorkNoteResponse(
+                    id=note.id,
+                    incident_id=note.incident_id,
+                    content=note.content,
+                    note_type=note.note_type,
+                    is_public=note.is_public == "Y",
+                    user={"id": note.created_by, "display_name": "User Name", "email": "user@example.com"},
+                    created_at=note.created_at,
+                    updated_at=note.updated_at
+                ))
+            
+            return note_list
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error retrieving work notes for incident {incident_id}: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="作業ノート一覧の取得中にエラーが発生しました"
+            )
+
+    def update_work_note(
+        self, 
+        incident_id: UUID, 
+        note_id: UUID, 
+        note_data: IncidentWorkNoteCreate, 
+        current_user_id: UUID
+    ) -> IncidentWorkNoteResponse:
+        """作業ノートを更新する"""
+        try:
+            # インシデントの存在確認
+            incident = self._get_incident_by_id(incident_id, current_user_id)
+            
+            # 作業ノートを取得
+            work_note = self.db.query(IncidentWorkNote).filter(
+                and_(
+                    IncidentWorkNote.id == note_id,
+                    IncidentWorkNote.incident_id == incident_id
+                )
+            ).first()
+            
+            if not work_note:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="指定された作業ノートが見つかりません"
+                )
+            
+            # 更新権限チェック（作成者のみ更新可能）
+            if work_note.created_by != current_user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="作業ノートの更新権限がありません"
+                )
+            
+            # 作業ノートを更新
+            work_note.content = note_data.content
+            work_note.note_type = note_data.note_type
+            work_note.is_public = "Y" if note_data.is_public else "N"
+            work_note.updated_at = datetime.utcnow()
+            
+            self.db.commit()
+            self.db.refresh(work_note)
+            
+            logger.info(f"Work note {note_id} updated by user {current_user_id}")
+            
+            return IncidentWorkNoteResponse(
+                id=work_note.id,
+                incident_id=work_note.incident_id,
+                content=work_note.content,
+                note_type=work_note.note_type,
+                is_public=work_note.is_public == "Y",
+                user={"id": current_user_id, "display_name": "Current User", "email": "user@example.com"},
+                created_at=work_note.created_at,
+                updated_at=work_note.updated_at
+            )
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            self.db.rollback()
+            logger.error(f"Error updating work note {note_id}: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="作業ノートの更新中にエラーが発生しました"
+            )
+
+    def delete_work_note(self, incident_id: UUID, note_id: UUID, current_user_id: UUID):
+        """作業ノートを削除する"""
+        try:
+            # インシデントの存在確認
+            incident = self._get_incident_by_id(incident_id, current_user_id)
+            
+            # 作業ノートを取得
+            work_note = self.db.query(IncidentWorkNote).filter(
+                and_(
+                    IncidentWorkNote.id == note_id,
+                    IncidentWorkNote.incident_id == incident_id
+                )
+            ).first()
+            
+            if not work_note:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="指定された作業ノートが見つかりません"
+                )
+            
+            # 削除権限チェック（作成者のみ削除可能）
+            if work_note.created_by != current_user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="作業ノートの削除権限がありません"
+                )
+            
+            # 作業ノートを削除
+            self.db.delete(work_note)
+            self.db.commit()
+            
+            logger.info(f"Work note {note_id} deleted by user {current_user_id}")
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            self.db.rollback()
+            logger.error(f"Error deleting work note {note_id}: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="作業ノートの削除中にエラーが発生しました"
             )
 
     def _get_incident_by_id(self, incident_id: UUID, current_user_id: UUID) -> Incident:

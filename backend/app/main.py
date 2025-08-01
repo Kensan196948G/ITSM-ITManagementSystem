@@ -17,6 +17,7 @@ from app.core.middleware import (
     RateLimitMiddleware,
     AuditMiddleware
 )
+from app.middleware.performance import setup_performance_middleware
 from app.api import api_router
 
 # ログ設定を初期化
@@ -41,6 +42,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# パフォーマンス最適化ミドルウェアをセットアップ
+setup_performance_middleware(app)
 
 # カスタムミドルウェアを追加
 app.add_middleware(AuditMiddleware)
@@ -168,11 +172,21 @@ async def general_exception_handler(request: Request, exc: Exception):
 @app.get("/health", tags=["health"])
 async def health_check():
     """ヘルスチェック"""
+    from app.core.performance import perf_monitor
+    from app.core.cache import cache_manager
+    import time
+    
+    performance_stats = perf_monitor.get_stats()
+    cache_stats = cache_manager.get_stats()
+    
     return {
         "status": "healthy",
         "service": settings.PROJECT_NAME,
         "version": settings.PROJECT_VERSION,
-        "environment": settings.ENVIRONMENT
+        "environment": settings.ENVIRONMENT,
+        "timestamp": time.time(),
+        "performance": performance_stats,
+        "cache": cache_stats
     }
 
 
