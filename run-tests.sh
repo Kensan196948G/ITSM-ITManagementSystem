@@ -1,8 +1,6 @@
 #!/bin/bash
-"""
-ITSM Test Execution Script
-Comprehensive test runner with reporting
-"""
+# ITSM Test Execution Script
+# Comprehensive test runner with reporting
 
 set -e
 
@@ -90,7 +88,7 @@ install_dependencies() {
 run_unit_tests() {
     log_info "Running unit tests..."
     
-    python -m pytest tests/ \
+    python3 -m pytest tests/ \
         -v \
         --tb=short \
         --html="$REPORTS_DIR/unit-report.html" \
@@ -110,7 +108,7 @@ run_unit_tests() {
 run_api_tests() {
     log_info "Running API tests..."
     
-    python -m pytest tests/api/ \
+    python3 -m pytest tests/api/ \
         -v \
         --tb=short \
         --html="$REPORTS_DIR/api-report.html" \
@@ -135,7 +133,7 @@ run_e2e_tests() {
     export HEADLESS=${HEADLESS:-true}
     export RECORD_VIDEO=${RECORD_VIDEO:-false}
     
-    python -m pytest tests/e2e/ \
+    python3 -m pytest tests/e2e/ \
         -v \
         --tb=short \
         --html="$REPORTS_DIR/e2e-report.html" \
@@ -156,7 +154,7 @@ run_load_tests() {
     export BENCHMARK_ROUNDS=${BENCHMARK_ROUNDS:-3}
     export BENCHMARK_TIMEOUT=${BENCHMARK_TIMEOUT:-300}
     
-    python -m pytest tests/load/ \
+    python3 -m pytest tests/load/ \
         -v \
         --tb=short \
         --html="$REPORTS_DIR/load-report.html" \
@@ -194,7 +192,7 @@ generate_reports() {
     log_info "Generating consolidated reports..."
     
     # Use Python report generator
-    python tests/utils/generate_consolidated_report.py \
+    python3 tests/utils/generate_consolidated_report.py \
         --input-dir "$REPORTS_DIR" \
         --output-dir "$REPORTS_DIR/consolidated"
     
@@ -207,7 +205,7 @@ check_quality_gates() {
     log_info "Checking quality gates..."
     
     # Use Python test runner for quality gate checks
-    if python tests/utils/test_runner.py --quality-gates-only --output "$REPORTS_DIR/consolidated/summary.json"; then
+    if python3 tests/utils/test_runner.py --quality-gates-only --output "$REPORTS_DIR/consolidated/summary.json"; then
         log_success "All quality gates passed!"
         return 0
     else

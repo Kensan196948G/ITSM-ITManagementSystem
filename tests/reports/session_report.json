@@ -1,0 +1,48 @@
+{
+  "start_time": "2025-08-01 13:37:09.077858",
+  "test_results": [
+    {
+      "test_name": "test_health_endpoint_success",
+      "outcome": true,
+      "duration": 0.0009459739994781557,
+      "timestamp": "2025-08-01T13:37:09.173983",
+      "markers": [
+        "api"
+      ]
+    },
+    {
+      "test_name": "test_version_endpoint_success",
+      "outcome": true,
+      "duration": 0.0009289169975090772,
+      "timestamp": "2025-08-01T13:37:09.176078",
+      "markers": [
+        "api"
+      ]
+    },
+    {
+      "test_name": "test_health_endpoint_performance",
+      "outcome": true,
+      "duration": 1.226247394002712,
+      "timestamp": "2025-08-01T13:37:10.403799",
+      "markers": [
+        "benchmark",
+        "api"
+      ]
+    },
+    {
+      "test_name": "test_concurrent_health_requests",
+      "outcome": true,
+      "duration": 0.006997054999374086,
+      "timestamp": "2025-08-01T13:37:10.411988",
+      "markers": [
+        "benchmark",
+        "api"
+      ]
+    }
+  ],
+  "coverage": {},
+  "performance": {},
+  "end_time": "2025-08-01 13:37:10.446581",
+  "duration": 1.368723,
+  "exit_status": 0
+}
