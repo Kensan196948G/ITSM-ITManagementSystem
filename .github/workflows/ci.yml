@@ -59,7 +59,7 @@ jobs:
         run: bandit -r . -f json -o bandit-report.json || true
 
       - name: Upload code quality artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: code-quality-reports
           path: |
@@ -118,7 +118,7 @@ jobs:
           npm test -- --coverage --watchAll=false --testResultsProcessor=jest-junit || exit 1
 
       - name: Upload unit test reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: unit-test-reports
@@ -195,7 +195,7 @@ init_db()
             -n 4 || exit 1
 
       - name: Upload API test reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: api-test-reports
@@ -272,10 +272,10 @@ init_db()
             --output-dir=../tests/reports/e2e-results || exit 1
 
       - name: Upload E2E test reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: e2e-test-reports
+          name: e2e-ci-reports
           path: |
             tests/reports/e2e-results/
             tests/reports/playwright-report/
@@ -323,7 +323,7 @@ init_db()
             --timeout=300 || exit 1
 
       - name: Upload performance test reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: performance-test-reports
@@ -347,7 +347,7 @@ init_db()
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Download all test reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
 
       - name: Install dependencies
         run: |
@@ -387,7 +387,7 @@ init_db()
           "
 
       - name: Upload consolidated reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: consolidated-reports
@@ -446,7 +446,7 @@ init_db()
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Download test reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
 
       - name: Auto-fix common issues
         run: |

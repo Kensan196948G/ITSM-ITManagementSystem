@@ -88,7 +88,7 @@ jobs:
         esac
     
     - name: Upload test reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: ${{ matrix.test-type }}-test-reports
@@ -173,10 +173,10 @@ jobs:
           --maxfail=5
     
     - name: Upload E2E test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: e2e-test-reports
+        name: e2e-test-automation-reports
         path: |
           tests/reports/e2e-*.html
           tests/reports/e2e-*.json
@@ -220,7 +220,7 @@ jobs:
           --benchmark-sort=mean
     
     - name: Upload load test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: load-test-reports
@@ -257,7 +257,7 @@ jobs:
         safety check
     
     - name: Upload security reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: security-reports
@@ -283,7 +283,7 @@ jobs:
         pip install jinja2 matplotlib pandas
     
     - name: Download all test reports
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         path: artifacts/
     
@@ -294,7 +294,7 @@ jobs:
           --output-dir tests/reports/consolidated/
     
     - name: Upload consolidated report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: consolidated-test-report
         path: tests/reports/consolidated/
@@ -346,7 +346,7 @@ jobs:
     
     steps:
     - name: Download test reports
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         path: artifacts/
     
