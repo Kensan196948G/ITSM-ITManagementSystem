@@ -1,8 +1,31 @@
 # ITSM準拠IT運用管理システム
 
-## 概要
+## 🎯 概要
 
 本システムは、ITIL (Information Technology Infrastructure Library) および ISO/IEC 20000に準拠した、エンタープライズグレードのIT運用管理システムです。インシデント管理、問題管理、変更管理、構成管理データベース（CMDB）などの主要なITSMプロセスを統合的に管理します。
+
+**🚀 Claude-Flow 6エージェント並列自動開発システム搭載**
+
+## 🤖 AI自動開発環境
+
+### Claude-Flow による24時間自動開発
+- 📘 **ITSM-CTO**: 技術設計・セキュリティ設計
+- 🛠️ **ITSM-DevAPI**: バックエンドAPI開発
+- 💻 **ITSM-DevUI**: フロントエンドUI開発  
+- 🔍 **ITSM-QA**: 品質保証・UI整合性
+- 🧪 **ITSM-Tester**: 自動テスト・E2E検証
+- 📈 **ITSM-Manager**: CI/CD・進行管理
+
+### 自動開発開始コマンド
+```bash
+./start-swarm-agents.sh
+```
+
+### GitHub自動同期
+```bash
+./git-auto-sync.sh          # 単発同期
+./git-scheduled-sync.sh     # 定期同期（1時間毎）
+```
 
 ## 主要機能
 
@@ -75,13 +98,24 @@
 - Node.js 18+
 - Python 3.11+
 - Git
+- ClaudeCode CLI
 
-### インストール手順
+### AI自動開発開始
+
+```bash
+# 1. 6エージェント並列開発環境起動
+./start-swarm-agents.sh
+
+# 2. GitHub自動同期開始（別ターミナル）
+./git-scheduled-sync.sh
+```
+
+### 手動インストール手順
 
 ```bash
 # リポジトリのクローン
-git clone https://github.com/your-org/itsm-system.git
-cd itsm-system
+git clone https://github.com/Kensan196948G/ITSM-ITManagementSystem.git
+cd ITSM-ITManagementSystem
 
 # 環境変数の設定
 cp .env.example .env
@@ -115,23 +149,34 @@ npm run dev
 ## プロジェクト構造
 
 ```
-itsm-system/
-├── backend/              # バックエンドアプリケーション
-│   ├── app/             # FastAPIアプリケーション
-│   ├── tests/           # テストコード
-│   └── migrations/      # データベースマイグレーション
-├── frontend/            # フロントエンドアプリケーション
-│   ├── src/            # Reactソースコード
-│   ├── public/         # 静的ファイル
-│   └── tests/          # テストコード
-├── docs/               # プロジェクトドキュメント
-├── plan/               # 開発計画ドキュメント
-├── infrastructure/     # インフラ設定
-│   ├── docker/        # Docker設定
-│   ├── k8s/           # Kubernetes設定
-│   └── terraform/     # Terraform設定
-└── scripts/           # ユーティリティスクリプト
+ITSM-ITManagementSystem/
+├── docs/                     # エージェント定義・仕様書
+│   ├── ITSM-CTO.md          # CTOエージェント定義
+│   ├── ITSM-DevAPI.md       # APIエージェント定義
+│   ├── ITSM-DevUI.md        # UIエージェント定義
+│   ├── ITSM-QA.md           # QAエージェント定義
+│   ├── ITSM-Tester.md       # テスターエージェント定義
+│   └── ITSM-Manager.md      # マネージャーエージェント定義
+├── backend/                  # バックエンドアプリケーション
+├── frontend/                 # フロントエンドアプリケーション
+├── logs/                     # ログファイル
+├── start-swarm-agents.sh     # 6エージェント起動
+├── git-auto-sync.sh         # GitHub自動同期
+└── git-scheduled-sync.sh    # 定期同期
 ```
+
+## 🤖 AI開発環境の特徴
+
+### 24時間自動開発
+- tmux不使用の軽量並列処理
+- ruv-swarm MCP による高度な協調動作
+- 自動修復・継続改善ループ
+- リアルタイム品質監視
+
+### 自動Git管理
+- 定期的なコミット・プッシュ
+- 競合解決の自動化
+- 開発進捗の可視化
 
 ## 開発ガイド
 
@@ -198,18 +243,15 @@ npm run test:e2e
 ## サポート
 
 ### ドキュメント
+- [Claude-Flow開発仕様書](docs/ClaudeCodeClaude-Flow%20による%206エージェント並列24時間自動開発仕様書（tmux%20不使用）.md)
 - [システム概要](docs/システム概要.md)
 - [アーキテクチャ設計](docs/アーキテクチャ設計.md)
 - [API仕様書](docs/API仕様書.md)
 - [運用マニュアル](docs/運用マニュアル.md)
 
 ### コミュニティ
-- [GitHub Issues](https://github.com/your-org/itsm-system/issues)
-- [Discord](https://discord.gg/itsm-system)
-- [Stack Overflow](https://stackoverflow.com/questions/tagged/itsm-system)
-
-### 商用サポート
-エンタープライズサポートについては、support@itsm-system.comまでお問い合わせください。
+- [GitHub Issues](https://github.com/Kensan196948G/ITSM-ITManagementSystem/issues)
+- [GitHub Repository](https://github.com/Kensan196948G/ITSM-ITManagementSystem)
 
 ## 貢献
 
@@ -217,21 +259,22 @@ npm run test:e2e
 
 ## ロードマップ
 
-### v1.0（現在）
-- ✅ 基本的なITSM機能
-- ✅ マルチテナント対応
-- ✅ REST API
+### v1.0（開発中）
+- 🤖 AI自動開発環境
+- 🔄 6エージェント並列処理
+- 📤 GitHub自動同期
 
-### v2.0（2024 Q2）
+### v2.0（2025 Q2）
+- ⬜ 基本的なITSM機能実装
+- ⬜ マルチテナント対応
+- ⬜ REST API完成
+
+### v3.0（2025 Q4）
 - ⬜ AI/ML統合
 - ⬜ モバイルアプリ
 - ⬜ GraphQL API
 
-### v3.0（2024 Q4）
-- ⬜ IoT機器管理
-- ⬜ 予測分析
-- ⬜ ブロックチェーン統合
-
 ---
 
-Copyright © 2024 ITSM System Project. All rights reserved.
+🤖 **Powered by Claude-Flow AI Development System**  
+Copyright © 2025 ITSM System Project. All rights reserved.
