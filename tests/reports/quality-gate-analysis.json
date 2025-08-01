@@ -1,0 +1,133 @@
+{
+  "timestamp": "2025-08-01T16:37:02.401804",
+  "test_suites": {
+    "all-tests": {
+      "suite_name": "all-tests",
+      "total": 38,
+      "passed": 32,
+      "failed": 6,
+      "skipped": 0,
+      "duration": 10.372995138168335,
+      "coverage": null,
+      "performance_issues": []
+    },
+    "comprehensive-load": {
+      "suite_name": "comprehensive-load",
+      "total": 8,
+      "passed": 6,
+      "failed": 2,
+      "skipped": 0,
+      "duration": 58.70837998390198,
+      "coverage": null,
+      "performance_issues": []
+    },
+    "comprehensive-api": {
+      "suite_name": "comprehensive-api",
+      "total": 40,
+      "passed": 40,
+      "failed": 0,
+      "skipped": 0,
+      "duration": 2.566358804702759,
+      "coverage": null,
+      "performance_issues": []
+    },
+    "api": {
+      "suite_name": "api",
+      "total": 106,
+      "passed": 106,
+      "failed": 0,
+      "skipped": 0,
+      "duration": 17.467793226242065,
+      "coverage": null,
+      "performance_issues": []
+    },
+    "e2e": {
+      "suite_name": "e2e",
+      "total": 24,
+      "passed": 14,
+      "failed": 0,
+      "skipped": 0,
+      "duration": 2.9546759128570557,
+      "coverage": null,
+      "performance_issues": []
+    },
+    "load": {
+      "suite_name": "load",
+      "total": 40,
+      "passed": 38,
+      "failed": 2,
+      "skipped": 0,
+      "duration": 18.16344976425171,
+      "coverage": null,
+      "performance_issues": []
+    },
+    "unit": {
+      "suite_name": "unit",
+      "total": 74,
+      "passed": 74,
+      "failed": 0,
+      "skipped": 0,
+      "duration": 0.12175798416137695,
+      "coverage": null,
+      "performance_issues": []
+    },
+    "api-fixed": {
+      "suite_name": "api-fixed",
+      "total": 62,
+      "passed": 62,
+      "failed": 0,
+      "skipped": 0,
+      "duration": 1.3734114170074463,
+      "coverage": null,
+      "performance_issues": []
+    },
+    "fixed-tests": {
+      "suite_name": "fixed-tests",
+      "total": 38,
+      "passed": 36,
+      "failed": 2,
+      "skipped": 0,
+      "duration": 9.412453651428223,
+      "coverage": null,
+      "performance_issues": []
+    },
+    "final-tests": {
+      "suite_name": "final-tests",
+      "total": 38,
+      "passed": 38,
+      "failed": 0,
+      "skipped": 0,
+      "duration": 10.519169569015503,
+      "coverage": null,
+      "performance_issues": []
+    }
+  },
+  "overall_metrics": {
+    "total_tests": 468,
+    "passed_tests": 446,
+    "failed_tests": 12,
+    "skipped_tests": 0,
+    "success_rate": 95.2991452991453
+  },
+  "quality_gate_results": {
+    "overall_status": "FAILED",
+    "criteria_results": {
+      "test_success_rate": {
+        "status": "PASSED",
+        "actual": 95.2991452991453,
+        "required": 95.0
+      },
+      "max_failed_tests": {
+        "status": "FAILED",
+        "actual": 12,
+        "required": 0
+      }
+    },
+    "failed_criteria": [
+      "max_failed_tests"
+    ]
+  },
+  "recommendations": [
+    "失敗したテスト 12 件を修正してください"
+  ]
+}
