@@ -342,23 +342,20 @@ class TestAPIPerformance:
     def test_api_timeout_handling(self, test_config, api_headers):
         """Test API timeout behavior"""
         from unittest.mock import patch
+        import requests
         
-        def test_timeout_scenario():
-            # Mock timeout scenario
-            with patch('requests.get') as mock_get:
-                # Simulate timeout exception
-                mock_get.side_effect = requests.exceptions.Timeout("Request timed out")
-                
-                try:
-                    response = requests.get(
-                        f"{test_config['base_url']}/incidents",
-                        headers=api_headers,
-                        timeout=0.001  # Very short timeout to force timeout
-                    )
-                    return response
-                except requests.exceptions.Timeout:
-                    return "timeout_occurred"
-        
-        result = test_timeout_scenario()
-        # Should get timeout
-        assert result == "timeout_occurred"
+        # Mock timeout scenario
+        with patch('requests.get') as mock_get:
+            # Simulate timeout exception
+            mock_get.side_effect = requests.exceptions.Timeout("Request timed out")
+            
+            try:
+                response = requests.get(
+                    f"{test_config['base_url']}/incidents",
+                    headers=api_headers,
+                    timeout=0.001  # Very short timeout to force timeout
+                )
+                assert False, "Should have raised timeout exception"
+            except requests.exceptions.Timeout:
+                # Expected behavior
+                assert True

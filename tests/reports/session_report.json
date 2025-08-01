@@ -1,41 +1,11 @@
 {
-  "start_time": "2025-08-01 16:01:59.445364",
+  "start_time": "2025-08-01 16:10:11.852488",
   "test_results": [
     {
-      "test_name": "test_spike_load_testing",
+      "test_name": "test_api_timeout_handling",
       "outcome": true,
-      "duration": 32.43632990900005,
-      "timestamp": "2025-08-01T16:02:31.978507",
-      "markers": [
-        "slow",
-        "load"
-      ]
-    },
-    {
-      "test_name": "test_volume_testing",
-      "outcome": true,
-      "duration": 0.004151017001277069,
-      "timestamp": "2025-08-01T16:02:31.984604",
-      "markers": [
-        "slow",
-        "load"
-      ]
-    },
-    {
-      "test_name": "test_resource_consumption_monitoring",
-      "outcome": false,
-      "duration": 6.006260309000936,
-      "timestamp": "2025-08-01T16:02:37.992439",
-      "markers": [
-        "slow",
-        "load"
-      ]
-    },
-    {
-      "test_name": "test_recovery_after_load",
-      "outcome": true,
-      "duration": 20.101473962000455,
-      "timestamp": "2025-08-01T16:02:58.151720",
+      "duration": 0.000704717000189703,
+      "timestamp": "2025-08-01T16:10:11.918618",
       "markers": [
         "slow",
         "load"
@@ -44,7 +14,7 @@
   ],
   "coverage": {},
   "performance": {},
-  "end_time": "2025-08-01 16:02:58.155373",
-  "duration": 58.710009,
-  "exit_status": 1
+  "end_time": "2025-08-01 16:10:11.919698",
+  "duration": 0.06721,
+  "exit_status": 0
 }

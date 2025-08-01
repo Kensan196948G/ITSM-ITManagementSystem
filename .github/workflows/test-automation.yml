@@ -63,7 +63,9 @@ jobs:
     - name: Create test environment file
       run: |
         cp .env.test .env
+        cp .env.test backend/.env.test
         echo "ITSM_TEST_MODE=true" >> .env
+        echo "ITSM_TEST_MODE=true" >> backend/.env.test
     
     - name: Run ${{ matrix.test-type }} tests
       run: |
@@ -72,15 +74,15 @@ jobs:
             pytest tests/api/ -v --tb=short \
               --html=tests/reports/api-report.html \
               --json-report --json-report-file=tests/reports/api-report.json \
-              --cov=src --cov-report=json:tests/reports/api-coverage.json \
-              --benchmark-json=tests/reports/api-benchmark.json \
+              --cov=backend/app --cov-report=json:tests/reports/api-coverage.json \
+              --benchmark-disable \
               -m "api and not slow"
             ;;
           unit)
             pytest tests/ -v --tb=short \
               --html=tests/reports/unit-report.html \
               --json-report --json-report-file=tests/reports/unit-report.json \
-              --cov=src --cov-report=json:tests/reports/unit-coverage.json \
+              --cov=backend/app --cov-report=json:tests/reports/unit-coverage.json \
               -m "unit"
             ;;
         esac

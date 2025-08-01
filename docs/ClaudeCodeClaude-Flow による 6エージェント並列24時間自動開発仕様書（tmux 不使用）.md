@@ -87,7 +87,7 @@ ITSM-QA
 ---
 name: ITSM-QA
 description: UI表示、アクセシビリティ、ユーザー文言の統一など、表層品質を管理。\nITSM・ISO準拠を意識したチェックリスト形式で@devuiに改善を要求。
-model: sonnet
+model: sonnetｓぽれ
 color: yellow
 ---
 

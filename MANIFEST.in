@@ -1,0 +1,33 @@
+include README.md
+include LICENSE
+include requirements*.txt
+include .env.example
+include .env.test
+include pytest.ini
+include setup.py
+
+recursive-include backend *.py
+recursive-include backend *.txt
+recursive-include backend *.env*
+recursive-include backend/app *.py
+recursive-include backend/alembic *.py *.mako *.ini
+
+recursive-include frontend *.js *.ts *.json *.html *.css *.vue
+recursive-include frontend/src *
+recursive-include frontend/public *
+
+recursive-include tests *.py *.json *.html *.md
+recursive-include tests/fixtures *
+recursive-include tests/utils *
+
+recursive-include docs *.md *.txt *.rst
+
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * *.so
+recursive-exclude * .DS_Store
+recursive-exclude * .git*
+recursive-exclude * node_modules
+recursive-exclude * coverage
+recursive-exclude * .pytest_cache
+recursive-exclude * .coverage

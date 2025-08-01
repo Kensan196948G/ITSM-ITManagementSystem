@@ -1,0 +1,2471 @@
+{
+  "start_time": "2025-08-01T16:03:05.335059",
+  "end_time": "2025-08-01T16:03:28.048051",
+  "duration": 22.712972164154053,
+  "suites": {
+    "api": {
+      "name": "api",
+      "command": "python3 -m pytest tests/api/ -v --tb=short -m api and not slow --html tests/reports/api-report.html --self-contained-html --json-report --json-report-file=tests/reports/api-report.json --junit-xml=tests/reports/api-junit.xml --cov=src --cov-report=html:tests/reports/api-coverage-html --cov-report=json:tests/reports/api-coverage.json --cov-report=term-missing --benchmark-json=tests/reports/api-benchmark.json -n 4",
+      "start_time": 1754031785.335087,
+      "end_time": 1754031808.0472136,
+      "duration": 22.71212649345398,
+      "return_code": 0,
+      "stdout": "============================= test session starts ==============================\nplatform linux -- Python 3.12.3, pytest-7.4.3, pluggy-1.6.0 -- /usr/bin/python3\ncachedir: .pytest_cache\nbenchmark: 4.0.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)\nmetadata: {'Python': '3.12.3', 'Platform': 'Linux-6.8.0-71-generic-x86_64-with-glibc2.39', 'Packages': {'pytest': '7.4.3', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '3.7.1', 'Faker': '20.1.0', 'benchmark': '4.0.0', 'metadata': '3.1.1', 'html': '4.1.1', 'mock': '3.12.0', 'asyncio': '0.21.1', 'xdist': '3.3.1', 'json-report': '1.5.0', 'cov': '4.1.0'}}\nrootdir: /media/kensan/LinuxHDD/ITSM-ITmanagementSystem\nconfigfile: pytest.ini\nplugins: anyio-3.7.1, Faker-20.1.0, benchmark-4.0.0, metadata-3.1.1, html-4.1.1, mock-3.12.0, asyncio-0.21.1, xdist-3.3.1, json-report-1.5.0, cov-4.1.0\nasyncio: mode=Mode.STRICT\ncreated: 4/4 workers\n4 workers [53 items]\n\nscheduling tests via LoadScheduling\n\ntests/api/test_auth.py::TestAuthentication::test_oauth_token_request_success \ntests/api/test_auth.py::TestAuthentication::test_api_request_without_token \ntests/api/test_auth.py::TestAuthentication::test_refresh_token_success \ntests/api/test_auth.py::TestAuthentication::test_session_management \n[gw1] [  1%] PASSED tests/api/test_auth.py::TestAuthentication::test_oauth_token_request_success \n[gw0] [  3%] PASSED tests/api/test_auth.py::TestAuthentication::test_refresh_token_success \ntests/api/test_auth.py::TestAuthentication::test_api_request_with_valid_token \n[gw0] [  5%] PASSED tests/api/test_auth.py::TestAuthentication::test_api_request_with_valid_token \ntests/api/test_auth.py::TestAuthentication::test_oauth_token_request_invalid_client \n[gw1] [  7%] PASSED tests/api/test_auth.py::TestAuthentication::test_oauth_token_request_invalid_client \n[gw2] [  9%] PASSED tests/api/test_auth.py::TestAuthentication::test_api_request_without_token \ntests/api/test_auth.py::TestAuthentication::test_token_expiration_handling \n[gw2] [ 11%] PASSED tests/api/test_auth.py::TestAuthentication::test_token_expiration_handling \n[gw3] [ 13%] PASSED tests/api/test_auth.py::TestAuthentication::test_session_management \ntests/api/test_auth.py::TestAuthentication::test_multi_factor_authentication \n[gw3] [ 15%] PASSED tests/api/test_auth.py::TestAuthentication::test_multi_factor_authentication \ntests/api/test_auth.py::TestAuthentication::test_oauth_token_request_invalid_grant \ntests/api/test_auth.py::TestAuthentication::test_api_request_with_invalid_token \n[gw1] [ 16%] PASSED tests/api/test_auth.py::TestAuthentication::test_oauth_token_request_invalid_grant \ntests/api/test_auth.py::TestAuthentication::test_login_validation_comprehensive \ntests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_problem_management_api \n[gw0] [ 18%] PASSED tests/api/test_auth.py::TestAuthentication::test_api_request_with_invalid_token \ntests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_incident_full_lifecycle \ntests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_reporting_api_endpoints \n[gw0] [ 20%] PASSED tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_reporting_api_endpoints \ntests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_notification_api_endpoints \n[gw1] [ 22%] PASSED tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_problem_management_api \n[gw2] [ 24%] PASSED tests/api/test_auth.py::TestAuthentication::test_login_validation_comprehensive \ntests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_change_management_api \n[gw0] [ 26%] PASSED tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_notification_api_endpoints \ntests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_category_management_api \ntests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_user_management_api \n[gw3] [ 28%] PASSED tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_incident_full_lifecycle \n[gw1] [ 30%] PASSED tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_change_management_api \ntests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_cmdb_api_endpoints \n[gw0] [ 32%] PASSED tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_user_management_api \ntests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_search_api_endpoints \ntests/api/test_comprehensive_api.py::TestAPIPerformance::test_incident_list_performance \n[gw1] [ 33%] PASSED tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_cmdb_api_endpoints \n[gw2] [ 35%] PASSED tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_category_management_api \ntests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_team_management_api \n[gw3] [ 37%] PASSED tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_search_api_endpoints \n[gw2] [ 39%] PASSED tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_team_management_api \ntests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_authentication_endpoints \ntests/api/test_comprehensive_api.py::TestAPIPerformance::test_incident_creation_performance \n[gw1] [ 41%] PASSED tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_authentication_endpoints \ntests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_health_check_endpoints \ntests/api/test_comprehensive_api.py::TestAPISecurity::test_unauthorized_access \n[gw2] [ 43%] PASSED tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_health_check_endpoints \n[gw1] [ 45%] PASSED tests/api/test_comprehensive_api.py::TestAPISecurity::test_unauthorized_access \ntests/api/test_health.py::TestHealthCheck::test_health_endpoint_success \n[gw2] [ 47%] PASSED tests/api/test_health.py::TestHealthCheck::test_health_endpoint_success \ntests/api/test_comprehensive_api.py::TestAPISecurity::test_invalid_token_access \ntests/api/test_health.py::TestHealthCheck::test_version_endpoint_success \n[gw1] [ 49%] PASSED tests/api/test_comprehensive_api.py::TestAPISecurity::test_invalid_token_access \n[gw2] [ 50%] PASSED tests/api/test_health.py::TestHealthCheck::test_version_endpoint_success \ntests/api/test_health.py::TestAPIPerformance::test_health_endpoint_performance \ntests/api/test_health.py::TestAPIPerformance::test_concurrent_health_requests \n[gw2] [ 52%] PASSED tests/api/test_health.py::TestAPIPerformance::test_concurrent_health_requests \ntests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_create_incident_validation_error \n[gw2] [ 54%] PASSED tests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_create_incident_validation_error \ntests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_get_incident_by_id_success \n[gw2] [ 56%] PASSED tests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_get_incident_by_id_success \ntests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_get_incident_not_found \n[gw2] [ 58%] PASSED tests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_get_incident_not_found \ntests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_update_incident_success \n[gw2] [ 60%] PASSED tests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_update_incident_success \ntests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_update_incident_invalid_status_transition \n[gw2] [ 62%] PASSED tests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_update_incident_invalid_status_transition \ntests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_list_incidents_with_pagination \n[gw2] [ 64%] PASSED tests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_list_incidents_with_pagination \ntests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_list_incidents_with_filters \n[gw2] [ 66%] PASSED tests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_list_incidents_with_filters \ntests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_delete_incident_success \n[gw2] [ 67%] PASSED tests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_delete_incident_success \ntests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_delete_incident_not_found \n[gw2] [ 69%] PASSED tests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_delete_incident_not_found \ntests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_get_incident_history_success \n[gw2] [ 71%] PASSED tests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_get_incident_history_success \ntests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_get_incident_history_with_filters \n[gw2] [ 73%] PASSED tests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_get_incident_history_with_filters \ntests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_add_work_note_success \n[gw2] [ 75%] PASSED tests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_add_work_note_success \ntests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_add_work_note_validation_error \n[gw2] [ 77%] PASSED tests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_add_work_note_validation_error \ntests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_get_work_notes_list \n[gw2] [ 79%] PASSED tests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_get_work_notes_list \ntests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_incident_assignment_workflow \n[gw2] [ 81%] PASSED tests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_incident_assignment_workflow \ntests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_incident_escalation_workflow \n[gw2] [ 83%] PASSED tests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_incident_escalation_workflow \ntests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_incident_resolution_workflow \n[gw2] [ 84%] PASSED tests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_incident_resolution_workflow \ntests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_incident_closure_workflow \n[gw2] [ 86%] PASSED tests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_incident_closure_workflow \n[gw3] [ 88%] PASSED tests/api/test_comprehensive_api.py::TestAPIPerformance::test_incident_creation_performance \ntests/api/test_comprehensive_api.py::TestAPISecurity::test_sql_injection_protection \n[gw3] [ 90%] PASSED tests/api/test_comprehensive_api.py::TestAPISecurity::test_sql_injection_protection \ntests/api/test_comprehensive_api.py::TestAPISecurity::test_xss_protection \n[gw3] [ 92%] PASSED tests/api/test_comprehensive_api.py::TestAPISecurity::test_xss_protection \n[gw0] [ 94%] PASSED tests/api/test_comprehensive_api.py::TestAPIPerformance::test_incident_list_performance \ntests/api/test_comprehensive_api.py::TestAPIPerformance::test_api_rate_limiting \n[gw0] [ 96%] PASSED tests/api/test_comprehensive_api.py::TestAPIPerformance::test_api_rate_limiting \n[gw1] [ 98%] PASSED tests/api/test_health.py::TestAPIPerformance::test_health_endpoint_performance \ntests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_create_incident_success \n[gw1] [100%] PASSED tests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_create_incident_success WARNING: Failed to generate report: No data to report.\n\n\n\n=============================== warnings summary ===============================\ntests/api/test_auth.py:10\ntests/api/test_auth.py:10\ntests/api/test_auth.py:10\ntests/api/test_auth.py:10\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_auth.py:10: PytestUnknownMarkWarning: Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.api\n\ntests/api/test_auth.py:11\ntests/api/test_auth.py:11\ntests/api/test_auth.py:11\ntests/api/test_auth.py:11\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_auth.py:11: PytestUnknownMarkWarning: Unknown pytest.mark.auth - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.auth\n\ntests/api/test_auth.py:347\ntests/api/test_auth.py:347\ntests/api/test_auth.py:347\ntests/api/test_auth.py:347\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_auth.py:347: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.slow\n\ntests/api/test_auth.py:396\ntests/api/test_auth.py:396\ntests/api/test_auth.py:396\ntests/api/test_auth.py:396\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_auth.py:396: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.slow\n\ntests/api/test_comprehensive_api.py:13\ntests/api/test_comprehensive_api.py:13\ntests/api/test_comprehensive_api.py:13\ntests/api/test_comprehensive_api.py:13\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py:13: PytestUnknownMarkWarning: Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.api\n\ntests/api/test_comprehensive_api.py:14\ntests/api/test_comprehensive_api.py:14\ntests/api/test_comprehensive_api.py:14\ntests/api/test_comprehensive_api.py:14\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py:14: PytestUnknownMarkWarning: Unknown pytest.mark.comprehensive - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.comprehensive\n\ntests/api/test_comprehensive_api.py:18\ntests/api/test_comprehensive_api.py:18\ntests/api/test_comprehensive_api.py:18\ntests/api/test_comprehensive_api.py:18\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py:18: PytestUnknownMarkWarning: Unknown pytest.mark.incidents - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.incidents\n\ntests/api/test_comprehensive_api.py:126\ntests/api/test_comprehensive_api.py:126\ntests/api/test_comprehensive_api.py:126\ntests/api/test_comprehensive_api.py:126\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py:126: PytestUnknownMarkWarning: Unknown pytest.mark.problems - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.problems\n\ntests/api/test_comprehensive_api.py:153\ntests/api/test_comprehensive_api.py:153\ntests/api/test_comprehensive_api.py:153\ntests/api/test_comprehensive_api.py:153\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py:153: PytestUnknownMarkWarning: Unknown pytest.mark.changes - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.changes\n\ntests/api/test_comprehensive_api.py:181\ntests/api/test_comprehensive_api.py:181\ntests/api/test_comprehensive_api.py:181\ntests/api/test_comprehensive_api.py:181\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py:181: PytestUnknownMarkWarning: Unknown pytest.mark.cmdb - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.cmdb\n\ntests/api/test_comprehensive_api.py:208\ntests/api/test_comprehensive_api.py:208\ntests/api/test_comprehensive_api.py:208\ntests/api/test_comprehensive_api.py:208\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py:208: PytestUnknownMarkWarning: Unknown pytest.mark.auth - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.auth\n\ntests/api/test_comprehensive_api.py:243\ntests/api/test_comprehensive_api.py:243\ntests/api/test_comprehensive_api.py:243\ntests/api/test_comprehensive_api.py:243\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py:243: PytestUnknownMarkWarning: Unknown pytest.mark.reports - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.reports\n\ntests/api/test_comprehensive_api.py:288\ntests/api/test_comprehensive_api.py:288\ntests/api/test_comprehensive_api.py:288\ntests/api/test_comprehensive_api.py:288\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py:288: PytestUnknownMarkWarning: Unknown pytest.mark.notifications - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.notifications\n\ntests/api/test_comprehensive_api.py:329\ntests/api/test_comprehensive_api.py:329\ntests/api/test_comprehensive_api.py:329\ntests/api/test_comprehensive_api.py:329\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py:329: PytestUnknownMarkWarning: Unknown pytest.mark.users - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.users\n\ntests/api/test_comprehensive_api.py:370\ntests/api/test_comprehensive_api.py:370\ntests/api/test_comprehensive_api.py:370\ntests/api/test_comprehensive_api.py:370\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py:370: PytestUnknownMarkWarning: Unknown pytest.mark.categories - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.categories\n\ntests/api/test_comprehensive_api.py:415\ntests/api/test_comprehensive_api.py:415\ntests/api/test_comprehensive_api.py:415\ntests/api/test_comprehensive_api.py:415\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py:415: PytestUnknownMarkWarning: Unknown pytest.mark.teams - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.teams\n\ntests/api/test_comprehensive_api.py:455\ntests/api/test_comprehensive_api.py:455\ntests/api/test_comprehensive_api.py:455\ntests/api/test_comprehensive_api.py:455\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py:455: PytestUnknownMarkWarning: Unknown pytest.mark.health - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.health\n\ntests/api/test_comprehensive_api.py:490\ntests/api/test_comprehensive_api.py:490\ntests/api/test_comprehensive_api.py:490\ntests/api/test_comprehensive_api.py:490\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py:490: PytestUnknownMarkWarning: Unknown pytest.mark.search - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.search\n\ntests/api/test_comprehensive_api.py:542\ntests/api/test_comprehensive_api.py:542\ntests/api/test_comprehensive_api.py:542\ntests/api/test_comprehensive_api.py:542\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py:542: PytestUnknownMarkWarning: Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.api\n\ntests/api/test_comprehensive_api.py:543\ntests/api/test_comprehensive_api.py:543\ntests/api/test_comprehensive_api.py:543\ntests/api/test_comprehensive_api.py:543\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py:543: PytestUnknownMarkWarning: Unknown pytest.mark.performance - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.performance\n\ntests/api/test_comprehensive_api.py:608\ntests/api/test_comprehensive_api.py:608\ntests/api/test_comprehensive_api.py:608\ntests/api/test_comprehensive_api.py:608\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py:608: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.slow\n\ntests/api/test_comprehensive_api.py:659\ntests/api/test_comprehensive_api.py:659\ntests/api/test_comprehensive_api.py:659\ntests/api/test_comprehensive_api.py:659\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py:659: PytestUnknownMarkWarning: Unknown pytest.mark.load - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.load\n\ntests/api/test_comprehensive_api.py:703\ntests/api/test_comprehensive_api.py:703\ntests/api/test_comprehensive_api.py:703\ntests/api/test_comprehensive_api.py:703\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py:703: PytestUnknownMarkWarning: Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.api\n\ntests/api/test_comprehensive_api.py:704\ntests/api/test_comprehensive_api.py:704\ntests/api/test_comprehensive_api.py:704\ntests/api/test_comprehensive_api.py:704\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py:704: PytestUnknownMarkWarning: Unknown pytest.mark.security - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.security\n\ntests/api/test_health.py:8\ntests/api/test_health.py:8\ntests/api/test_health.py:8\ntests/api/test_health.py:8\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_health.py:8: PytestUnknownMarkWarning: Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.api\n\ntests/api/test_health.py:57\ntests/api/test_health.py:57\ntests/api/test_health.py:57\ntests/api/test_health.py:57\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_health.py:57: PytestUnknownMarkWarning: Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.api\n\ntests/api/incidents/test_incidents_crud.py:11\ntests/api/incidents/test_incidents_crud.py:11\ntests/api/incidents/test_incidents_crud.py:11\ntests/api/incidents/test_incidents_crud.py:11\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_crud.py:11: PytestUnknownMarkWarning: Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.api\n\ntests/api/incidents/test_incidents_crud.py:12\ntests/api/incidents/test_incidents_crud.py:12\ntests/api/incidents/test_incidents_crud.py:12\ntests/api/incidents/test_incidents_crud.py:12\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_crud.py:12: PytestUnknownMarkWarning: Unknown pytest.mark.incidents - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.incidents\n\ntests/api/incidents/test_incidents_crud.py:13\ntests/api/incidents/test_incidents_crud.py:13\ntests/api/incidents/test_incidents_crud.py:13\ntests/api/incidents/test_incidents_crud.py:13\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_crud.py:13: PytestUnknownMarkWarning: Unknown pytest.mark.critical - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.critical\n\ntests/api/incidents/test_incidents_crud.py:371\ntests/api/incidents/test_incidents_crud.py:371\ntests/api/incidents/test_incidents_crud.py:371\ntests/api/incidents/test_incidents_crud.py:371\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_crud.py:371: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.slow\n\ntests/api/incidents/test_incidents_history.py:10\ntests/api/incidents/test_incidents_history.py:10\ntests/api/incidents/test_incidents_history.py:10\ntests/api/incidents/test_incidents_history.py:10\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_history.py:10: PytestUnknownMarkWarning: Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.api\n\ntests/api/incidents/test_incidents_history.py:11\ntests/api/incidents/test_incidents_history.py:11\ntests/api/incidents/test_incidents_history.py:11\ntests/api/incidents/test_incidents_history.py:11\n  /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_history.py:11: PytestUnknownMarkWarning: Unknown pytest.mark.incidents - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html\n    @pytest.mark.incidents\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n- generated xml file: /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/reports/api-junit.xml -\n--------------------------------- JSON report ----------------------------------\nreport saved to: tests/reports/api-report.json\n\n---------- coverage: platform linux, python 3.12.3-final-0 -----------\n\n- Generated html report: file:///media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/reports/api-report.html -\n====================== 53 passed, 128 warnings in 17.78s =======================\n",
+      "stderr": "/home/kensan/.local/lib/python3.12/site-packages/pytest_benchmark/logger.py:46: PytestBenchmarkWarning: Benchmarks are automatically disabled because xdist plugin is active.Benchmarks cannot be performed reliably in a parallelized environment.\n  warner(PytestBenchmarkWarning(text))\n/home/kensan/.local/lib/python3.12/site-packages/coverage/inorout.py:509: CoverageWarning: Module src was never imported. (module-not-imported)\n  self.warn(f\"Module {pkg} was never imported.\", slug=\"module-not-imported\")\n/home/kensan/.local/lib/python3.12/site-packages/coverage/control.py:918: CoverageWarning: No data was collected. (no-data-collected)\n  self._warn(\"No data was collected.\", slug=\"no-data-collected\")\n/home/kensan/.local/lib/python3.12/site-packages/pytest_benchmark/logger.py:46: PytestBenchmarkWarning: Not saving anything, no benchmarks have been run!\n  warner(PytestBenchmarkWarning(text))\n/home/kensan/.local/lib/python3.12/site-packages/coverage/inorout.py:509: CoverageWarning: Module src was never imported. (module-not-imported)\n  self.warn(f\"Module {pkg} was never imported.\", slug=\"module-not-imported\")\n/home/kensan/.local/lib/python3.12/site-packages/coverage/control.py:918: CoverageWarning: No data was collected. (no-data-collected)\n  self._warn(\"No data was collected.\", slug=\"no-data-collected\")\n/home/kensan/.local/lib/python3.12/site-packages/coverage/inorout.py:509: CoverageWarning: Module src was never imported. (module-not-imported)\n  self.warn(f\"Module {pkg} was never imported.\", slug=\"module-not-imported\")\n/home/kensan/.local/lib/python3.12/site-packages/coverage/control.py:918: CoverageWarning: No data was collected. (no-data-collected)\n  self._warn(\"No data was collected.\", slug=\"no-data-collected\")\n\nWrote benchmark data in: <_io.BufferedWriter name='tests/reports/api-benchmark.json'>\n\nWrote benchmark data in: <_io.BufferedWriter name='tests/reports/api-benchmark.json'>\n/home/kensan/.local/lib/python3.12/site-packages/coverage/inorout.py:509: CoverageWarning: Module src was never imported. (module-not-imported)\n  self.warn(f\"Module {pkg} was never imported.\", slug=\"module-not-imported\")\n/home/kensan/.local/lib/python3.12/site-packages/coverage/control.py:918: CoverageWarning: No data was collected. (no-data-collected)\n  self._warn(\"No data was collected.\", slug=\"no-data-collected\")\n\nWrote benchmark data in: <_io.BufferedWriter name='tests/reports/api-benchmark.json'>\n/home/kensan/.local/lib/python3.12/site-packages/pytest_cov/plugin.py:312: CovReportWarning: Failed to generate report: No data to report.\n\n  warnings.warn(CovReportWarning(message))\n",
+      "success": true,
+      "detailed_results": {
+        "created": 1754031807.5947962,
+        "duration": 17.467793226242065,
+        "exitcode": 0,
+        "root": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem",
+        "environment": {},
+        "summary": {
+          "passed": 53,
+          "total": 53,
+          "collected": 53
+        },
+        "tests": [
+          {
+            "nodeid": "tests/api/test_auth.py::TestAuthentication::test_oauth_token_request_success",
+            "lineno": 14,
+            "outcome": "passed",
+            "keywords": [
+              "test_oauth_token_request_success",
+              "TestAuthentication",
+              "auth",
+              "api",
+              "tests/api/test_auth.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.110629915001482,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.026993931001925375,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0008558239969715942,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_auth.py::TestAuthentication::test_api_request_without_token",
+            "lineno": 186,
+            "outcome": "passed",
+            "keywords": [
+              "test_api_request_without_token",
+              "TestAuthentication",
+              "auth",
+              "api",
+              "tests/api/test_auth.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.12170150900055887,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.02315430499947979,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0008320870001625735,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_auth.py::TestAuthentication::test_refresh_token_success",
+            "lineno": 107,
+            "outcome": "passed",
+            "keywords": [
+              "test_refresh_token_success",
+              "TestAuthentication",
+              "auth",
+              "api",
+              "tests/api/test_auth.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.13284394500078633,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.008305629999085795,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0008368920025532134,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_auth.py::TestAuthentication::test_api_request_with_valid_token",
+            "lineno": 138,
+            "outcome": "passed",
+            "keywords": [
+              "test_api_request_with_valid_token",
+              "TestAuthentication",
+              "auth",
+              "api",
+              "tests/api/test_auth.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.001304731998970965,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.002400383000349393,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0005979580018902197,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_auth.py::TestAuthentication::test_oauth_token_request_invalid_client",
+            "lineno": 49,
+            "outcome": "passed",
+            "keywords": [
+              "test_oauth_token_request_invalid_client",
+              "TestAuthentication",
+              "auth",
+              "api",
+              "tests/api/test_auth.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0009975450011552311,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.005386537999584107,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0006198370028869249,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_auth.py::TestAuthentication::test_token_expiration_handling",
+            "lineno": 205,
+            "outcome": "passed",
+            "keywords": [
+              "test_token_expiration_handling",
+              "TestAuthentication",
+              "auth",
+              "api",
+              "tests/api/test_auth.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0011317759999656118,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.00237819500034675,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0006540840004163329,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_auth.py::TestAuthentication::test_session_management",
+            "lineno": 263,
+            "outcome": "passed",
+            "keywords": [
+              "test_session_management",
+              "TestAuthentication",
+              "auth",
+              "api",
+              "tests/api/test_auth.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.16199624499859056,
+              "outcome": "passed",
+              "longrepr": "[gw3] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.00629488000049605,
+              "outcome": "passed",
+              "longrepr": "[gw3] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0006187990002217703,
+              "outcome": "passed",
+              "longrepr": "[gw3] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_auth.py::TestAuthentication::test_multi_factor_authentication",
+            "lineno": 292,
+            "outcome": "passed",
+            "keywords": [
+              "test_multi_factor_authentication",
+              "TestAuthentication",
+              "auth",
+              "api",
+              "tests/api/test_auth.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0007074809982441366,
+              "outcome": "passed",
+              "longrepr": "[gw3] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.0023179290001280606,
+              "outcome": "passed",
+              "longrepr": "[gw3] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0005292779969749972,
+              "outcome": "passed",
+              "longrepr": "[gw3] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_auth.py::TestAuthentication::test_api_request_with_invalid_token",
+            "lineno": 159,
+            "outcome": "passed",
+            "keywords": [
+              "test_api_request_with_invalid_token",
+              "TestAuthentication",
+              "auth",
+              "api",
+              "tests/api/test_auth.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.001308348000748083,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.005280929999571526,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0007875730007071979,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_auth.py::TestAuthentication::test_oauth_token_request_invalid_grant",
+            "lineno": 78,
+            "outcome": "passed",
+            "keywords": [
+              "test_oauth_token_request_invalid_grant",
+              "TestAuthentication",
+              "auth",
+              "api",
+              "tests/api/test_auth.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0010048549993371125,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.0018739649967756122,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0012337029984337278,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_auth.py::TestAuthentication::test_login_validation_comprehensive",
+            "lineno": 232,
+            "outcome": "passed",
+            "keywords": [
+              "test_login_validation_comprehensive",
+              "TestAuthentication",
+              "auth",
+              "api",
+              "tests/api/test_auth.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0010266190001857467,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.021921195002505556,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.006718974000250455,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_reporting_api_endpoints",
+            "lineno": 242,
+            "outcome": "passed",
+            "keywords": [
+              "test_reporting_api_endpoints",
+              "reports",
+              "pytestmark",
+              "TestComprehensiveAPI",
+              "comprehensive",
+              "api",
+              "tests/api/test_comprehensive_api.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0039727280018269084,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.0025542910007061437,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0007006499981798697,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_incident_full_lifecycle",
+            "lineno": 17,
+            "outcome": "passed",
+            "keywords": [
+              "test_incident_full_lifecycle",
+              "incidents",
+              "pytestmark",
+              "TestComprehensiveAPI",
+              "comprehensive",
+              "api",
+              "tests/api/test_comprehensive_api.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.010052444999018917,
+              "outcome": "passed",
+              "longrepr": "[gw3] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.021428018000733573,
+              "outcome": "passed",
+              "longrepr": "[gw3] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0009565029977238737,
+              "outcome": "passed",
+              "longrepr": "[gw3] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_problem_management_api",
+            "lineno": 125,
+            "outcome": "passed",
+            "keywords": [
+              "test_problem_management_api",
+              "problems",
+              "pytestmark",
+              "TestComprehensiveAPI",
+              "comprehensive",
+              "api",
+              "tests/api/test_comprehensive_api.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.014510790002532303,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.0025941849999071565,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.000524363000295125,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_notification_api_endpoints",
+            "lineno": 287,
+            "outcome": "passed",
+            "keywords": [
+              "test_notification_api_endpoints",
+              "notifications",
+              "pytestmark",
+              "TestComprehensiveAPI",
+              "comprehensive",
+              "api",
+              "tests/api/test_comprehensive_api.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0022293550027825404,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.0035017810005228966,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0006352199998218566,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_change_management_api",
+            "lineno": 152,
+            "outcome": "passed",
+            "keywords": [
+              "test_change_management_api",
+              "changes",
+              "pytestmark",
+              "TestComprehensiveAPI",
+              "comprehensive",
+              "api",
+              "tests/api/test_comprehensive_api.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.006493985998531571,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.0019148930005030707,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0006506579993583728,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_user_management_api",
+            "lineno": 328,
+            "outcome": "passed",
+            "keywords": [
+              "test_user_management_api",
+              "users",
+              "pytestmark",
+              "TestComprehensiveAPI",
+              "comprehensive",
+              "api",
+              "tests/api/test_comprehensive_api.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0058797510027943645,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.002109765999193769,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0005461299988382962,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_category_management_api",
+            "lineno": 369,
+            "outcome": "passed",
+            "keywords": [
+              "test_category_management_api",
+              "categories",
+              "pytestmark",
+              "TestComprehensiveAPI",
+              "comprehensive",
+              "api",
+              "tests/api/test_comprehensive_api.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.010595134997856803,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.006281951002165442,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0005988480006635655,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_cmdb_api_endpoints",
+            "lineno": 180,
+            "outcome": "passed",
+            "keywords": [
+              "test_cmdb_api_endpoints",
+              "cmdb",
+              "pytestmark",
+              "TestComprehensiveAPI",
+              "comprehensive",
+              "api",
+              "tests/api/test_comprehensive_api.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.005778163998911623,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.0024514159995305818,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0005992650003463496,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_search_api_endpoints",
+            "lineno": 489,
+            "outcome": "passed",
+            "keywords": [
+              "test_search_api_endpoints",
+              "search",
+              "pytestmark",
+              "TestComprehensiveAPI",
+              "comprehensive",
+              "api",
+              "tests/api/test_comprehensive_api.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0013677730021299794,
+              "outcome": "passed",
+              "longrepr": "[gw3] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.00785334199827048,
+              "outcome": "passed",
+              "longrepr": "[gw3] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0006765549987903796,
+              "outcome": "passed",
+              "longrepr": "[gw3] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_comprehensive_api.py::TestAPIPerformance::test_incident_list_performance",
+            "lineno": 572,
+            "outcome": "passed",
+            "keywords": [
+              "test_incident_list_performance",
+              "benchmark",
+              "pytestmark",
+              "TestAPIPerformance",
+              "performance",
+              "api",
+              "tests/api/test_comprehensive_api.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.002591109998320462,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 2.2983010830030253,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0017551999990246259,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_team_management_api",
+            "lineno": 414,
+            "outcome": "passed",
+            "keywords": [
+              "test_team_management_api",
+              "teams",
+              "pytestmark",
+              "TestComprehensiveAPI",
+              "comprehensive",
+              "api",
+              "tests/api/test_comprehensive_api.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.001046555997163523,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.0024977989996841643,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0005125410025357269,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_authentication_endpoints",
+            "lineno": 207,
+            "outcome": "passed",
+            "keywords": [
+              "test_authentication_endpoints",
+              "auth",
+              "pytestmark",
+              "TestComprehensiveAPI",
+              "comprehensive",
+              "api",
+              "tests/api/test_comprehensive_api.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0010898450018430594,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.0018932359998871107,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.00566458200046327,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_comprehensive_api.py::TestAPIPerformance::test_incident_creation_performance",
+            "lineno": 546,
+            "outcome": "passed",
+            "keywords": [
+              "test_incident_creation_performance",
+              "benchmark",
+              "pytestmark",
+              "TestAPIPerformance",
+              "performance",
+              "api",
+              "tests/api/test_comprehensive_api.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0023656319972360507,
+              "outcome": "passed",
+              "longrepr": "[gw3] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 2.108997678002197,
+              "outcome": "passed",
+              "longrepr": "[gw3] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0007134189982025418,
+              "outcome": "passed",
+              "longrepr": "[gw3] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_comprehensive_api.py::TestComprehensiveAPI::test_health_check_endpoints",
+            "lineno": 454,
+            "outcome": "passed",
+            "keywords": [
+              "test_health_check_endpoints",
+              "health",
+              "pytestmark",
+              "TestComprehensiveAPI",
+              "comprehensive",
+              "api",
+              "tests/api/test_comprehensive_api.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0012418670012266375,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.0019362509992788546,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0006025129987392575,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_comprehensive_api.py::TestAPISecurity::test_unauthorized_access",
+            "lineno": 707,
+            "outcome": "passed",
+            "keywords": [
+              "test_unauthorized_access",
+              "TestAPISecurity",
+              "security",
+              "api",
+              "tests/api/test_comprehensive_api.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.005065848999947775,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.006133750997832976,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0006784209981560707,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_health.py::TestHealthCheck::test_health_endpoint_success",
+            "lineno": 11,
+            "outcome": "passed",
+            "keywords": [
+              "test_health_endpoint_success",
+              "TestHealthCheck",
+              "api",
+              "tests/api/test_health.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0011150089994771406,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.0019931030001316685,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0005421889982244466,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_comprehensive_api.py::TestAPISecurity::test_invalid_token_access",
+            "lineno": 729,
+            "outcome": "passed",
+            "keywords": [
+              "test_invalid_token_access",
+              "TestAPISecurity",
+              "security",
+              "api",
+              "tests/api/test_comprehensive_api.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.001052386000083061,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.0035351649967196863,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0022397739994630683,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_health.py::TestHealthCheck::test_version_endpoint_success",
+            "lineno": 33,
+            "outcome": "passed",
+            "keywords": [
+              "test_version_endpoint_success",
+              "TestHealthCheck",
+              "api",
+              "tests/api/test_health.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0029399730010482017,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.003686205000121845,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0005416569983935915,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_health.py::TestAPIPerformance::test_health_endpoint_performance",
+            "lineno": 61,
+            "outcome": "passed",
+            "keywords": [
+              "test_health_endpoint_performance",
+              "TestAPIPerformance",
+              "benchmark",
+              "api",
+              "tests/api/test_health.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0014214600014383905,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 3.603419908999058,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0005719380023947451,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_health.py::TestAPIPerformance::test_concurrent_health_requests",
+            "lineno": 74,
+            "outcome": "passed",
+            "keywords": [
+              "test_concurrent_health_requests",
+              "TestAPIPerformance",
+              "benchmark",
+              "api",
+              "tests/api/test_health.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.004863876001763856,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.03908999200211838,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.002074387997708982,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_create_incident_validation_error",
+            "lineno": 44,
+            "outcome": "passed",
+            "keywords": [
+              "test_create_incident_validation_error",
+              "TestIncidentsCRUD",
+              "critical",
+              "incidents",
+              "api",
+              "tests/api/incidents/test_incidents_crud.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.001221220001752954,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.005141501998878084,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.003636322999227559,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_get_incident_by_id_success",
+            "lineno": 90,
+            "outcome": "passed",
+            "keywords": [
+              "test_get_incident_by_id_success",
+              "TestIncidentsCRUD",
+              "critical",
+              "incidents",
+              "api",
+              "tests/api/incidents/test_incidents_crud.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.004160101001616567,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.005122181999468012,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0031514840011368506,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_get_incident_not_found",
+            "lineno": 141,
+            "outcome": "passed",
+            "keywords": [
+              "test_get_incident_not_found",
+              "TestIncidentsCRUD",
+              "critical",
+              "incidents",
+              "api",
+              "tests/api/incidents/test_incidents_crud.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0030753809987800196,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.0021014400008425582,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0007261270002345555,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_update_incident_success",
+            "lineno": 165,
+            "outcome": "passed",
+            "keywords": [
+              "test_update_incident_success",
+              "TestIncidentsCRUD",
+              "critical",
+              "incidents",
+              "api",
+              "tests/api/incidents/test_incidents_crud.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.002489075999619672,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.005422659000032581,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.000589945000683656,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_update_incident_invalid_status_transition",
+            "lineno": 196,
+            "outcome": "passed",
+            "keywords": [
+              "test_update_incident_invalid_status_transition",
+              "TestIncidentsCRUD",
+              "critical",
+              "incidents",
+              "api",
+              "tests/api/incidents/test_incidents_crud.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.003285120998043567,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.004234723000990925,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0005534399970201775,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_list_incidents_with_pagination",
+            "lineno": 231,
+            "outcome": "passed",
+            "keywords": [
+              "test_list_incidents_with_pagination",
+              "TestIncidentsCRUD",
+              "critical",
+              "incidents",
+              "api",
+              "tests/api/incidents/test_incidents_crud.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.003574220998416422,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.005274348997772904,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0005414010011008941,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_list_incidents_with_filters",
+            "lineno": 288,
+            "outcome": "passed",
+            "keywords": [
+              "test_list_incidents_with_filters",
+              "TestIncidentsCRUD",
+              "critical",
+              "incidents",
+              "api",
+              "tests/api/incidents/test_incidents_crud.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.004893789999186993,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.004221118997520534,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0005293119975249283,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_delete_incident_success",
+            "lineno": 333,
+            "outcome": "passed",
+            "keywords": [
+              "test_delete_incident_success",
+              "TestIncidentsCRUD",
+              "critical",
+              "incidents",
+              "api",
+              "tests/api/incidents/test_incidents_crud.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.005102024999359855,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.0014397339982679114,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0038153630011947826,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_delete_incident_not_found",
+            "lineno": 347,
+            "outcome": "passed",
+            "keywords": [
+              "test_delete_incident_not_found",
+              "TestIncidentsCRUD",
+              "critical",
+              "incidents",
+              "api",
+              "tests/api/incidents/test_incidents_crud.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.001037968999298755,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.006302244000835344,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0005447549992823042,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_get_incident_history_success",
+            "lineno": 14,
+            "outcome": "passed",
+            "keywords": [
+              "test_get_incident_history_success",
+              "TestIncidentHistory",
+              "incidents",
+              "api",
+              "tests/api/incidents/test_incidents_history.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0027397939993534237,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.004999514003429795,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0036598810002033133,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_get_incident_history_with_filters",
+            "lineno": 95,
+            "outcome": "passed",
+            "keywords": [
+              "test_get_incident_history_with_filters",
+              "TestIncidentHistory",
+              "incidents",
+              "api",
+              "tests/api/incidents/test_incidents_history.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.003382004997547483,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.005299882002873346,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0005407960015872959,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_add_work_note_success",
+            "lineno": 140,
+            "outcome": "passed",
+            "keywords": [
+              "test_add_work_note_success",
+              "TestIncidentHistory",
+              "incidents",
+              "api",
+              "tests/api/incidents/test_incidents_history.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.004420686000230489,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.004282502999558346,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0038248960008786526,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_add_work_note_validation_error",
+            "lineno": 176,
+            "outcome": "passed",
+            "keywords": [
+              "test_add_work_note_validation_error",
+              "TestIncidentHistory",
+              "incidents",
+              "api",
+              "tests/api/incidents/test_incidents_history.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.002776846002234379,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.005200171999604208,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.001782571998774074,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_get_work_notes_list",
+            "lineno": 216,
+            "outcome": "passed",
+            "keywords": [
+              "test_get_work_notes_list",
+              "TestIncidentHistory",
+              "incidents",
+              "api",
+              "tests/api/incidents/test_incidents_history.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.002833471000485588,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.0060752879981009755,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0005337990005500615,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_incident_assignment_workflow",
+            "lineno": 264,
+            "outcome": "passed",
+            "keywords": [
+              "test_incident_assignment_workflow",
+              "TestIncidentHistory",
+              "incidents",
+              "api",
+              "tests/api/incidents/test_incidents_history.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.005020927001169184,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.0052400079985091,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0005492340023920406,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_incident_escalation_workflow",
+            "lineno": 304,
+            "outcome": "passed",
+            "keywords": [
+              "test_incident_escalation_workflow",
+              "TestIncidentHistory",
+              "incidents",
+              "api",
+              "tests/api/incidents/test_incidents_history.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0035043480020249262,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.004267922999133589,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0005366199984564446,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_incident_resolution_workflow",
+            "lineno": 342,
+            "outcome": "passed",
+            "keywords": [
+              "test_incident_resolution_workflow",
+              "TestIncidentHistory",
+              "incidents",
+              "api",
+              "tests/api/incidents/test_incidents_history.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.003503714000544278,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.0020412269986991305,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0006164149999676738,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/incidents/test_incidents_history.py::TestIncidentHistory::test_incident_closure_workflow",
+            "lineno": 387,
+            "outcome": "passed",
+            "keywords": [
+              "test_incident_closure_workflow",
+              "TestIncidentHistory",
+              "incidents",
+              "api",
+              "tests/api/incidents/test_incidents_history.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0035030429971811827,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.003648067999165505,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.01663315499899909,
+              "outcome": "passed",
+              "longrepr": "[gw2] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_comprehensive_api.py::TestAPISecurity::test_sql_injection_protection",
+            "lineno": 758,
+            "outcome": "passed",
+            "keywords": [
+              "test_sql_injection_protection",
+              "TestAPISecurity",
+              "security",
+              "api",
+              "tests/api/test_comprehensive_api.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0029777739982819185,
+              "outcome": "passed",
+              "longrepr": "[gw3] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.002195856999605894,
+              "outcome": "passed",
+              "longrepr": "[gw3] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0006658980018983129,
+              "outcome": "passed",
+              "longrepr": "[gw3] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_comprehensive_api.py::TestAPISecurity::test_xss_protection",
+            "lineno": 782,
+            "outcome": "passed",
+            "keywords": [
+              "test_xss_protection",
+              "TestAPISecurity",
+              "security",
+              "api",
+              "tests/api/test_comprehensive_api.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0022403379989555106,
+              "outcome": "passed",
+              "longrepr": "[gw3] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.0017213899991475046,
+              "outcome": "passed",
+              "longrepr": "[gw3] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.003062166000745492,
+              "outcome": "passed",
+              "longrepr": "[gw3] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/test_comprehensive_api.py::TestAPIPerformance::test_api_rate_limiting",
+            "lineno": 658,
+            "outcome": "passed",
+            "keywords": [
+              "test_api_rate_limiting",
+              "load",
+              "pytestmark",
+              "TestAPIPerformance",
+              "performance",
+              "api",
+              "tests/api/test_comprehensive_api.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.002453389002766926,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.005212077001488069,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0029976029982208274,
+              "outcome": "passed",
+              "longrepr": "[gw0] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          },
+          {
+            "nodeid": "tests/api/incidents/test_incidents_crud.py::TestIncidentsCRUD::test_create_incident_success",
+            "lineno": 16,
+            "outcome": "passed",
+            "keywords": [
+              "test_create_incident_success",
+              "TestIncidentsCRUD",
+              "critical",
+              "incidents",
+              "api",
+              "tests/api/incidents/test_incidents_crud.py",
+              "ITSM-ITmanagementSystem"
+            ],
+            "setup": {
+              "duration": 0.0015023329979158007,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "call": {
+              "duration": 0.0012844999982917216,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            },
+            "teardown": {
+              "duration": 0.0018514860021241475,
+              "outcome": "passed",
+              "longrepr": "[gw1] linux -- Python 3.12.3 /usr/bin/python3"
+            }
+          }
+        ],
+        "warnings": [
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_auth.py",
+            "lineno": 10
+          },
+          {
+            "message": "Unknown pytest.mark.auth - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_auth.py",
+            "lineno": 11
+          },
+          {
+            "message": "Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_auth.py",
+            "lineno": 347
+          },
+          {
+            "message": "Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_auth.py",
+            "lineno": 396
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 13
+          },
+          {
+            "message": "Unknown pytest.mark.comprehensive - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 14
+          },
+          {
+            "message": "Unknown pytest.mark.incidents - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 18
+          },
+          {
+            "message": "Unknown pytest.mark.problems - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 126
+          },
+          {
+            "message": "Unknown pytest.mark.changes - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 153
+          },
+          {
+            "message": "Unknown pytest.mark.cmdb - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 181
+          },
+          {
+            "message": "Unknown pytest.mark.auth - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 208
+          },
+          {
+            "message": "Unknown pytest.mark.reports - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 243
+          },
+          {
+            "message": "Unknown pytest.mark.notifications - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 288
+          },
+          {
+            "message": "Unknown pytest.mark.users - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 329
+          },
+          {
+            "message": "Unknown pytest.mark.categories - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 370
+          },
+          {
+            "message": "Unknown pytest.mark.teams - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 415
+          },
+          {
+            "message": "Unknown pytest.mark.health - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 455
+          },
+          {
+            "message": "Unknown pytest.mark.search - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 490
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 542
+          },
+          {
+            "message": "Unknown pytest.mark.performance - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 543
+          },
+          {
+            "message": "Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 608
+          },
+          {
+            "message": "Unknown pytest.mark.load - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 659
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 703
+          },
+          {
+            "message": "Unknown pytest.mark.security - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 704
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_health.py",
+            "lineno": 8
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_health.py",
+            "lineno": 57
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_crud.py",
+            "lineno": 11
+          },
+          {
+            "message": "Unknown pytest.mark.incidents - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_crud.py",
+            "lineno": 12
+          },
+          {
+            "message": "Unknown pytest.mark.critical - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_crud.py",
+            "lineno": 13
+          },
+          {
+            "message": "Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_crud.py",
+            "lineno": 371
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_history.py",
+            "lineno": 10
+          },
+          {
+            "message": "Unknown pytest.mark.incidents - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_history.py",
+            "lineno": 11
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_auth.py",
+            "lineno": 10
+          },
+          {
+            "message": "Unknown pytest.mark.auth - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_auth.py",
+            "lineno": 11
+          },
+          {
+            "message": "Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_auth.py",
+            "lineno": 347
+          },
+          {
+            "message": "Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_auth.py",
+            "lineno": 396
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 13
+          },
+          {
+            "message": "Unknown pytest.mark.comprehensive - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 14
+          },
+          {
+            "message": "Unknown pytest.mark.incidents - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 18
+          },
+          {
+            "message": "Unknown pytest.mark.problems - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 126
+          },
+          {
+            "message": "Unknown pytest.mark.changes - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 153
+          },
+          {
+            "message": "Unknown pytest.mark.cmdb - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 181
+          },
+          {
+            "message": "Unknown pytest.mark.auth - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 208
+          },
+          {
+            "message": "Unknown pytest.mark.reports - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 243
+          },
+          {
+            "message": "Unknown pytest.mark.notifications - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 288
+          },
+          {
+            "message": "Unknown pytest.mark.users - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 329
+          },
+          {
+            "message": "Unknown pytest.mark.categories - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 370
+          },
+          {
+            "message": "Unknown pytest.mark.teams - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 415
+          },
+          {
+            "message": "Unknown pytest.mark.health - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 455
+          },
+          {
+            "message": "Unknown pytest.mark.search - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 490
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 542
+          },
+          {
+            "message": "Unknown pytest.mark.performance - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 543
+          },
+          {
+            "message": "Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 608
+          },
+          {
+            "message": "Unknown pytest.mark.load - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 659
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 703
+          },
+          {
+            "message": "Unknown pytest.mark.security - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 704
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_health.py",
+            "lineno": 8
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_health.py",
+            "lineno": 57
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_crud.py",
+            "lineno": 11
+          },
+          {
+            "message": "Unknown pytest.mark.incidents - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_crud.py",
+            "lineno": 12
+          },
+          {
+            "message": "Unknown pytest.mark.critical - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_crud.py",
+            "lineno": 13
+          },
+          {
+            "message": "Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_crud.py",
+            "lineno": 371
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_history.py",
+            "lineno": 10
+          },
+          {
+            "message": "Unknown pytest.mark.incidents - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_history.py",
+            "lineno": 11
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_auth.py",
+            "lineno": 10
+          },
+          {
+            "message": "Unknown pytest.mark.auth - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_auth.py",
+            "lineno": 11
+          },
+          {
+            "message": "Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_auth.py",
+            "lineno": 347
+          },
+          {
+            "message": "Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_auth.py",
+            "lineno": 396
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 13
+          },
+          {
+            "message": "Unknown pytest.mark.comprehensive - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 14
+          },
+          {
+            "message": "Unknown pytest.mark.incidents - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 18
+          },
+          {
+            "message": "Unknown pytest.mark.problems - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 126
+          },
+          {
+            "message": "Unknown pytest.mark.changes - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 153
+          },
+          {
+            "message": "Unknown pytest.mark.cmdb - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 181
+          },
+          {
+            "message": "Unknown pytest.mark.auth - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 208
+          },
+          {
+            "message": "Unknown pytest.mark.reports - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 243
+          },
+          {
+            "message": "Unknown pytest.mark.notifications - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 288
+          },
+          {
+            "message": "Unknown pytest.mark.users - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 329
+          },
+          {
+            "message": "Unknown pytest.mark.categories - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 370
+          },
+          {
+            "message": "Unknown pytest.mark.teams - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 415
+          },
+          {
+            "message": "Unknown pytest.mark.health - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 455
+          },
+          {
+            "message": "Unknown pytest.mark.search - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 490
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 542
+          },
+          {
+            "message": "Unknown pytest.mark.performance - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 543
+          },
+          {
+            "message": "Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 608
+          },
+          {
+            "message": "Unknown pytest.mark.load - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 659
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 703
+          },
+          {
+            "message": "Unknown pytest.mark.security - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 704
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_health.py",
+            "lineno": 8
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_health.py",
+            "lineno": 57
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_crud.py",
+            "lineno": 11
+          },
+          {
+            "message": "Unknown pytest.mark.incidents - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_crud.py",
+            "lineno": 12
+          },
+          {
+            "message": "Unknown pytest.mark.critical - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_crud.py",
+            "lineno": 13
+          },
+          {
+            "message": "Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_crud.py",
+            "lineno": 371
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_history.py",
+            "lineno": 10
+          },
+          {
+            "message": "Unknown pytest.mark.incidents - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_history.py",
+            "lineno": 11
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_auth.py",
+            "lineno": 10
+          },
+          {
+            "message": "Unknown pytest.mark.auth - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_auth.py",
+            "lineno": 11
+          },
+          {
+            "message": "Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_auth.py",
+            "lineno": 347
+          },
+          {
+            "message": "Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_auth.py",
+            "lineno": 396
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 13
+          },
+          {
+            "message": "Unknown pytest.mark.comprehensive - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 14
+          },
+          {
+            "message": "Unknown pytest.mark.incidents - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 18
+          },
+          {
+            "message": "Unknown pytest.mark.problems - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 126
+          },
+          {
+            "message": "Unknown pytest.mark.changes - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 153
+          },
+          {
+            "message": "Unknown pytest.mark.cmdb - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 181
+          },
+          {
+            "message": "Unknown pytest.mark.auth - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 208
+          },
+          {
+            "message": "Unknown pytest.mark.reports - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 243
+          },
+          {
+            "message": "Unknown pytest.mark.notifications - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 288
+          },
+          {
+            "message": "Unknown pytest.mark.users - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 329
+          },
+          {
+            "message": "Unknown pytest.mark.categories - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 370
+          },
+          {
+            "message": "Unknown pytest.mark.teams - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 415
+          },
+          {
+            "message": "Unknown pytest.mark.health - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 455
+          },
+          {
+            "message": "Unknown pytest.mark.search - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 490
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 542
+          },
+          {
+            "message": "Unknown pytest.mark.performance - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 543
+          },
+          {
+            "message": "Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 608
+          },
+          {
+            "message": "Unknown pytest.mark.load - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 659
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 703
+          },
+          {
+            "message": "Unknown pytest.mark.security - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_comprehensive_api.py",
+            "lineno": 704
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_health.py",
+            "lineno": 8
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/test_health.py",
+            "lineno": 57
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_crud.py",
+            "lineno": 11
+          },
+          {
+            "message": "Unknown pytest.mark.incidents - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_crud.py",
+            "lineno": 12
+          },
+          {
+            "message": "Unknown pytest.mark.critical - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_crud.py",
+            "lineno": 13
+          },
+          {
+            "message": "Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_crud.py",
+            "lineno": 371
+          },
+          {
+            "message": "Unknown pytest.mark.api - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_history.py",
+            "lineno": 10
+          },
+          {
+            "message": "Unknown pytest.mark.incidents - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html",
+            "category": "PytestUnknownMarkWarning",
+            "when": "collect",
+            "filename": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/tests/api/incidents/test_incidents_history.py",
+            "lineno": 11
+          }
+        ]
+      },
+      "summary": {
+        "total": 53,
+        "passed": 53,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 22.71212649345398
+      }
+    }
+  },
+  "summary": {
+    "total_tests": 53,
+    "passed": 53,
+    "failed": 0,
+    "skipped": 0,
+    "success_rate": 100.0,
+    "overall_success": true
+  },
+  "quality_gates": {
+    "passed": true,
+    "violations": []
+  }
+}
