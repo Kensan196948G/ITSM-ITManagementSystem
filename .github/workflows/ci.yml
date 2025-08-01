@@ -101,6 +101,13 @@ jobs:
 
       - name: Run Python unit tests
         working-directory: ./backend
+        env:
+          DATABASE_URL: sqlite:///./test.db
+          ASYNC_DATABASE_URL: sqlite+aiosqlite:///./test.db
+          ENCRYPTION_KEY: test-encryption-key-32chars-long!
+          SECRET_KEY: test-secret-key
+          ALGORITHM: HS256
+          ACCESS_TOKEN_EXPIRE_MINUTES: 30
         run: |
           python -m pytest tests/ -v \
             --tb=short \
@@ -168,6 +175,8 @@ jobs:
         working-directory: ./backend
         env:
           DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/itsm_test
+          ASYNC_DATABASE_URL: postgresql+asyncpg://testuser:testpassword@localhost:5432/itsm_test
+          ENCRYPTION_KEY: test-encryption-key-32chars-long!
         run: |
           python -c "
           import sys
@@ -183,6 +192,9 @@ jobs:
         working-directory: ./backend
         env:
           DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/itsm_test
+          ASYNC_DATABASE_URL: postgresql+asyncpg://testuser:testpassword@localhost:5432/itsm_test
+          ENCRYPTION_KEY: test-encryption-key-32chars-long!
+          SECRET_KEY: test-secret-key
           TESTING: true
         run: |
           python -m pytest ../tests/api/ -v \
@@ -251,6 +263,9 @@ jobs:
           sleep 10
         env:
           DATABASE_URL: sqlite:///./test_database.db
+          ASYNC_DATABASE_URL: sqlite+aiosqlite:///./test_database.db
+          ENCRYPTION_KEY: test-encryption-key-32chars-long!
+          SECRET_KEY: test-secret-key
 
       - name: Start frontend server
         working-directory: ./frontend
@@ -311,6 +326,9 @@ jobs:
           sleep 10
         env:
           DATABASE_URL: sqlite:///./perf_test_database.db
+          ASYNC_DATABASE_URL: sqlite+aiosqlite:///./perf_test_database.db
+          ENCRYPTION_KEY: test-encryption-key-32chars-long!
+          SECRET_KEY: test-secret-key
 
       - name: Run load tests
         working-directory: .
