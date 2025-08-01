@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import List, Optional, Dict, Any
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 
 from app.models.user import UserRole
 from app.schemas.common import PaginationMeta
@@ -29,7 +29,8 @@ class UserCreate(UserBase):
     two_factor_enabled: bool = Field(False, description="二要素認証有効")
     password_expiry_days: Optional[int] = Field(None, gt=0, le=365, description="パスワード有効期限（日数）")
 
-    @validator('password')
+    @field_validator('password')
+    @classmethod
     def validate_password(cls, v):
         """パスワードバリデーション"""
         if len(v) < 8:
@@ -60,7 +61,8 @@ class UserUpdate(BaseModel):
     password: Optional[str] = Field(None, min_length=8, max_length=128, description="パスワード")
     password_expiry_days: Optional[int] = Field(None, gt=0, le=365, description="パスワード有効期限（日数）")
 
-    @validator('password')
+    @field_validator('password')
+    @classmethod
     def validate_password(cls, v):
         """パスワードバリデーション"""
         if v is None:
@@ -104,8 +106,7 @@ class UserResponse(UserBase):
     performance_stats: Optional[Dict[str, Any]] = Field(None, description="パフォーマンス統計")
     manager: Optional[Dict[str, str]] = Field(None, description="上司情報")
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserListResponse(BaseModel):
@@ -147,14 +148,16 @@ class PasswordChangeRequest(BaseModel):
     new_password: str = Field(..., min_length=8, max_length=128, description="新しいパスワード")
     confirm_password: str = Field(..., min_length=8, max_length=128, description="新しいパスワード（確認）")
 
-    @validator('confirm_password')
-    def passwords_match(cls, v, values):
+    @field_validator('confirm_password')
+    @classmethod
+    def passwords_match(cls, v, info):
         """パスワード確認バリデーション"""
-        if 'new_password' in values and v != values['new_password']:
+        if info.data.get('new_password') and v != info.data.get('new_password'):
             raise ValueError('パスワードが一致しません')
         return v
 
-    @validator('new_password')
+    @field_validator('new_password')
+    @classmethod
     def validate_new_password(cls, v):
         """新しいパスワードバリデーション"""
         if len(v) < 8:

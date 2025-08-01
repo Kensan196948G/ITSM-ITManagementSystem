@@ -3,7 +3,7 @@ import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, Cartesia
 import { PerformanceData, TimeSeriesData, AgentStats, BottleneckAnalysis } from '../../types/dashboard'
 import MetricCard from '../../components/dashboard/MetricCard'
 import ChartCard from '../../components/dashboard/ChartCard'
-import { GradientAreaChart, AnimatedGaugeChart, HeatmapChart, TreemapChart } from '../../components/charts'
+// import { GradientAreaChart, AnimatedGaugeChart, HeatmapChart, TreemapChart } from '../../components/charts'
 import { gradients, animations, chartColors } from '../../theme/theme'
 
 // 新しいコンポーネントのインターフェース定義
@@ -486,69 +486,9 @@ const PerformanceAnalytics: React.FC = React.memo(() => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
-        {/* カスタムCSS - 安定したレイアウト用 */}
-        <style jsx>{`
-          .dashboard-container {
-            display: grid;
-            gap: 24px;
-            grid-template-columns: 1fr;
-          }
-          
-          .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-bottom: 32px;
-          }
-          
-          .charts-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 24px;
-          }
-          
-          @media (min-width: 1024px) {
-            .charts-grid {
-              grid-template-columns: repeat(2, 1fr);
-            }
-          }
-          
-          .chart-card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            padding: 24px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-          }
-          
-          .full-width {
-            grid-column: 1 / -1;
-          }
-          
-          .heatmap-container {
-            overflow-x: auto;
-            min-width: 800px;
-          }
-          
-          .heatmap-grid {
-            display: grid;
-            grid-template-columns: 60px repeat(24, 32px);
-            gap: 2px;
-            margin: 16px 0;
-          }
-          
-          .hover-scale:hover {
-            transform: scale(1.02);
-            transition: transform 0.2s ease;
-          }
-          
-          .metric-card {
-            min-height: 200px;
-          }
-        `}</style>
 
         {/* ヘッダー - 安定したレイアウト */}
-        <div className="chart-card mb-6">
+        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
@@ -600,7 +540,7 @@ const PerformanceAnalytics: React.FC = React.memo(() => {
         </div>
 
         {/* KPI メトリクス - 安定したグリッド */}
-        <div className="metrics-grid">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <EnhancedMetricCard
             title="チケット平均解決時間"
             value={data.ticketMetrics.avgResolutionTime}
@@ -648,27 +588,25 @@ const PerformanceAnalytics: React.FC = React.memo(() => {
         </div>
 
         {/* チャートセクション - 安定したレイアウト */}
-        <div className="charts-grid">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* 解決時間トレンド */}
           <ChartCard title="🎯 チケット解決時間トレンド" subtitle="過去30日間の平均解決時間">
-            <GradientAreaChart
-              data={data.ticketMetrics.resolutionTrend.map(item => ({
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={data.ticketMetrics.resolutionTrend.map(item => ({
                 ...item,
                 date: new Date(item.timestamp).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' })
-              }))}
-              dataKey="value"
-              xAxisKey="date"
-              gradientColors={{
-                start: '#667eea',
-                end: '#764ba2'
-              }}
-              height={300}
-              animated={true}
-            />
+              }))}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Area type="monotone" dataKey="value" stroke="#667eea" fill="#667eea" />
+              </AreaChart>
+            </ResponsiveContainer>
           </ChartCard>
 
           {/* サーバー負荷の半円形ゲージ */}
-          <div className="chart-card">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div className="mb-6">
               <h3 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
                 <span className="mr-3">⚡</span>
@@ -678,15 +616,12 @@ const PerformanceAnalytics: React.FC = React.memo(() => {
             </div>
             
             <div className="flex flex-col items-center space-y-6">
-              <SemicircleGauge
-                value={data.systemMetrics.serverLoad}
-                max={100}
-                thresholds={{ good: 59, warning: 79 }}
-                size={280}
-                title="サーバー負荷"
-                unit="%"
-                animated={true}
-              />
+              <div className="text-center">
+                <div className="text-6xl font-black text-gray-800 mb-4">
+                  {data.systemMetrics.serverLoad}%
+                </div>
+                <div className="text-xl font-semibold text-gray-600">サーバー負荷</div>
+              </div>
               
               <div className="grid grid-cols-2 gap-4 w-full">
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
@@ -706,7 +641,7 @@ const PerformanceAnalytics: React.FC = React.memo(() => {
           </div>
 
           {/* 担当者パフォーマンス */}
-          <div className="chart-card">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div className="mb-6">
               <h3 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
                 <span className="mr-3">👥</span>
@@ -745,7 +680,7 @@ const PerformanceAnalytics: React.FC = React.memo(() => {
           </div>
 
           {/* ボトルネック分析 */}
-          <div className="chart-card">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div className="mb-6">
               <h3 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
                 <span className="mr-3">🎯</span>
@@ -769,7 +704,7 @@ const PerformanceAnalytics: React.FC = React.memo(() => {
           </div>
 
           {/* 時間帯別パフォーマンス - ヒートマップ */}
-          <div className="chart-card full-width">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 lg:col-span-2">
             <div className="mb-6">
               <h3 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
                 <span className="mr-3">🕒</span>
@@ -778,7 +713,7 @@ const PerformanceAnalytics: React.FC = React.memo(() => {
               <p className="text-gray-600">24時間×7日間のパフォーマンスヒートマップ</p>
             </div>
             
-            <div className="heatmap-container">
+            <div className="overflow-x-auto min-w-[800px]">
               {/* Legend */}
               <div className="flex items-center justify-between mb-4">
                 <div className="text-sm text-gray-600">パフォーマンス強度</div>
@@ -799,7 +734,7 @@ const PerformanceAnalytics: React.FC = React.memo(() => {
               </div>
               
               {/* Heatmap grid */}
-              <div className="heatmap-grid">
+              <div className="grid grid-cols-25 gap-1 overflow-x-auto min-w-[800px]" style={{ gridTemplateColumns: '60px repeat(24, 32px)' }}>
                 {/* Hour labels */}
                 <div></div>
                 {Array.from({ length: 24 }, (_, i) => (
@@ -822,7 +757,7 @@ const PerformanceAnalytics: React.FC = React.memo(() => {
                       return (
                         <div
                           key={`${day}-${hour}`}
-                          className="w-8 h-8 rounded cursor-pointer hover-scale flex items-center justify-center group relative"
+                          className="w-8 h-8 rounded cursor-pointer hover:scale-105 transition-transform duration-200 flex items-center justify-center group relative"
                           style={{
                             backgroundColor: `rgba(59, 130, 246, ${Math.max(intensity, 0.1)})`,
                             transition: 'all 0.2s ease'
@@ -866,7 +801,7 @@ const PerformanceAnalytics: React.FC = React.memo(() => {
           </div>
 
           {/* ビジネスメトリクス */}
-          <div className="chart-card full-width">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 lg:col-span-2">
             <div className="mb-8">
               <h3 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
                 <span className="mr-3">💼</span>

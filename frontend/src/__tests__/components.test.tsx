@@ -6,12 +6,23 @@ import Header from '../components/layout/Header';
 import Sidebar from '../components/layout/Sidebar';
 import ErrorBoundary from '../components/common/ErrorBoundary';
 import { theme } from '../theme/theme';
+import { AuthProvider } from '../contexts/AuthContext';
 
-// Test wrapper
+// Mock auth context for testing
+const mockUser = {
+  id: '1',
+  username: 'testuser',
+  email: 'test@example.com',
+  roles: ['user']
+};
+
+// Test wrapper with auth context
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <BrowserRouter>
     <ThemeProvider theme={theme}>
-      {children}
+      <AuthProvider>
+        {children}
+      </AuthProvider>  
     </ThemeProvider>
   </BrowserRouter>
 );

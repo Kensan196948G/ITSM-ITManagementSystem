@@ -22,44 +22,34 @@ from unittest.mock import Mock
 import sys
 sys.path.insert(0, '/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/backend')
 
-# Create simple FastAPI app for testing
-from fastapi import FastAPI
-app = FastAPI(title="Test ITSM API")
+# Import real application
+try:
+    from app.main import app
+    print(f"✅ Successfully imported real FastAPI app. Routes: {len(app.routes)}")
+except ImportError as e:
+    print(f"❌ Failed to import real app: {e}")
+    from fastapi import FastAPI
+    app = FastAPI(title="Fallback Test ITSM API")
 
-# Mock settings and other components
-settings = Mock()
-Base = Mock()
-create_access_token = Mock(return_value="test_access_token")
-User = Mock()
-get_db = Mock(return_value=None)
+# Import real dependencies
+try:
+    from app.core.config import settings
+    from app.db.base import Base
+    from app.core.security import create_access_token
+    from app.models.user import User
+    from app.api.deps import get_db
+    print("✅ Successfully imported real dependencies")
+except ImportError as e:
+    print(f"⚠️ Some real dependencies not available: {e}")
+    # Fallback to mocks only if real imports fail
+    settings = Mock()
+    Base = Mock()
+    create_access_token = Mock(return_value="test_access_token")
+    User = Mock()
+    get_db = Mock(return_value=None)
 
-print(f"Created test FastAPI app. App type: {type(app)}")
+print(f"App type: {type(app)}")
 print(f"App has dependency_overrides: {hasattr(app, 'dependency_overrides')}")
-
-# Add basic health endpoint for testing
-@app.get("/health")
-def health_check():
-    return {"status": "healthy"}
-
-# Add mock auth endpoints for testing
-@app.post("/api/v1/auth/login")
-def mock_login(username: str = None, password: str = None):
-    """Mock login endpoint"""
-    return {
-        "access_token": "mock_access_token_12345",
-        "token_type": "bearer",
-        "expires_in": 3600
-    }
-
-@app.get("/api/v1/auth/me")
-def mock_current_user():
-    """Mock current user endpoint"""
-    return {
-        "id": 1,
-        "email": "test@example.com",
-        "username": "testuser",
-        "full_name": "Test User"
-    }
 
 # Test Database Configuration
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
@@ -170,12 +160,24 @@ def test_user_data():
 @pytest.fixture
 def test_user(db_session, test_user_data):
     """Create a test user in the database."""
-    # Mock user creation for testing
-    user = Mock()
-    user.id = 1
-    user.email = test_user_data["email"]
-    user.username = test_user_data["username"]
-    user.full_name = test_user_data["full_name"]
+    from passlib.context import CryptContext
+    from app.models.user import UserRole
+    
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    hashed_password = pwd_context.hash(test_user_data["password"])
+    
+    user = User(
+        email=test_user_data["email"],
+        first_name="Test",
+        last_name="User",
+        hashed_password=hashed_password,
+        role=UserRole.USER,
+        department="IT",
+        is_active=True
+    )
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
     return user
 
 

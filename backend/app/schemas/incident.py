@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional, List
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from app.models.incident import IncidentStatus, Priority, Impact
 
@@ -45,8 +45,7 @@ class UserInfo(BaseModel):
     display_name: Optional[str]
     email: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class CategoryInfo(BaseModel):
@@ -54,8 +53,7 @@ class CategoryInfo(BaseModel):
     id: UUID
     name: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TeamInfo(BaseModel):
@@ -63,8 +61,7 @@ class TeamInfo(BaseModel):
     id: UUID
     name: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class SLAInfo(BaseModel):
@@ -94,8 +91,7 @@ class IncidentResponse(IncidentBase):
     updated_at: datetime
     sla: SLAInfo
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class IncidentListResponse(BaseModel):
@@ -125,8 +121,7 @@ class IncidentWorkNoteResponse(IncidentWorkNoteBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class IncidentHistoryResponse(BaseModel):
@@ -139,5 +134,4 @@ class IncidentHistoryResponse(BaseModel):
     user: UserInfo
     changed_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

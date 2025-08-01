@@ -4,7 +4,7 @@ import os
 from typing import List, Union
 
 from pydantic import AnyHttpUrl, Field, field_validator
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -55,9 +55,10 @@ class Settings(BaseSettings):
     MAX_STORAGE_PER_TENANT: int = Field(10 * 1024 * 1024 * 1024, env="MAX_STORAGE_PER_TENANT")  # 10GB
     ATTACHMENT_STORAGE_PATH: str = Field("./storage/attachments", env="ATTACHMENT_STORAGE_PATH")
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=True
+    )
 
 
 # グローバル設定インスタンス

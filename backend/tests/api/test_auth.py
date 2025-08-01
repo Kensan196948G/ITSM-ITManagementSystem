@@ -17,7 +17,7 @@ class TestAuthAPI:
             "username": test_user_data["email"],
             "password": test_user_data["password"]
         }
-        response = client.post("/api/v1/auth/login", data=login_data)
+        response = client.post("/api/v1/auth/login", json=login_data)
         assert response.status_code == 200
         data = response.json()
         assert "access_token" in data
@@ -32,7 +32,7 @@ class TestAuthAPI:
             "username": "nonexistent@example.com",
             "password": "wrongpassword"
         }
-        response = client.post("/api/v1/auth/login", data=login_data)
+        response = client.post("/api/v1/auth/login", json=login_data)
         assert response.status_code == 401
         data = response.json()
         assert "detail" in data
