@@ -3,7 +3,8 @@
 import os
 from typing import List, Union
 
-from pydantic import AnyHttpUrl, BaseSettings, Field, validator
+from pydantic import AnyHttpUrl, Field, field_validator
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -29,7 +30,8 @@ class Settings(BaseSettings):
     # CORS
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
     
-    @validator("BACKEND_CORS_ORIGINS", pre=True)
+    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
+    @classmethod
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
