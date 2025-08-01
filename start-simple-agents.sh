@@ -46,8 +46,8 @@ Task subagent_type=ITSM-QA description="Quality Assurance" prompt="開発され�
 # 5. Testerエージェント - 自動テスト
 Task subagent_type=ITSM-Tester description="Automated Testing" prompt="PytestとPlaywrightを使用してAPIテストとE2Eテストを実装してください。テストケースの作成、自動実行、結果レポートの生成を行ってください。"
 
-# 6. Managerエージェント - プロジェクト管理
-Task subagent_type=ITSM-Manager description="Project Management" prompt="6エージェントの開発進捗を監視し、品質チェック、統合テスト、デプロイメント準備を管理してください。開発状況のレポートとリリース判定を行ってください。"
+# 6. Managerエージェント - 開発工程管理
+Task subagent_type=ITSM-Manager description="Development Process Management" prompt="plan/フォルダ内の開発工程書類（24時間自動開発計画.md、エージェント役割分担.md、開発プロセス.md、開発工程管理テンプレート.md）に基づいて、6エージェント並列開発の全体統括を行ってください。各Phaseの進行管理、エージェント間タスク調整、工程ドキュメントの更新・追記、品質・進捗監視、完了基準判定を実施し、計画的な開発プロセスを推進してください。"
 
 # 開発進捗確認
 echo "✅ All 6 agents have been tasked with ITSM development"
