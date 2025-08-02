@@ -60,8 +60,8 @@ interface ImprovementCardProps {
   actionable: boolean
 }
 
-// 強化されたメトリクスカードコンポーネント
-const EnhancedMetricCard: React.FC<EnhancedMetricCardProps> = React.memo(({
+// 🎨 アイコン豊富な新しいメトリクスカードコンポーネント
+const IconRichMetricCard: React.FC<EnhancedMetricCardProps> = React.memo(({
   title,
   value,
   unit = '',
@@ -72,14 +72,15 @@ const EnhancedMetricCard: React.FC<EnhancedMetricCardProps> = React.memo(({
   color,
   animated = true
 }) => {
+  const theme = useTheme()
   const [animatedValue, setAnimatedValue] = useState(0)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
     if (animated && typeof value === 'number') {
-      const duration = 1500
-      const steps = 30
+      const duration = 2000
+      const steps = 50
       const increment = value / steps
       let current = 0
       
@@ -99,54 +100,104 @@ const EnhancedMetricCard: React.FC<EnhancedMetricCardProps> = React.memo(({
     }
   }, [value, animated])
 
-  const getColorClasses = useCallback((color: string) => {
+  const getColorScheme = useCallback((color: string) => {
     switch (color) {
       case 'primary':
         return {
-          bg: 'from-blue-500 to-blue-600',
-          text: 'text-white',
-          shadow: 'shadow-blue-500/25'
+          main: theme.palette.primary.main,
+          light: theme.palette.primary.light,
+          gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          icon: '🚀'
         }
       case 'success':
         return {
-          bg: 'from-green-500 to-green-600',
-          text: 'text-white',
-          shadow: 'shadow-green-500/25'
+          main: theme.palette.success.main,
+          light: theme.palette.success.light,
+          gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+          icon: '✅'
         }
       case 'warning':
         return {
-          bg: 'from-yellow-500 to-yellow-600',
-          text: 'text-white',
-          shadow: 'shadow-yellow-500/25'
+          main: theme.palette.warning.main,
+          light: theme.palette.warning.light,
+          gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+          icon: '⚠️'
         }
       case 'error':
         return {
-          bg: 'from-red-500 to-red-600',
-          text: 'text-white',
-          shadow: 'shadow-red-500/25'
+          main: theme.palette.error.main,
+          light: theme.palette.error.light,
+          gradient: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)',
+          icon: '🔥'
         }
       default:
         return {
-          bg: 'from-gray-500 to-gray-600',
-          text: 'text-white',
-          shadow: 'shadow-gray-500/25'
+          main: theme.palette.grey[600],
+          light: theme.palette.grey[400],
+          gradient: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+          icon: '📊'
         }
     }
-  }, [])
+  }, [theme])
 
-  const colors = getColorClasses(color)
+  const colorScheme = getColorScheme(color)
   const progressPercentage = target ? Math.min((typeof value === 'number' ? value : 0) / target * 100, 100) : 0
 
   return (
-    <div className={`metric-card relative p-6 rounded-2xl bg-gradient-to-br ${colors.bg} ${colors.text} shadow-lg ${colors.shadow} transition-all duration-300 hover:scale-105`}>
-      <div className="relative z-10">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">{title}</h3>
-          <div className="text-3xl opacity-80">{icon}</div>
-        </div>
-
-        <div className="mb-3">
-          <div className="text-4xl font-black mb-1">
+    <Card 
+      sx={{ 
+        height: '100%',
+        background: colorScheme.gradient,
+        transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+        '&:hover': {
+          transform: 'translateY(-8px) scale(1.02)',
+          boxShadow: `0 20px 40px ${alpha(colorScheme.main, 0.3)}`,
+        },
+        position: 'relative',
+        overflow: 'hidden'
+      }}
+    >
+      {/* 背景装飾パターン */}
+      <Box sx={{
+        position: 'absolute',
+        top: -50,
+        right: -50,
+        width: 100,
+        height: 100,
+        borderRadius: '50%',
+        background: `radial-gradient(circle, ${alpha('#fff', 0.1)} 0%, transparent 70%)`,
+      }} />
+      
+      <CardContent sx={{ p: 3, color: 'white', position: 'relative', zIndex: 1 }}>
+        {/* ヘッダー部分 */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Avatar sx={{ 
+              bgcolor: alpha('#fff', 0.2), 
+              width: 48, 
+              height: 48,
+              fontSize: '1.5rem'
+            }}>
+              {colorScheme.icon}
+            </Avatar>
+            <Box>
+              <Typography variant="body2" sx={{ opacity: 0.9, fontWeight: 500 }}>
+                {title}
+              </Typography>
+            </Box>
+          </Box>
+          <Box sx={{ fontSize: '2rem', opacity: 0.7 }}>
+            {icon}
+          </Box>
+        </Box>
+        
+        {/* メイン値表示 */}
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="h3" sx={{ 
+            fontWeight: 800, 
+            mb: 0.5,
+            textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+          }}>
             {animated && mounted ? 
               (typeof value === 'number' ? 
                 animatedValue.toLocaleString(undefined, { maximumFractionDigits: 1 }) : 
@@ -154,32 +205,53 @@ const EnhancedMetricCard: React.FC<EnhancedMetricCardProps> = React.memo(({
               ) : 
               (typeof value === 'number' ? value.toLocaleString() : value)
             }
-            <span className="text-xl font-medium ml-2">{unit}</span>
-          </div>
-        </div>
+            <Typography component="span" variant="h5" sx={{ ml: 1, opacity: 0.8 }}>
+              {unit}
+            </Typography>
+          </Typography>
+        </Box>
 
-        <div className="flex items-center space-x-2 mb-3 text-sm">
-          <span className="text-lg">{change > 0 ? '↗️' : change < 0 ? '↘️' : '→'}</span>
-          <span className="font-bold">{Math.abs(change)}%</span>
-          <span className="opacity-80">({changeLabel})</span>
-        </div>
+        {/* トレンド表示 */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <Box sx={{ fontSize: '1.2rem' }}>
+            {change > 0 ? '📈' : change < 0 ? '📉' : '➡️'}
+          </Box>
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            {change > 0 ? '+' : ''}{change}%
+          </Typography>
+          <Typography variant="caption" sx={{ opacity: 0.8 }}>
+            {changeLabel}
+          </Typography>
+        </Box>
 
+        {/* 進捗バー */}
         {target && (
-          <div className="mt-3">
-            <div className="flex justify-between text-sm opacity-80 mb-1">
-              <span>目標達成度</span>
-              <span>{progressPercentage.toFixed(1)}%</span>
-            </div>
-            <div className="w-full bg-white bg-opacity-20 rounded-full h-2">
-              <div 
-                className="bg-white bg-opacity-80 h-2 rounded-full transition-all duration-1000 ease-out"
-                style={{ width: `${progressPercentage}%` }}
-              />
-            </div>
-          </div>
+          <Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                目標達成度
+              </Typography>
+              <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                {progressPercentage.toFixed(1)}%
+              </Typography>
+            </Box>
+            <LinearProgress 
+              variant="determinate" 
+              value={progressPercentage} 
+              sx={{
+                height: 6,
+                borderRadius: 3,
+                bgcolor: alpha('#fff', 0.3),
+                '& .MuiLinearProgress-bar': {
+                  bgcolor: '#fff',
+                  borderRadius: 3,
+                }
+              }}
+            />
+          </Box>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 })
 
@@ -383,6 +455,154 @@ const ImprovementCard: React.FC<ImprovementCardProps> = React.memo(({
   )
 })
 
+// 📊 多機能データテーブルコンポーネント
+const PerformanceDataTable: React.FC<{
+  data: any[]
+  title: string
+  icon: React.ReactNode
+}> = ({ data, title, icon }) => {
+  const theme = useTheme()
+  
+  const columns: TableColumn[] = [
+    {
+      id: 'name',
+      label: '名前',
+      searchable: true,
+      render: (value, row) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Avatar sx={{ width: 32, height: 32, bgcolor: theme.palette.primary.main }}>
+            <GroupIcon />
+          </Avatar>
+          <Typography variant="body2" fontWeight={600}>{value}</Typography>
+        </Box>
+      )
+    },
+    {
+      id: 'resolvedTickets',
+      label: '解決数',
+      align: 'center',
+      render: (value) => (
+        <Chip 
+          label={value} 
+          color="primary" 
+          variant="outlined"
+          icon={<CheckCircleIcon />}
+        />
+      )
+    },
+    {
+      id: 'avgResolutionTime',
+      label: '平均時間',
+      align: 'center',
+      render: (value) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <ScheduleIcon fontSize="small" color="action" />
+          <Typography variant="body2">{value}h</Typography>
+        </Box>
+      )
+    },
+    {
+      id: 'efficiency',
+      label: '効率性',
+      align: 'center',
+      render: (value) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <LinearProgress 
+            variant="determinate" 
+            value={value} 
+            sx={{ 
+              width: 60, 
+              height: 8, 
+              borderRadius: 4,
+              bgcolor: alpha(theme.palette.primary.main, 0.1)
+            }} 
+          />
+          <Typography variant="body2" fontWeight={600}>{value}%</Typography>
+        </Box>
+      )
+    },
+    {
+      id: 'rating',
+      label: '評価',
+      align: 'center',
+      render: (value) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <Box sx={{ color: '#FFD700', fontSize: '1.2rem' }}>⭐</Box>
+          <Typography variant="body2" fontWeight={600}>{value}</Typography>
+        </Box>
+      )
+    }
+  ]
+
+  return (
+    <Card sx={{ height: '100%' }}>
+      <CardContent sx={{ p: 0 }}>
+        <Box sx={{ 
+          p: 2, 
+          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+          color: 'white'
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {icon}
+            <Typography variant="h6" fontWeight={600}>{title}</Typography>
+          </Box>
+        </Box>
+        <DataTable
+          data={data}
+          columns={columns}
+          dense
+          initialPageSize={5}
+          searchable={false}
+          filterable={false}
+          exportable={true}
+        />
+      </CardContent>
+    </Card>
+  )
+}
+
+// 🎯 リッチチャートコンポーネント
+const RichChartCard: React.FC<{
+  title: string
+  children: React.ReactNode
+  icon: React.ReactNode
+  color?: string
+  actions?: React.ReactNode
+}> = ({ title, children, icon, color = 'primary', actions }) => {
+  const theme = useTheme()
+  
+  return (
+    <Card sx={{ 
+      height: '100%',
+      '&:hover': {
+        transform: 'translateY(-4px)',
+        boxShadow: theme.shadows[8]
+      },
+      transition: 'all 0.3s ease'
+    }}>
+      <CardContent sx={{ p: 0 }}>
+        <Box sx={{ 
+          p: 2, 
+          background: `linear-gradient(135deg, ${theme.palette[color].main} 0%, ${theme.palette[color].dark} 100%)`,
+          color: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {icon}
+            <Typography variant="h6" fontWeight={600}>{title}</Typography>
+          </Box>
+          {actions}
+        </Box>
+        <Box sx={{ p: 2 }}>
+          {children}
+        </Box>
+      </CardContent>
+    </Card>
+  )
+}
+
 const PerformanceAnalytics: React.FC = React.memo(() => {
   const [data, setData] = useState<PerformanceData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -507,108 +727,165 @@ const PerformanceAnalytics: React.FC = React.memo(() => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
+    <Box sx={{ 
+      minHeight: '100vh', 
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      p: 3
+    }}>
+      <Grid container spacing={3}>
+        {/* 🎨 ヘッダーセクション - アイコン豊富な新デザイン */}
+        <Grid item xs={12}>
+          <Card sx={{ 
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.2)'
+          }}>
+            <CardContent sx={{ p: 4 }}>
+              <Stack direction={{ xs: 'column', lg: 'row' }} spacing={3} alignItems="center" justifyContent="space-between">
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Avatar sx={{ 
+                    width: 80, 
+                    height: 80, 
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    fontSize: '2rem',
+                    boxShadow: '0 8px 32px rgba(102, 126, 234, 0.4)'
+                  }}>
+                    📊
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h3" sx={{ 
+                      fontWeight: 900,
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      color: 'transparent',
+                      mb: 1
+                    }}>
+                      🚀 パフォーマンス分析ダッシュボード
+                    </Typography>
+                    <Typography variant="h6" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <MonitorIcon />
+                      システムとビジネスのパフォーマンス指標をリアルタイム監視・分析
+                    </Typography>
+                  </Box>
+                </Stack>
+                
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <FormControl size="small" sx={{ minWidth: 150 }}>
+                    <InputLabel>📅 期間選択</InputLabel>
+                    <Select
+                      value={selectedTimeframe}
+                      onChange={(e) => setSelectedTimeframe(e.target.value as any)}
+                      label="📅 期間選択"
+                      sx={{ borderRadius: 2 }}
+                    >
+                      <MenuItem value="1d">🕐 24時間</MenuItem>
+                      <MenuItem value="7d">📅 7日間</MenuItem>
+                      <MenuItem value="30d">📅 30日間</MenuItem>
+                      <MenuItem value="90d">📅 90日間</MenuItem>
+                    </Select>
+                  </FormControl>
+                  
+                  <Button
+                    variant="contained"
+                    onClick={() => window.location.reload()}
+                    startIcon={<RefreshIcon />}
+                    sx={{
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)',
+                        transform: 'scale(1.05)'
+                      },
+                      transition: 'all 0.2s',
+                      borderRadius: 2,
+                      px: 3
+                    }}
+                  >
+                    更新
+                  </Button>
+                </Stack>
+              </Stack>
+              
+              {/* ✨ リアルタイムステータス表示 */}
+              <Box sx={{ mt: 3, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                <Chip 
+                  icon={<CheckCircleIcon />} 
+                  label="システム正常" 
+                  color="success" 
+                  variant="outlined"
+                  sx={{ fontSize: '0.9rem', py: 1 }}
+                />
+                <Chip 
+                  icon={<MonitorIcon />} 
+                  label="リアルタイム更新中" 
+                  color="primary" 
+                  variant="outlined"
+                  sx={{ fontSize: '0.9rem', py: 1 }}
+                />
+                <Chip 
+                  icon={<ScheduleIcon />} 
+                  label={`最終更新: ${new Date().toLocaleTimeString('ja-JP')}`}
+                  variant="outlined"
+                  sx={{ fontSize: '0.9rem', py: 1 }}
+                />
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
 
-        {/* ヘッダー - 安定したレイアウト */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <span className="text-2xl text-white">📊</span>
-              </div>
-              <div>
-                <h1 className="text-4xl font-black text-gray-900 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  パフォーマンス分析ダッシュボード
-                </h1>
-                <p className="text-gray-600 mt-2 text-lg">システムとビジネスのパフォーマンス指標をリアルタイム監視・分析</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <select
-                  value={selectedTimeframe}
-                  onChange={(e) => setSelectedTimeframe(e.target.value as any)}
-                  className="appearance-none bg-white border-2 border-gray-200 rounded-xl px-6 py-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-blue-300 transition-colors duration-200"
-                >
-                  <option value="1d">📅 24時間</option>
-                  <option value="7d">📅 7日間</option>
-                  <option value="30d">📅 30日間</option>
-                  <option value="90d">📅 90日間</option>
-                </select>
-              </div>
-              <button
-                onClick={() => window.location.reload()}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl text-sm font-semibold hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
-              >
-                <span>更新</span>
-              </button>
-            </div>
-          </div>
-          
-          {/* ステータスインジケーター */}
-          <div className="mt-6 flex items-center space-x-6">
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-sm text-gray-600 font-medium">システム正常</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-              <span className="text-sm text-gray-600 font-medium">リアルタイム更新中</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-500">最終更新: {new Date().toLocaleTimeString('ja-JP')}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* KPI メトリクス - 安定したグリッド */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <EnhancedMetricCard
+        {/* 📈 KPI メトリクス - アイコン豊富な新デザイン */}
+        <Grid item xs={12} sm={6} md={3}>
+          <IconRichMetricCard
             title="チケット平均解決時間"
             value={data.ticketMetrics.avgResolutionTime}
             unit="時間"
             change={-8.2}
             changeLabel="前週比"
             target={4.0}
-            icon={<span>⏱️</span>}
+            icon={<ScheduleIcon />}
             color="success"
             animated={true}
           />
-          <EnhancedMetricCard
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <IconRichMetricCard
             title="API応答時間"
             value={data.systemMetrics.apiResponseTime}
             unit="ms"
             change={5.1}
             changeLabel="前週比"
             target={200}
-            icon={<span>🚀</span>}
+            icon={<SpeedIcon />}
             color="warning"
             animated={true}
           />
-          <EnhancedMetricCard
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <IconRichMetricCard
             title="顧客満足度"
             value={data.businessMetrics.customerSatisfaction}
             unit="/5.0"
             change={3.2}
             changeLabel="前月比"
             target={5.0}
-            icon={<span>⭐</span>}
+            icon={<CheckCircleIcon />}
             color="primary"
             animated={true}
           />
-          <EnhancedMetricCard
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <IconRichMetricCard
             title="ROI"
             value={data.businessMetrics.roi}
             unit="%"
             change={12.4}
             changeLabel="前四半期比"
             target={200}
-            icon={<span>📈</span>}
+            icon={<TrendingUpIcon />}
             color="success"
             animated={true}
           />
-        </div>
+        </Grid>
 
         {/* チャートセクション - 安定したレイアウト */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
