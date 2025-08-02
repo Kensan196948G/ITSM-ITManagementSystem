@@ -181,7 +181,9 @@ class CacheHeaderMiddleware(BaseHTTPMiddleware):
         
         if cache_time:
             response.headers["Cache-Control"] = f"max-age={cache_time}, must-revalidate"
-            response.headers["ETag"] = f'"{hash(str(response.body))}"'
+            # StreamingResponseの場合はETagを設定しない
+            if hasattr(response, 'body') and response.body is not None:
+                response.headers["ETag"] = f'"{hash(str(response.body))}"'
         else:
             response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
             response.headers["Pragma"] = "no-cache"
