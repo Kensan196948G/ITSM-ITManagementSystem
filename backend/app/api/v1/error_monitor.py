@@ -991,3 +991,287 @@ async def _run_emergency_repair(
         logger.info(f"緊急修復完了 - セッション: {session_id}")
     except Exception as e:
         logger.error(f"緊急修復エラー: {e}")
+
+# === 統合エラー監視・修復システム エンドポイント ===
+
+@router.post("/integrated-monitoring/start")
+async def start_integrated_monitoring(
+    background_tasks: BackgroundTasks,
+    monitoring_interval: int = Query(5, description="監視間隔（秒）"),
+    auto_repair: bool = Query(True, description="自動修復を有効にする"),
+    enhanced_mode: bool = Query(True, description="強化モードを有効にする")
+):
+    """統合エラー監視・修復システムを開始"""
+    try:
+        sessions_started = []
+        
+        # 1. 基本API監視開始
+        if not api_monitor.monitoring:
+            background_tasks.add_task(api_monitor.start_monitoring, monitoring_interval)
+            sessions_started.append("api_monitor")
+        
+        # 2. 継続的バックエンド監視開始
+        continuous_monitor = ContinuousBackendMonitor()
+        if not hasattr(continuous_monitor, 'running') or not continuous_monitor.running:
+            background_tasks.add_task(continuous_monitor.start_monitoring)
+            sessions_started.append("continuous_monitor")
+        
+        # 3. 強化された無限ループ監視開始（enhanced_modeの場合）
+        if enhanced_mode:
+            monitoring_status = enhanced_monitor.get_monitoring_status()
+            if not monitoring_status.get("monitoring_active", False):
+                background_tasks.add_task(enhanced_monitor.start_infinite_monitoring)
+                sessions_started.append("enhanced_infinite_loop_monitor")
+        
+        return {
+            "message": "統合エラー監視・修復システムを開始しました",
+            "sessions_started": sessions_started,
+            "config": {
+                "monitoring_interval": monitoring_interval,
+                "auto_repair_enabled": auto_repair,
+                "enhanced_mode_enabled": enhanced_mode
+            },
+            "started_at": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"統合監視開始エラー: {str(e)}")
+
+@router.post("/integrated-monitoring/stop")
+async def stop_integrated_monitoring():
+    """統合エラー監視・修復システムを停止"""
+    try:
+        sessions_stopped = []
+        
+        # 1. API監視停止
+        if api_monitor.monitoring:
+            api_monitor.stop_monitoring()
+            sessions_stopped.append("api_monitor")
+        
+        # 2. 継続監視停止
+        continuous_monitor = ContinuousBackendMonitor()
+        if hasattr(continuous_monitor, 'running') and continuous_monitor.running:
+            continuous_monitor.stop_monitoring()
+            sessions_stopped.append("continuous_monitor")
+        
+        # 3. 強化された無限ループ監視停止
+        monitoring_status = enhanced_monitor.get_monitoring_status()
+        if monitoring_status.get("monitoring_active", False):
+            await enhanced_monitor.stop_infinite_monitoring()
+            sessions_stopped.append("enhanced_infinite_loop_monitor")
+        
+        return {
+            "message": "統合エラー監視・修復システムを停止しました",
+            "sessions_stopped": sessions_stopped,
+            "stopped_at": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"統合監視停止エラー: {str(e)}")
+
+@router.get("/integrated-monitoring/status")
+async def get_integrated_monitoring_status():
+    """統合エラー監視・修復システムのステータスを取得"""
+    try:
+        # 各監視システムのステータスを取得
+        api_status = api_monitor.get_status()
+        
+        continuous_monitor = ContinuousBackendMonitor()
+        continuous_status = {
+            "running": getattr(continuous_monitor, 'running', False),
+            "error_count": len(getattr(continuous_monitor, 'error_counts', {}))
+        }
+        
+        enhanced_status = enhanced_monitor.get_monitoring_status()
+        
+        # 修復エンジンの統計
+        repair_stats = advanced_repair_engine.get_repair_statistics()
+        
+        return {
+            "integrated_monitoring": {
+                "api_monitor": {
+                    "active": api_status["monitoring"],
+                    "total_errors": api_status["total_errors"],
+                    "recent_errors": api_status["recent_errors"],
+                    "last_health_check": api_status["last_health_check"],
+                    "is_healthy": api_status["is_healthy"]
+                },
+                "continuous_monitor": continuous_status,
+                "enhanced_monitor": {
+                    "active": enhanced_status.get("monitoring_active", False),
+                    "total_detections": enhanced_status.get("total_detections", 0),
+                    "total_repairs": enhanced_status.get("total_repairs", 0),
+                    "performance_metrics": enhanced_status.get("performance_metrics", {})
+                },
+                "advanced_repair_engine": repair_stats
+            },
+            "overall_health": {
+                "any_monitoring_active": any([
+                    api_status["monitoring"],
+                    continuous_status["running"],
+                    enhanced_status.get("monitoring_active", False)
+                ]),
+                "total_systems_monitoring": sum([
+                    1 if api_status["monitoring"] else 0,
+                    1 if continuous_status["running"] else 0,
+                    1 if enhanced_status.get("monitoring_active", False) else 0
+                ]),
+                "global_repair_success_rate": repair_stats.get("success_rate", 0)
+            },
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"統合ステータス取得エラー: {str(e)}")
+
+@router.get("/comprehensive-dashboard")
+async def get_comprehensive_monitoring_dashboard():
+    """包括的監視ダッシュボード情報を取得"""
+    try:
+        # 各システムからの情報を統合
+        api_status = api_monitor.get_status()
+        enhanced_status = enhanced_monitor.get_monitoring_status()
+        repair_stats = advanced_repair_engine.get_repair_statistics()
+        
+        # システムリソース情報
+        import psutil
+        system_resources = {
+            "cpu_percent": psutil.cpu_percent(interval=1),
+            "memory": {
+                "percent": psutil.virtual_memory().percent,
+                "used_gb": round(psutil.virtual_memory().used / (1024**3), 2),
+                "total_gb": round(psutil.virtual_memory().total / (1024**3), 2)
+            },
+            "disk": {
+                "percent": psutil.disk_usage('/').percent,
+                "used_gb": round(psutil.disk_usage('/').used / (1024**3), 2),
+                "total_gb": round(psutil.disk_usage('/').total / (1024**3), 2)
+            }
+        }
+        
+        # 最近24時間の統計
+        recent_errors = [e for e in api_monitor.errors if e.timestamp > datetime.now() - timedelta(hours=24)]
+        
+        # 包括的ダッシュボード情報
+        dashboard = {
+            "overview": {
+                "systems_active": sum([
+                    1 if api_status["monitoring"] else 0,
+                    1 if enhanced_status.get("monitoring_active", False) else 0
+                ]),
+                "total_errors_24h": len(recent_errors),
+                "critical_errors_24h": len([e for e in recent_errors if e.severity.value == "critical"]),
+                "repairs_successful_24h": repair_stats.get("successful_repairs", 0),
+                "overall_health_score": _calculate_overall_health_score(api_status, enhanced_status, system_resources)
+            },
+            "monitoring_systems": {
+                "api_monitor": {
+                    "status": "active" if api_status["monitoring"] else "inactive",
+                    "total_errors": api_status["total_errors"],
+                    "recent_errors": api_status["recent_errors"],
+                    "last_check": api_status["last_health_check"]
+                },
+                "enhanced_monitor": {
+                    "status": "active" if enhanced_status.get("monitoring_active", False) else "inactive",
+                    "total_detections": enhanced_status.get("total_detections", 0),
+                    "total_repairs": enhanced_status.get("total_repairs", 0),
+                    "success_rate": enhanced_status.get("performance_metrics", {}).get("repair_success_rate", 0)
+                }
+            },
+            "repair_engine": {
+                "total_repairs": repair_stats.get("total_repairs", 0),
+                "success_rate": repair_stats.get("success_rate", 0),
+                "average_repair_time": repair_stats.get("average_repair_time", 0)
+            },
+            "system_resources": system_resources,
+            "error_trends": _analyze_error_trends(recent_errors),
+            "recommendations": _generate_comprehensive_recommendations(api_status, enhanced_status, repair_stats, system_resources),
+            "generated_at": datetime.now().isoformat()
+        }
+        
+        return dashboard
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"ダッシュボード情報取得エラー: {str(e)}")
+
+# === ヘルパー関数 ===
+
+def _calculate_overall_health_score(api_status: Dict, enhanced_status: Dict, system_resources: Dict) -> float:
+    """総合ヘルススコアを計算"""
+    score = 100.0
+    
+    # 監視システムの状態
+    if not api_status.get("monitoring", False):
+        score -= 20
+    if not enhanced_status.get("monitoring_active", False):
+        score -= 20
+    
+    # エラー状況
+    if api_status.get("recent_errors", 0) > 10:
+        score -= 15
+    elif api_status.get("recent_errors", 0) > 5:
+        score -= 10
+    
+    # システムリソース
+    if system_resources.get("cpu_percent", 0) > 80:
+        score -= 15
+    if system_resources.get("memory", {}).get("percent", 0) > 85:
+        score -= 15
+    
+    return max(0, score)
+
+def _analyze_error_trends(errors: List) -> Dict[str, Any]:
+    """エラートレンドを分析"""
+    if not errors:
+        return {"trend": "データ不足"}
+    
+    # 時間別集計（4時間ごと）
+    time_buckets = {}
+    for error in errors:
+        hour_bucket = error.timestamp.hour // 4 * 4
+        time_buckets[hour_bucket] = time_buckets.get(hour_bucket, 0) + 1
+    
+    # 重要度別集計
+    severity_counts = {}
+    for error in errors:
+        severity = error.severity.value
+        severity_counts[severity] = severity_counts.get(severity, 0) + 1
+    
+    return {
+        "hourly_distribution": time_buckets,
+        "severity_distribution": severity_counts,
+        "peak_error_time": max(time_buckets.items(), key=lambda x: x[1])[0] if time_buckets else "不明",
+        "total_errors": len(errors)
+    }
+
+def _generate_comprehensive_recommendations(api_status: Dict, enhanced_status: Dict, repair_stats: Dict, system_resources: Dict) -> List[str]:
+    """包括的推奨事項を生成"""
+    recommendations = []
+    
+    # 監視システム関連
+    if not api_status.get("monitoring", False):
+        recommendations.append("🔍 API監視を開始してください")
+    if not enhanced_status.get("monitoring_active", False):
+        recommendations.append("⚡ 強化された監視システムを開始してください")
+    
+    # パフォーマンス関連
+    if system_resources.get("cpu_percent", 0) > 80:
+        recommendations.append("⚠️ CPU使用率が高いです。プロセスの最適化を検討してください")
+    if system_resources.get("memory", {}).get("percent", 0) > 85:
+        recommendations.append("⚠️ メモリ使用率が高いです。メモリリークの確認を推奨します")
+    
+    # 修復関連
+    success_rate = repair_stats.get("success_rate", 0)
+    if success_rate < 70:
+        recommendations.append("🔧 修復成功率が低いです。修復ロジックの改善を推奨します")
+    elif success_rate > 90:
+        recommendations.append("✅ 修復システムは優秀に動作しています")
+    
+    # エラー関連
+    if api_status.get("recent_errors", 0) > 10:
+        recommendations.append("🚨 多数のエラーが発生しています。緊急対応を推奨します")
+    
+    if not recommendations:
+        recommendations.append("🎉 すべてのシステムが正常に動作しています！")
+    
+    return recommendations
