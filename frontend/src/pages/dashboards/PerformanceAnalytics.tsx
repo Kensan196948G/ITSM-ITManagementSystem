@@ -1022,203 +1022,166 @@ const PerformanceAnalytics: React.FC = React.memo(() => {
           />
         </Grid>
 
-          {/* ボトルネック分析 */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div className="mb-6">
-              <h3 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
-                <span className="mr-3">🎯</span>
-                ボトルネック分析
-              </h3>
-              <p className="text-gray-600">パフォーマンス改善領域</p>
-            </div>
-            
-            <div className="space-y-4">
+        {/* 🔍 ボトルネック分析カード */}
+        <Grid item xs={12}>
+          <RichChartCard 
+            title="ボトルネック分析・改善提案" 
+            icon={<BugIcon />}
+            color="error"
+            actions={
+              <IconButton size="small" sx={{ color: 'white' }}>
+                <ReportIcon />
+              </IconButton>
+            }
+          >
+            <Grid container spacing={3}>
               {data.ticketMetrics.bottlenecks.map((bottleneck, index) => (
-                <ImprovementCard
-                  key={index}
-                  title={bottleneck.area}
-                  impact={bottleneck.impact}
-                  priority={bottleneck.severity === 'high' ? 'high' : bottleneck.severity === 'medium' ? 'medium' : 'low'}
-                  suggestions={bottleneck.suggestions}
-                  actionable={true}
-                />
+                <Grid item xs={12} md={4} key={index}>
+                  <ImprovementCard
+                    title={bottleneck.area}
+                    impact={bottleneck.impact}
+                    priority={bottleneck.severity === 'high' ? 'high' : bottleneck.severity === 'medium' ? 'medium' : 'low'}
+                    suggestions={bottleneck.suggestions}
+                    actionable={true}
+                  />
+                </Grid>
               ))}
-            </div>
-          </div>
+            </Grid>
+          </RichChartCard>
+        </Grid>
 
-          {/* 時間帯別パフォーマンス - ヒートマップ */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 lg:col-span-2">
-            <div className="mb-6">
-              <h3 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
-                <span className="mr-3">🕒</span>
-                時間帯別パフォーマンス
-              </h3>
-              <p className="text-gray-600">24時間×7日間のパフォーマンスヒートマップ</p>
-            </div>
-            
-            <div className="overflow-x-auto min-w-[800px]">
-              {/* Legend */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="text-sm text-gray-600">パフォーマンス強度</div>
-                <div className="flex items-center space-x-4 text-xs text-gray-500">
-                  <div className="flex items-center space-x-1">
-                    <div className="w-4 h-4 bg-blue-100 rounded"></div>
-                    <span>低</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <div className="w-4 h-4 bg-blue-400 rounded"></div>
-                    <span>中</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <div className="w-4 h-4 bg-blue-700 rounded"></div>
-                    <span>高</span>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Heatmap grid */}
-              <div className="grid grid-cols-25 gap-1 overflow-x-auto min-w-[800px]" style={{ gridTemplateColumns: '60px repeat(24, 32px)' }}>
-                {/* Hour labels */}
-                <div></div>
-                {Array.from({ length: 24 }, (_, i) => (
-                  <div key={i} className="text-xs text-gray-500 text-center py-1">
-                    {i.toString().padStart(2, '0')}
-                  </div>
-                ))}
-                
-                {/* Data rows */}
-                {['月', '火', '水', '木', '金', '土', '日'].map((day, dayIndex) => (
-                  <React.Fragment key={day}>
-                    <div className="text-xs text-gray-600 py-2 flex items-center justify-center font-medium">
-                      {day}
-                    </div>
-                    {Array.from({ length: 24 }, (_, hour) => {
-                      const dataPoint = heatmapData.find(d => d.y === day && d.x === hour.toString().padStart(2, '0') + ':00')
-                      const value = dataPoint ? dataPoint.value : 0
-                      const intensity = value / 100
-                      
-                      return (
-                        <div
-                          key={`${day}-${hour}`}
-                          className="w-8 h-8 rounded cursor-pointer hover:scale-105 transition-transform duration-200 flex items-center justify-center group relative"
-                          style={{
-                            backgroundColor: `rgba(59, 130, 246, ${Math.max(intensity, 0.1)})`,
-                            transition: 'all 0.2s ease'
-                          }}
-                          title={`${day}曜日 ${hour.toString().padStart(2, '0')}:00 - ${value}%`}
-                        >
-                          {value > 80 && (
-                            <div className="text-white text-xs font-bold">
-                              {value}
-                            </div>
-                          )}
-                        </div>
-                      )
-                    })}
-                  </React.Fragment>
-                ))}
-              </div>
-              
-              {/* Summary statistics */}
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-blue-50 p-4 rounded-lg text-center">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {Math.max(...heatmapData.map(d => d.value))}
-                  </div>
-                  <div className="text-sm text-blue-700">最高パフォーマンス</div>
-                </div>
-                <div className="bg-blue-50 p-4 rounded-lg text-center">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {(heatmapData.reduce((sum, d) => sum + d.value, 0) / heatmapData.length).toFixed(1)}
-                  </div>
-                  <div className="text-sm text-blue-700">平均パフォーマンス</div>
-                </div>
-                <div className="bg-blue-50 p-4 rounded-lg text-center">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {heatmapData.filter(d => d.value > 70).length}
-                  </div>
-                  <div className="text-sm text-blue-700">高パフォーマンス時間帯</div>
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* 💼 ビジネスメトリクス表示 */}
+        <Grid item xs={12}>
+          <RichChartCard 
+            title="ビジネスインパクト分析" 
+            icon={<AssignmentIcon />}
+            color="success"
+            actions={
+              <IconButton size="small" sx={{ color: 'white' }}>
+                <TrendingUpIcon />
+              </IconButton>
+            }
+          >
+            <Grid container spacing={3}>
+              {/* ROI指標 */}
+              <Grid item xs={12} md={4}>
+                <Card sx={{ 
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  textAlign: 'center',
+                  p: 3,
+                  height: '100%'
+                }}>
+                  <Box sx={{ position: 'relative' }}>
+                    <Box sx={{ position: 'absolute', top: 0, right: 0, fontSize: '2rem', opacity: 0.3 }}>
+                      🎯
+                    </Box>
+                    <Typography variant="h3" sx={{ fontWeight: 900, mb: 1 }}>
+                      {data.businessMetrics.roi}
+                      <Typography component="span" variant="h5">%</Typography>
+                    </Typography>
+                    <Typography variant="h6" sx={{ mb: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                      <TrendingUpIcon />
+                      投資収益率
+                    </Typography>
+                    <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                      ROI指標
+                    </Typography>
+                  </Box>
+                </Card>
+              </Grid>
 
-          {/* ビジネスメトリクス */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 lg:col-span-2">
-            <div className="mb-8">
-              <h3 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
-                <span className="mr-3">💼</span>
-                ビジネスメトリクス
-              </h3>
-              <p className="text-gray-600">業務効率とコスト分析</p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* 業務効率改善率 */}
-              <div className="relative p-6 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg">
-                <div className="text-center">
-                  <div className="text-5xl font-black mb-3">
-                    {data.businessMetrics.efficiencyImprovement}<span className="text-2xl">%</span>
-                  </div>
-                  <div className="text-xl font-semibold mb-2">業務効率改善率</div>
-                  <div className="text-sm opacity-90">前四半期比較</div>
-                </div>
-                <div className="absolute top-4 right-4 text-3xl opacity-70">📈</div>
-              </div>
+              {/* 効率改善 */}
+              <Grid item xs={12} md={4}>
+                <Card sx={{ 
+                  background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                  color: 'white',
+                  textAlign: 'center',
+                  p: 3,
+                  height: '100%'
+                }}>
+                  <Box sx={{ position: 'relative' }}>
+                    <Box sx={{ position: 'absolute', top: 0, right: 0, fontSize: '2rem', opacity: 0.3 }}>
+                      📈
+                    </Box>
+                    <Typography variant="h3" sx={{ fontWeight: 900, mb: 1 }}>
+                      {data.businessMetrics.efficiencyImprovement}
+                      <Typography component="span" variant="h5">%</Typography>
+                    </Typography>
+                    <Typography variant="h6" sx={{ mb: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                      <SpeedIcon />
+                      業務効率改善率
+                    </Typography>
+                    <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                      前四半期比較
+                    </Typography>
+                  </Box>
+                </Card>
+              </Grid>
 
               {/* コスト効率 */}
-              <div className="relative p-6 rounded-2xl bg-gradient-to-br from-green-500 to-teal-600 text-white shadow-lg">
-                <div className="text-center">
-                  <div className="text-5xl font-black mb-3">
-                    {data.businessMetrics.costEfficiency}<span className="text-2xl">%</span>
-                  </div>
-                  <div className="text-xl font-semibold mb-2">コスト効率</div>
-                  <div className="text-sm opacity-90">最適化レベル</div>
-                </div>
-                <div className="absolute top-4 right-4 text-3xl opacity-70">💰</div>
-              </div>
+              <Grid item xs={12} md={4}>
+                <Card sx={{ 
+                  background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                  color: 'white',
+                  textAlign: 'center',
+                  p: 3,
+                  height: '100%'
+                }}>
+                  <Box sx={{ position: 'relative' }}>
+                    <Box sx={{ position: 'absolute', top: 0, right: 0, fontSize: '2rem', opacity: 0.3 }}>
+                      💰
+                    </Box>
+                    <Typography variant="h3" sx={{ fontWeight: 900, mb: 1 }}>
+                      {data.businessMetrics.costEfficiency}
+                      <Typography component="span" variant="h5">%</Typography>
+                    </Typography>
+                    <Typography variant="h6" sx={{ mb: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                      <SecurityIcon />
+                      コスト効率
+                    </Typography>
+                    <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                      最適化レベル
+                    </Typography>
+                  </Box>
+                </Card>
+              </Grid>
 
-              {/* 投資収益率 */}
-              <div className="relative p-6 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 text-white shadow-lg">
-                <div className="text-center">
-                  <div className="text-5xl font-black mb-3">
-                    {data.businessMetrics.roi}<span className="text-2xl">%</span>
-                  </div>
-                  <div className="text-xl font-semibold mb-2">投資収益率</div>
-                  <div className="text-sm opacity-90">ROI指標</div>
-                </div>
-                <div className="absolute top-4 right-4 text-3xl opacity-70">🎯</div>
-              </div>
-            </div>
-            
-            {/* Summary cards */}
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="text-lg font-semibold text-blue-800">月次成長率</h4>
-                    <p className="text-3xl font-bold text-blue-600">+{(data.businessMetrics.efficiencyImprovement / 3).toFixed(1)}%</p>
-                    <p className="text-sm text-blue-600">継続的改善トレンド</p>
-                  </div>
-                  <div className="text-4xl text-blue-500">📊</div>
-                </div>
-              </div>
-              
-              <div className="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-xl border border-green-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="text-lg font-semibold text-green-800">コスト削減額</h4>
-                    <p className="text-3xl font-bold text-green-600">¥{(data.businessMetrics.costEfficiency * 1000).toLocaleString()}</p>
-                    <p className="text-sm text-green-600">月間節約効果</p>
-                  </div>
-                  <div className="text-4xl text-green-500">💴</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+              {/* サマリー統計 */}
+              <Grid item xs={12} md={6}>
+                <Card sx={{ p: 3, background: alpha('#667eea', 0.1) }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box>
+                      <Typography variant="h6" color="primary" fontWeight={600}>月次成長率</Typography>
+                      <Typography variant="h4" color="primary" fontWeight={800}>
+                        +{(data.businessMetrics.efficiencyImprovement / 3).toFixed(1)}%
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">継続的改善トレンド</Typography>
+                    </Box>
+                    <Box sx={{ fontSize: '3rem' }}>📊</Box>
+                  </Box>
+                </Card>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <Card sx={{ p: 3, background: alpha('#43e97b', 0.1) }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box>
+                      <Typography variant="h6" color="success.main" fontWeight={600}>コスト削減額</Typography>
+                      <Typography variant="h4" color="success.main" fontWeight={800}>
+                        ¥{(data.businessMetrics.costEfficiency * 1000).toLocaleString()}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">月間節約効果</Typography>
+                    </Box>
+                    <Box sx={{ fontSize: '3rem' }}>💴</Box>
+                  </Box>
+                </Card>
+              </Grid>
+            </Grid>
+          </RichChartCard>
+        </Grid>
+      </Grid>
+    </Box>
   )
 })
 

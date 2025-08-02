@@ -1,9 +1,31 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts'
+import { 
+  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
+  ResponsiveContainer, LineChart, Line, RadialBarChart, RadialBar, TreemapChart, Treemap 
+} from 'recharts'
+import {
+  Box, Grid, Typography, Card, CardContent, Avatar, IconButton, Divider, Chip,
+  LinearProgress, useTheme, Tabs, Tab, Button, useMediaQuery, Stack, Alert,
+  Skeleton, Badge, Tooltip as MuiTooltip, FormControl, InputLabel, Select, MenuItem,
+  Fab, alpha, CircularProgress as MuiCircularProgress, Paper, TableContainer, 
+  Table, TableHead, TableRow, TableCell, TableBody, AccordionSummary, AccordionDetails, Accordion
+} from '@mui/material'
+import {
+  Target as TargetIcon, Timeline as TimelineIcon, Warning as WarningIcon, 
+  CheckCircle as CheckCircleIcon, Schedule as ScheduleIcon, TrendingUp as TrendingUpIcon,
+  TrendingDown as TrendingDownIcon, Assessment as AssessmentIcon, Notifications as NotificationsIcon,
+  Error as ErrorIcon, Group as GroupIcon, Assignment as AssignmentIcon, Speed as SpeedIcon,
+  Security as SecurityIcon, Build as BuildIcon, MonitorHeart as MonitorIcon,
+  ExpandMore as ExpandMoreIcon, PlayArrow as PlayIcon, Pause as PauseIcon,
+  Refresh as RefreshIcon, Settings as SettingsIcon, FilterList as FilterIcon,
+  Download as DownloadIcon, Share as ShareIcon, Analytics as AnalyticsIcon,
+  Dashboard as DashboardIcon, BugReport as BugIcon, Computer as ComputerIcon,
+  NetworkCheck as NetworkIcon, Apps as AppsIcon, Hardware as HardwareIcon
+} from '@mui/icons-material'
 import { SLAData, Ticket, CategorySLAStats, EscalationEvent } from '../../types/dashboard'
 import MetricCard from '../../components/dashboard/MetricCard'
 import ChartCard from '../../components/dashboard/ChartCard'
-import { CircularProgress, HeatmapChart } from '../../components/charts'
+import DataTable, { TableColumn } from '../../components/common/DataTable'
 import { gradients, animations, chartColors } from '../../theme/theme'
 
 const SLAMonitoring: React.FC = React.memo(() => {
