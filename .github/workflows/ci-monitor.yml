@@ -17,15 +17,41 @@ env:
 jobs:
   monitor:
     name: Continuous CI/CD Failure Detection & Auto-Repair
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+    runs-on: ubuntu-20.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      actions: read
+      checks: read
+      issues: write
 
     steps:
+      - name: Environment Check
+        run: |
+          echo "=== Runner Environment Check ==="
+          echo "Runner environment: $(lsb_release -d)"
+          echo "Available memory: $(free -h)"
+          echo "Available disk: $(df -h)"
+          echo "Current user: $(whoami)"
+          echo "Home directory: $HOME"
+          echo "Working directory: $(pwd)"
+          echo "==============================="
+          
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+        
+      - name: Verify Checkout
+        run: |
+          if [ ! -d ".git" ]; then
+            echo "⚠️ Repository checkout failed, attempting alternative method"
+            git clone https://github.com/${{ github.repository }}.git .
+          else
+            echo "✅ Repository checkout successful"
+          fi
 
       - name: Install GitHub CLI
         run: |
