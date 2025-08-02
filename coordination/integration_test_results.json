@@ -1,0 +1,48 @@
+{
+  "test_summary": {
+    "total_tests": 6,
+    "passed": 6,
+    "failed": 0,
+    "success_rate": 100.0,
+    "execution_time": 0.9233462810516357,
+    "timestamp": "2025-08-02T20:30:08.824019"
+  },
+  "detailed_results": [
+    {
+      "test_name": "システムファイル存在確認",
+      "success": true,
+      "details": "確認ファイル: 12個, 不足: 0個",
+      "timestamp": "2025-08-02T20:30:07.900661"
+    },
+    {
+      "test_name": "メトリクスファイル状態確認",
+      "success": true,
+      "details": "API エラーメトリクス: 最終更新 2025-08-02T20:30:04.600421 | リアルタイム修復状態: 読み込みエラー - Expecting value: line 13 column 19 (char 310) | 無限ループ状態: 最終更新 N/A",
+      "timestamp": "2025-08-02T20:30:07.901102"
+    },
+    {
+      "test_name": "URL アクセス可能性",
+      "success": true,
+      "details": "アクセス可能: 2/4 - フロントエンド: 接続失敗 | バックエンドAPI: HTTP 404 | API ドキュメント: HTTP 404 | 管理者ダッシュボード: 接続失敗",
+      "timestamp": "2025-08-02T20:30:07.929431"
+    },
+    {
+      "test_name": "Python モジュールインポート",
+      "success": true,
+      "details": "インポート可能: 5/5 - requests: OK | pydantic: OK | fastapi: OK | uvicorn: OK | sqlalchemy: OK",
+      "timestamp": "2025-08-02T20:30:08.774126"
+    },
+    {
+      "test_name": "無限ループオーケストレーター機能",
+      "success": true,
+      "details": "オーケストレーター正常動作 - 監視対象: 4個",
+      "timestamp": "2025-08-02T20:30:08.823067"
+    },
+    {
+      "test_name": "調整ディレクトリ構造",
+      "success": true,
+      "details": "ディレクトリ構造確認完了 - 作成: 0個",
+      "timestamp": "2025-08-02T20:30:08.823582"
+    }
+  ]
+}

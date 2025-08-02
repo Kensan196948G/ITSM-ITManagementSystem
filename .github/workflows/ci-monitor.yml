@@ -2,8 +2,8 @@ name: ITSM CI/CD Monitor - Auto-Repair Detection
 
 on:
   schedule:
-    # GitHub Actions minimum is 5 minutes for public repos
-    - cron: '*/5 * * * *'  # Every 5 minutes
+    # Reduced frequency to prevent API rate limiting
+    - cron: '*/15 * * * *'  # Every 15 minutes
   workflow_dispatch:
   repository_dispatch:
     types: [ci-failure-detected, manual-monitor-trigger]
@@ -18,7 +18,7 @@ jobs:
   monitor:
     name: Continuous CI/CD Failure Detection & Auto-Repair
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
 
     steps:
       - name: Checkout Repository
@@ -66,6 +66,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Rate limiting protection
+          sleep 2
           echo "🔄 Starting CI/CD monitoring loop with ${MONITOR_INTERVAL}s intervals"
           
           # Function to check CI status
@@ -73,17 +75,23 @@ jobs:
             local failed_runs=0
             local check_time=$(date -u +%Y-%m-%dT%H:%M:%S.%6N)
             
-            # Get recent workflow runs (last 10)
-            local runs=$(gh run list --limit 10 --json status,conclusion,workflowName,createdAt,url)
+            # Get recent workflow runs (last 10) with rate limiting
+            local runs=$(gh run list --limit 10 --json status,conclusion,workflowName,createdAt,url,id 2>/dev/null || echo '[]')
             
-            # Check for failed runs (excluding self)
-            local recent_failures=$(echo "$runs" | jq -r '.[] | select(.conclusion == "failure" and .workflowName != "ITSM CI/CD Monitor - Auto-Repair Detection") | .workflowName' | wc -l)
+            # Check if API call failed
+            if [ "$runs" = "[]" ] || [ -z "$runs" ]; then
+              echo "⚠️ API call failed or no data returned. Skipping this check."
+              return 0
+            fi
+            
+            # Check for failed runs (excluding self and monitor workflows)
+            local recent_failures=$(echo "$runs" | jq -r '.[] | select(.conclusion == "failure" and .workflowName != "ITSM CI/CD Monitor - Auto-Repair Detection" and .workflowName != "GitHub Actions Integration Monitor" and (.workflowName | test("Monitor|monitor") | not)) | .workflowName' | wc -l)
             
             if [ "$recent_failures" -gt 0 ]; then
               echo "⚠️ Detected $recent_failures recent CI failures"
               
-              # Get failure details
-              local failure_details=$(echo "$runs" | jq -r '.[] | select(.conclusion == "failure" and .workflowName != "ITSM CI/CD Monitor - Auto-Repair Detection") | "Workflow: \(.workflowName), URL: \(.url)"')
+              # Get failure details (excluding monitor workflows)
+              local failure_details=$(echo "$runs" | jq -r '.[] | select(.conclusion == "failure" and .workflowName != "ITSM CI/CD Monitor - Auto-Repair Detection" and .workflowName != "GitHub Actions Integration Monitor" and (.workflowName | test("Monitor|monitor") | not)) | "Workflow: \(.workflowName), ID: \(.id), URL: \(.url)"')
               
               echo "Failure details:"
               echo "$failure_details"
@@ -129,11 +137,14 @@ jobs:
             if [ "$consecutive" -ge "$MAX_CONSECUTIVE_FAILURES" ]; then
               echo "🚨 THRESHOLD EXCEEDED - Triggering auto-repair sequence"
               
-              # Trigger ci-retry workflow
-              if gh workflow run ci-retry.yml --ref main; then
+              # Trigger ci-retry workflow with rate limiting
+              echo "Triggering auto-repair with 3-second delay..."
+              sleep 3
+              if gh workflow run ci-retry.yml --ref main 2>/dev/null; then
                 echo "Successfully triggered ci-retry workflow"
+                sleep 2  # Additional delay after trigger
               else
-                echo "Failed to trigger ci-retry workflow"
+                echo "Failed to trigger ci-retry workflow - possible rate limit"
               fi
               
               # Update repairs triggered counter

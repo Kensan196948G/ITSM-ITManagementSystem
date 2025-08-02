@@ -4,9 +4,12 @@ on:
   workflow_run:
     workflows: ["ITSM CI/CD Pipeline", "ITSM Test Automation", "Test Suite"]
     types: [completed]
+    # Exclude self-referential triggers
+    branches-ignore:
+      - 'refs/heads/github-actions-*'
   schedule:
-    # Monitor every 5 minutes during work hours
-    - cron: '*/5 9-18 * * 1-5'
+    # Reduced frequency to prevent API overload
+    - cron: '*/30 9-18 * * 1-5'  # Every 30 minutes during work hours
   workflow_dispatch:
 
 env:
@@ -16,7 +19,15 @@ env:
 jobs:
   monitor-workflows:
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'failure' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    timeout-minutes: 10
+    if: |
+      (
+        github.event.workflow_run.conclusion == 'failure' && 
+        github.event.workflow_run.name != 'GitHub Actions Integration Monitor' &&
+        github.event.workflow_run.name != 'ITSM CI/CD Monitor - Auto-Repair Detection'
+      ) || 
+      github.event_name == 'schedule' || 
+      github.event_name == 'workflow_dispatch'
     
     steps:
     - name: Checkout repository
@@ -70,7 +81,12 @@ jobs:
         
         failed_workflows = []
         for run in workflow_runs:
-            if run['conclusion'] == 'failure':
+            # Exclude monitor workflows from failure detection to prevent loops
+            if (run['conclusion'] == 'failure' and 
+                run['name'] not in ['GitHub Actions Integration Monitor', 
+                                  'ITSM CI/CD Monitor - Auto-Repair Detection',
+                                  'Infinite Loop Repair Engine'] and
+                'monitor' not in run['name'].lower()):
                 failed_workflows.append({
                     'id': run['id'],
                     'name': run['name'],
@@ -103,15 +119,25 @@ jobs:
             for workflow in failed_workflows:
                 print(f"  - {workflow['name']} (ID: {workflow['id']})")
         
-        # Rate limiting protection
+        # Enhanced rate limiting protection
         import time
-        time.sleep(2)  # Prevent API rate limiting
+        time.sleep(5)  # Extended delay to prevent API rate limiting
+        
+        # Additional check to prevent infinite loops
+        if report['failed_runs'] > 5:
+            print("⚠️ Excessive failures detected - potential system instability")
+            print("Monitoring frequency will be reduced for next cycle")
         
         EOF
 
     - name: Trigger Local Repair Integration
-      if: github.event.workflow_run.conclusion == 'failure'
+      if: |
+        github.event.workflow_run.conclusion == 'failure' && 
+        github.event.workflow_run.name != 'GitHub Actions Integration Monitor' &&
+        github.event.workflow_run.name != 'ITSM CI/CD Monitor - Auto-Repair Detection'
       run: |
+        # Prevent self-triggering loops
+        echo "Checking if repair trigger is safe..."
         # Create repair trigger for local system
         cat << 'EOF' > coordination/github_actions_repair_trigger.json
         {
@@ -147,7 +173,10 @@ jobs:
         fi
 
     - name: Create Issue for Critical Failures
-      if: github.event.workflow_run.conclusion == 'failure'
+      if: |
+        github.event.workflow_run.conclusion == 'failure' && 
+        github.event.workflow_run.name != 'GitHub Actions Integration Monitor' &&
+        github.event.workflow_run.name != 'ITSM CI/CD Monitor - Auto-Repair Detection'
       uses: actions/github-script@v6
       with:
         script: |
