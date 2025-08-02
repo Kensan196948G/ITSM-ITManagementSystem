@@ -1,10 +1,231 @@
 {
-  "backend_errors": [],
-  "api_errors": [],
-  "database_errors": [],
-  "validation_errors": [],
-  "cors_errors": [],
-  "authentication_errors": [],
-  "last_check": "2025-08-02T13:23:08.558168",
-  "error_count": 0
+  "summary": {
+    "sessionStart": "2025-08-02T04:25:08.531554+00:00",
+    "monitoringDuration": 30,
+    "totalErrors": 0,
+    "errorTypes": {},
+    "severityCounts": {
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    },
+    "sourceCounts": {
+      "frontend": 0,
+      "backend": 0
+    },
+    "agentAssignments": {
+      "ITSM-DevUI": 0,
+      "ITSM-DevAPI": 0
+    },
+    "consoleMessages": 18,
+    "networkErrors": 0
+  },
+  "errors": [
+    {
+      "timestamp": "2025-08-02T04:23:39.325206+00:00",
+      "type": "unknown_error",
+      "severity": "low",
+      "message": "HTTP 403: Forbidden",
+      "source": "backend",
+      "file": "http://192.168.3.135:8000/api/v1/incidents/",
+      "line": 0,
+      "stackTrace": "",
+      "assignTo": "ITSM-DevAPI",
+      "originalType": "network_error",
+      "additionalData": {
+        "status_code": 403,
+        "status_text": "Forbidden",
+        "url": "http://192.168.3.135:8000/api/v1/incidents/",
+        "headers": {
+          "cache-control": "max-age=120, must-revalidate",
+          "content-length": "113",
+          "content-security-policy": "default-src 'self'",
+          "content-type": "application/json",
+          "date": "Sat, 02 Aug 2025 04:23:39 GMT",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "server": "uvicorn",
+          "strict-transport-security": "max-age=31536000; includeSubDomains",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "x-process-time": "0.009",
+          "x-ratelimit-limit": "1000",
+          "x-ratelimit-remaining": "977",
+          "x-ratelimit-reset": "1754108640",
+          "x-request-id": "dabdc4b5-c959-41ef-8cad-6c28d8c29b23",
+          "x-xss-protection": "1; mode=block"
+        }
+      }
+    },
+    {
+      "timestamp": "2025-08-02T04:23:39.336340+00:00",
+      "type": "unknown_error",
+      "severity": "low",
+      "message": "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "source": "backend",
+      "file": "http://192.168.3.135:8000/api/v1/incidents/",
+      "line": 0,
+      "stackTrace": "",
+      "assignTo": "ITSM-DevAPI",
+      "originalType": "console_error"
+    },
+    {
+      "timestamp": "2025-08-02T04:23:39.345311+00:00",
+      "type": "security_error",
+      "severity": "medium",
+      "message": "Refused to apply inline style because it violates the following Content Security Policy directive: \"default-src 'self'\". Either the 'unsafe-inline' keyword, a hash ('sha256-4Su6mBWzEIFnH4pAGMOuaeBrstwJN4Z3pq/s1Kn4/KQ='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. Note also that 'style-src' was not explicitly set, so 'default-src' is used as a fallback.\n",
+      "source": "backend",
+      "file": "http://192.168.3.135:8000/api/v1/incidents/",
+      "line": 0,
+      "stackTrace": "",
+      "assignTo": "ITSM-DevAPI",
+      "originalType": "console_error"
+    },
+    {
+      "timestamp": "2025-08-02T04:23:40.408707+00:00",
+      "type": "security_error",
+      "severity": "medium",
+      "message": "Refused to apply inline style because it violates the following Content Security Policy directive: \"default-src 'self'\". Either the 'unsafe-inline' keyword, a hash ('sha256-4Su6mBWzEIFnH4pAGMOuaeBrstwJN4Z3pq/s1Kn4/KQ='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. Note also that 'style-src' was not explicitly set, so 'default-src' is used as a fallback.\n",
+      "source": "backend",
+      "file": "http://192.168.3.135:8000/api/v1/problems/",
+      "line": 0,
+      "stackTrace": "",
+      "assignTo": "ITSM-DevAPI",
+      "originalType": "console_error"
+    },
+    {
+      "timestamp": "2025-08-02T04:23:41.472848+00:00",
+      "type": "security_error",
+      "severity": "medium",
+      "message": "Refused to apply inline style because it violates the following Content Security Policy directive: \"default-src 'self'\". Either the 'unsafe-inline' keyword, a hash ('sha256-4Su6mBWzEIFnH4pAGMOuaeBrstwJN4Z3pq/s1Kn4/KQ='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. Note also that 'style-src' was not explicitly set, so 'default-src' is used as a fallback.\n",
+      "source": "backend",
+      "file": "http://192.168.3.135:8000/api/v1/changes/",
+      "line": 0,
+      "stackTrace": "",
+      "assignTo": "ITSM-DevAPI",
+      "originalType": "console_error"
+    },
+    {
+      "timestamp": "2025-08-02T04:23:42.612223+00:00",
+      "type": "unknown_error",
+      "severity": "low",
+      "message": "HTTP 403: Forbidden",
+      "source": "backend",
+      "file": "http://192.168.3.135:8000/api/v1/auth/me",
+      "line": 0,
+      "stackTrace": "",
+      "assignTo": "ITSM-DevAPI",
+      "originalType": "network_error",
+      "additionalData": {
+        "status_code": 403,
+        "status_text": "Forbidden",
+        "url": "http://192.168.3.135:8000/api/v1/auth/me",
+        "headers": {
+          "cache-control": "no-cache, no-store, must-revalidate",
+          "content-length": "113",
+          "content-security-policy": "default-src 'self'",
+          "content-type": "application/json",
+          "date": "Sat, 02 Aug 2025 04:23:42 GMT",
+          "expires": "0",
+          "pragma": "no-cache",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "server": "uvicorn",
+          "strict-transport-security": "max-age=31536000; includeSubDomains",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "x-process-time": "0.035",
+          "x-ratelimit-limit": "1000",
+          "x-ratelimit-remaining": "965",
+          "x-ratelimit-reset": "1754108640",
+          "x-request-id": "3cd25b49-6219-4ac7-be64-141450051af8",
+          "x-xss-protection": "1; mode=block"
+        }
+      }
+    },
+    {
+      "timestamp": "2025-08-02T04:23:42.634729+00:00",
+      "type": "unknown_error",
+      "severity": "low",
+      "message": "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "source": "backend",
+      "file": "http://192.168.3.135:8000/api/v1/auth/me",
+      "line": 0,
+      "stackTrace": "",
+      "assignTo": "ITSM-DevAPI",
+      "originalType": "console_error"
+    },
+    {
+      "timestamp": "2025-08-02T04:23:42.660323+00:00",
+      "type": "security_error",
+      "severity": "medium",
+      "message": "Refused to apply inline style because it violates the following Content Security Policy directive: \"default-src 'self'\". Either the 'unsafe-inline' keyword, a hash ('sha256-4Su6mBWzEIFnH4pAGMOuaeBrstwJN4Z3pq/s1Kn4/KQ='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. Note also that 'style-src' was not explicitly set, so 'default-src' is used as a fallback.\n",
+      "source": "backend",
+      "file": "http://192.168.3.135:8000/api/v1/auth/me",
+      "line": 0,
+      "stackTrace": "",
+      "assignTo": "ITSM-DevAPI",
+      "originalType": "console_error"
+    },
+    {
+      "timestamp": "2025-08-02T04:23:43.734823+00:00",
+      "type": "network_error",
+      "severity": "low",
+      "message": "HTTP 404: Not Found",
+      "source": "backend",
+      "file": "http://192.168.3.135:8000/api/nonexistent",
+      "line": 0,
+      "stackTrace": "",
+      "assignTo": "ITSM-DevAPI",
+      "originalType": "network_error",
+      "additionalData": {
+        "status_code": 404,
+        "status_text": "Not Found",
+        "url": "http://192.168.3.135:8000/api/nonexistent",
+        "headers": {
+          "cache-control": "no-cache, no-store, must-revalidate",
+          "content-length": "22",
+          "content-security-policy": "default-src 'self'",
+          "content-type": "application/json",
+          "date": "Sat, 02 Aug 2025 04:23:43 GMT",
+          "expires": "0",
+          "pragma": "no-cache",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "server": "uvicorn",
+          "strict-transport-security": "max-age=31536000; includeSubDomains",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "x-process-time": "0.015",
+          "x-ratelimit-limit": "1000",
+          "x-ratelimit-remaining": "964",
+          "x-ratelimit-reset": "1754108640",
+          "x-request-id": "5d4e3377-d683-4f13-b9a5-fa5500ff20ea",
+          "x-xss-protection": "1; mode=block"
+        }
+      }
+    },
+    {
+      "timestamp": "2025-08-02T04:23:43.743369+00:00",
+      "type": "network_error",
+      "severity": "low",
+      "message": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "source": "backend",
+      "file": "http://192.168.3.135:8000/api/nonexistent",
+      "line": 0,
+      "stackTrace": "",
+      "assignTo": "ITSM-DevAPI",
+      "originalType": "console_error"
+    },
+    {
+      "timestamp": "2025-08-02T04:23:43.751907+00:00",
+      "type": "security_error",
+      "severity": "medium",
+      "message": "Refused to apply inline style because it violates the following Content Security Policy directive: \"default-src 'self'\". Either the 'unsafe-inline' keyword, a hash ('sha256-4Su6mBWzEIFnH4pAGMOuaeBrstwJN4Z3pq/s1Kn4/KQ='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. Note also that 'style-src' was not explicitly set, so 'default-src' is used as a fallback.\n",
+      "source": "backend",
+      "file": "http://192.168.3.135:8000/api/nonexistent",
+      "line": 0,
+      "stackTrace": "",
+      "assignTo": "ITSM-DevAPI",
+      "originalType": "console_error"
+    }
+  ],
+  "lastUpdate": "2025-08-02T04:25:08.531570+00:00"
 }
