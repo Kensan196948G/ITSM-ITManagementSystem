@@ -128,6 +128,14 @@ jobs:
             print("⚠️ Excessive failures detected - potential system instability")
             print("Monitoring frequency will be reduced for next cycle")
         
+        # Success indicator for workflow
+        print("🎯 Monitor execution completed successfully")
+        print(f"✨ Exit status: 0 (Success)")
+        
+        # Explicit success exit
+        import sys
+        sys.exit(0)
+        
         EOF
 
     - name: Trigger Local Repair Integration
@@ -157,20 +165,23 @@ jobs:
         echo "Workflow: ${{ github.event.workflow_run.name }}"
         echo "Status: ${{ github.event.workflow_run.conclusion }}"
 
-    - name: Auto-commit monitoring data
+    - name: Store monitoring data as artifact
+      if: success()
+      uses: actions/upload-artifact@v3
+      with:
+        name: github-actions-monitor-report
+        path: |
+          coordination/github_actions_monitor_report.json
+          coordination/github_actions_repair_trigger.json
+        retention-days: 7
+        
+    - name: Log monitoring summary
       if: success()
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        
-        if [[ -n $(git status --porcelain) ]]; then
-          git add coordination/
-          git commit -m "🤖 GitHub Actions Monitor: Auto-update $(date -u +%Y-%m-%d\ %H:%M:%S\ UTC)"
-          git push
-          echo "✅ Monitoring data committed and pushed"
-        else
-          echo "ℹ️ No changes to commit"
-        fi
+        echo "✅ GitHub Actions monitoring completed successfully"
+        echo "📊 Report stored as workflow artifact"
+        echo "🔄 Local repair triggers created if needed"
+        echo "ℹ️ Monitoring data available for $(date -u +%Y-%m-%d\ %H:%M:%S\ UTC)"
 
     - name: Create Issue for Critical Failures
       if: |

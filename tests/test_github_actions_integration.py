@@ -36,7 +36,8 @@ class TestGitHubActionsIntegration:
         """ワークフローの基本構造をテスト"""
         assert "name" in workflow_content
         assert workflow_content["name"] == "GitHub Actions Integration Monitor"
-        assert "on" in workflow_content
+        # YAMLの'on'がTrueとしてパースされるケースを考慮
+        assert True in workflow_content or "on" in workflow_content
         assert "jobs" in workflow_content
         assert "monitor-workflows" in workflow_content["jobs"]
     
@@ -118,7 +119,8 @@ class TestGitHubActionsIntegration:
     
     def test_workflow_trigger_conditions(self, workflow_content):
         """ワークフロートリガー条件のテスト"""
-        triggers = workflow_content["on"]
+        # YAMLパースによりTrueキーになっている場合を対応
+        triggers = workflow_content.get(True, workflow_content.get("on", {}))
         
         # 適切なトリガー条件が設定されていることを確認
         assert "workflow_run" in triggers
