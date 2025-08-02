@@ -1,29 +1,13 @@
-import { defineConfig, loadEnv } from 'vite'
+import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { visualizer } from 'rollup-plugin-visualizer'
 import { resolve } from 'path'
 
-export default defineConfig(({ command, mode }) => {
-  const env = loadEnv(mode, process.cwd(), '')
-  
-  return {
-    plugins: [
-      react({
-        // React Refresh for faster development
-        fastRefresh: true,
-        // Optimize JSX transform
-        jsxRuntime: 'automatic',
-      }),
-      // Bundle analyzer (only in analyze mode)
-      ...(env.ANALYZE === 'true' ? [
-        visualizer({
-          filename: 'dist/stats.html',
-          open: true,
-          gzipSize: true,
-          brotliSize: true,
-        })
-      ] : []),
-    ],
+export default defineConfig({
+  plugins: [
+    react({
+      jsxRuntime: 'automatic',
+    }),
+  ],
     
     server: {
       port: 3000,
