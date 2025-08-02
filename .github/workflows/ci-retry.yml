@@ -50,6 +50,7 @@ jobs:
   analyze-failure:
     name: Analyze CI Failure & Plan Repair
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: write
       actions: read
