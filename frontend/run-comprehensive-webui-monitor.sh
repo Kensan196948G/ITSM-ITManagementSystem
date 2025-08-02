@@ -1,20 +1,22 @@
 #!/bin/bash
 
-# 包括的WebUIエラー監視・修復システム実行スクリプト
+# MCP Playwright WebUI 包括的監視・修復システム実行スクリプト
 # http://192.168.3.135:3000 と http://192.168.3.135:3000/admin の完全自動監視・修復
 
 set -e
 
-echo "🚀 包括的WebUIエラー監視・修復システムを開始します..."
+echo "🚀 MCP Playwright WebUI 包括的監視・修復システムを開始します..."
 
 # プロジェクトディレクトリに移動
 cd "$(dirname "$0")"
 
-# 色付きログ関数
+# 色付きログ関数（拡張版）
 log_info() { echo -e "\033[0;32m[INFO]\033[0m $1"; }
 log_warn() { echo -e "\033[0;33m[WARN]\033[0m $1"; }
 log_error() { echo -e "\033[0;31m[ERROR]\033[0m $1"; }
 log_step() { echo -e "\033[0;36m[STEP]\033[0m $1"; }
+log_success() { echo -e "\033[0;32m[SUCCESS]\033[0m $1"; }
+log_critical() { echo -e "\033[1;31m[CRITICAL]\033[0m $1"; }
 
 # エラーハンドリング
 handle_error() {
@@ -78,16 +80,19 @@ install_dependencies() {
     log_info "✅ 依存関係の準備完了"
 }
 
-# TypeScriptコンパイル関数
+# TypeScriptコンパイル関数（MCP Playwright対応）
 compile_typescript() {
-    log_step "TypeScriptファイルをコンパイル中..."
+    log_step "MCP Playwright TypeScriptファイルをコンパイル中..."
     
-    # 個別にコンパイル（エラーを継続）
+    # 新しいMCP Playwrightファイルを含める
     local compile_files=(
+        "mcp-webui-error-monitor.ts"
+        "webui-auto-repair.ts"
+        "admin-dashboard-monitor.ts"
+        "comprehensive-webui-monitor.ts"
         "webui-error-monitor.ts"
         "component-error-fixer.ts"
         "ui-error-detector.ts"
-        "comprehensive-webui-monitor.ts"
     )
     
     for file in "${compile_files[@]}"; do
@@ -103,7 +108,7 @@ compile_typescript() {
         fi
     done
     
-    log_info "✅ TypeScriptコンパイル完了"
+    log_success "✅ MCP Playwright TypeScriptコンパイル完了"
 }
 
 # WebUIサーバー確認関数
