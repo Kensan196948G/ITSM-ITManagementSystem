@@ -13,6 +13,12 @@ from pydantic import BaseModel, Field
 
 from app.core.security import get_current_user
 from app.core.exceptions import ITSMException
+from app.core.cicd_security import (
+    verify_api_authentication, 
+    check_ci_permissions, 
+    check_rate_limit_middleware,
+    security_manager
+)
 from app.models.user import User
 from app.core.config import settings
 
