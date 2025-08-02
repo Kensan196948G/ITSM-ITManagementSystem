@@ -1,0 +1,31 @@
+{
+  "timestamp": "2025-08-02T12:00:36.914627",
+  "monitoring_status": {
+    "is_monitoring": true,
+    "uptime_hours": -2.7777777777777777e-10
+  },
+  "error_metrics": {
+    "total_errors": 0,
+    "error_categories": {},
+    "error_severities": {},
+    "fix_success_rate": 0
+  },
+  "security_metrics": {
+    "total_alerts": 0,
+    "blocked_ips": 0,
+    "suspicious_ips": 0,
+    "alert_types": {}
+  },
+  "performance_metrics": {
+    "avg_response_time": 0.024443626403808594,
+    "max_response_time": 0.03147077560424805,
+    "current_cpu_usage": 85.1,
+    "current_memory_usage": 60.0
+  },
+  "database_health": {
+    "is_healthy": true,
+    "size_mb": 0.25,
+    "integrity_status": "ok"
+  },
+  "health_status": "unhealthy"
+}
