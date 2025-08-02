@@ -982,5 +982,17 @@
     "cpuLoad": 0.775,
     "platform": "linux",
     "uptime": 125847.25
+  },
+  {
+    "timestamp": 1754129251543,
+    "memoryTotal": 8236572672,
+    "memoryUsed": 3697995776,
+    "memoryFree": 4538576896,
+    "memoryUsagePercent": 44.897263986648646,
+    "memoryEfficiency": 55.102736013351354,
+    "cpuCount": 4,
+    "cpuLoad": 0.7175,
+    "platform": "linux",
+    "uptime": 125877.28
   }
 ]
