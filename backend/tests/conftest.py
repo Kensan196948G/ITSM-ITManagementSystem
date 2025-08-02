@@ -21,6 +21,12 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 import os
 from unittest.mock import Mock
 
+# Set test environment variables before importing application
+os.environ["TESTING"] = "true"
+os.environ["REDIS_URL"] = "redis://localhost:6379/1"  # Use test Redis DB
+os.environ["DATABASE_URL"] = "sqlite:///./test.db"
+os.environ["ASYNC_DATABASE_URL"] = "sqlite+aiosqlite:///./test_async.db"
+
 # Create a minimal test FastAPI app
 import sys
 sys.path.insert(0, '/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/backend')
@@ -120,13 +126,9 @@ def client(db_session) -> Generator[TestClient, None, None]:
     if hasattr(app, 'dependency_overrides') and get_db:
         app.dependency_overrides[get_db] = override_get_db
     
-    # Create TestClient with correct syntax for different versions
-    try:
-        # Try new syntax first
-        test_client = TestClient(app=app)
-    except TypeError:
-        # Fall back to older syntax
-        test_client = TestClient(app)
+    # Create TestClient using the correct import and syntax
+    from starlette.testclient import TestClient as StarletteTestClient
+    test_client = StarletteTestClient(app)
     
     try:
         yield test_client
