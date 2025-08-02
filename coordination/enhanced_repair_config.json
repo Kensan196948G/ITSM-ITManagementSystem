@@ -1,0 +1,38 @@
+{
+  "monitoring": {
+    "poll_interval": 30,
+    "max_concurrent_repairs": 3,
+    "retry_delay": 60,
+    "health_check_interval": 300
+  },
+  "repair": {
+    "max_repair_cycles": 15,
+    "confidence_threshold": 0.75,
+    "timeout_seconds": 600,
+    "max_file_changes": 10
+  },
+  "security": {
+    "manual_approval_threshold": "medium",
+    "isolation_branch_prefix": "claude-autofix",
+    "require_review_for_critical": true,
+    "backup_before_repair": true
+  },
+  "claude_flow": {
+    "command": "npx claude-flow@alpha mcp start",
+    "timeout": 300,
+    "auto_mode": true,
+    "max_tokens": 8192
+  },
+  "github": {
+    "auto_merge_threshold": 0.9,
+    "pr_template_path": ".github/pull_request_template.md",
+    "required_checks": ["CI", "Tests"],
+    "auto_assign_reviewers": true
+  },
+  "quality_gates": {
+    "required_clean_cycles": 3,
+    "test_pass_requirement": true,
+    "lint_pass_requirement": true,
+    "coverage_threshold": 0.8
+  }
+}

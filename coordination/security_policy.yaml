@@ -1,0 +1,162 @@
+# GitHub Actions 自動修復システム セキュリティポリシー
+
+security_levels:
+  critical:
+    description: "セキュリティクリティカル - 必ず手動承認"
+    auto_approve: false
+    require_review: true
+    max_file_changes: 1
+    patterns:
+      - "backend/app/core/security.py"
+      - "backend/app/core/config.py"
+      - "backend/app/api/deps.py"
+      - ".env*"
+      - "docker-compose*.yml"
+    
+  high:
+    description: "高リスク - 慎重な審査が必要"
+    auto_approve: false
+    require_review: true
+    max_file_changes: 3
+    patterns:
+      - ".github/workflows/"
+      - "requirements.txt"
+      - "package.json"
+      - "backend/app/models/"
+      - "backend/app/db/"
+    
+  medium:
+    description: "中リスク - 条件付き自動承認"
+    auto_approve: true
+    confidence_threshold: 0.8
+    max_file_changes: 5
+    patterns:
+      - "backend/app/api/"
+      - "backend/app/services/"
+      - "frontend/src/"
+      - "tests/"
+    
+  low:
+    description: "低リスク - 自動承認可能"
+    auto_approve: true
+    confidence_threshold: 0.6
+    max_file_changes: 10
+    patterns:
+      - "docs/"
+      - "*.md"
+      - "*.txt"
+      - "backend/logs/"
+
+# 禁止パターン
+forbidden_patterns:
+  dangerous_commands:
+    - "rm -rf"
+    - "sudo"
+    - "chmod 777"
+    - "--force"
+    - "DROP TABLE"
+    - "DELETE FROM"
+  
+  sensitive_data:
+    - "password"
+    - "secret"
+    - "token"
+    - "api_key"
+    - "private_key"
+  
+  security_bypass:
+    - "disable_security"
+    - "skip_auth"
+    - "bypass_validation"
+    - "ignore_ssl"
+
+# 自動承認ルール
+auto_approval_rules:
+  dependency_updates:
+    enabled: true
+    patterns:
+      - "pip install"
+      - "npm install"
+      - "requirements.txt"
+      - "package.json"
+    conditions:
+      - security_level: "medium"
+      - max_changes: 3
+      - no_critical_files: true
+  
+  test_fixes:
+    enabled: true
+    patterns:
+      - "test_*.py"
+      - "*.test.ts"
+      - "*.spec.ts"
+    conditions:
+      - security_level: "low"
+      - max_changes: 5
+      - test_directory_only: true
+  
+  documentation_updates:
+    enabled: true
+    patterns:
+      - "*.md"
+      - "docs/"
+      - "README*"
+    conditions:
+      - security_level: "low"
+      - no_code_changes: true
+
+# 品質ゲート
+quality_gates:
+  required_checks:
+    - "lint_pass"
+    - "test_pass"
+    - "security_scan_pass"
+    - "no_secrets_detected"
+  
+  coverage_requirements:
+    minimum_coverage: 0.8
+    allow_coverage_decrease: false
+    max_coverage_drop: 0.05
+  
+  performance_thresholds:
+    max_build_time: 600  # 10分
+    max_test_time: 300   # 5分
+    max_deploy_time: 180 # 3分
+
+# 通知設定
+notifications:
+  critical_repairs:
+    slack_webhook: "${SLACK_WEBHOOK_URL}"
+    teams_webhook: "${TEAMS_WEBHOOK_URL}"
+    email_recipients:
+      - "admin@example.com"
+      - "security@example.com"
+  
+  failed_repairs:
+    slack_channel: "#ci-cd-alerts"
+    include_logs: true
+    max_log_lines: 50
+  
+  successful_repairs:
+    slack_channel: "#ci-cd-success"
+    include_summary: true
+
+# バックアップ設定
+backup:
+  enabled: true
+  retention_days: 30
+  storage_path: "coordination/backups"
+  compression: true
+  exclude_patterns:
+    - "*.log"
+    - "node_modules/"
+    - "__pycache__/"
+    - ".git/"
+
+# 監査ログ
+audit:
+  enabled: true
+  log_level: "INFO"
+  log_file: "coordination/logs/audit.log"
+  include_diffs: true
+  retention_days: 90
