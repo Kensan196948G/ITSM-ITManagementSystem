@@ -287,7 +287,8 @@ class InfiniteLoopMonitor:
                 "python-json-logger>=2.0.7",
                 "aiosqlite>=0.19.0",
                 "jinja2>=3.1.2",
-                "factory-boy>=3.3.0"
+                "factory-boy>=3.3.0",
+                "python-magic"
             ]
             
             for req in test_requirements:
