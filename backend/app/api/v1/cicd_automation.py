@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 import httpx
 from pydantic import BaseModel, Field
 
-from app.core.security import get_current_user
+from app.api.deps import get_current_user
 from app.core.exceptions import ITSMException
 from app.core.cicd_security import (
     verify_api_authentication,
