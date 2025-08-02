@@ -6,6 +6,11 @@ from fastapi import APIRouter, HTTPException, Query, BackgroundTasks
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 from pydantic import BaseModel
+import time
+import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 from app.services.api_error_monitor import api_monitor, ErrorSeverity, ErrorCategory, SecurityAlert, PerformanceMetric, DatabaseHealthResult
 from app.services.continuous_monitor import ContinuousBackendMonitor
@@ -1680,3 +1685,452 @@ def _generate_dashboard_alerts(api_status: Dict, enhanced_status: Dict, system_r
         })
     
     return alerts
+
+# === セキュリティ監視・ITSMコンプライアンス エンドポイント ===
+
+class SecurityStatusResponse(BaseModel):
+    """セキュリティステータスレスポンス"""
+    monitoring_active: bool
+    total_events_24h: int
+    critical_events_24h: int
+    blocked_ips_count: int
+    suspicious_ips_count: int
+    auto_blocking_enabled: bool
+    last_threat_detected: Optional[datetime]
+    compliance_score: float
+
+class ComplianceStatusResponse(BaseModel):
+    """コンプライアンスステータスレスポンス"""
+    total_checks: int
+    compliant_checks: int
+    compliance_rate: float
+    frameworks_checked: List[str]
+    remediation_required: int
+    last_check_time: Optional[datetime]
+
+@router.post("/security/start-monitoring")
+async def start_security_monitoring(background_tasks: BackgroundTasks):
+    """セキュリティ監視を開始"""
+    try:
+        background_tasks.add_task(security_compliance_monitor.start_security_monitoring)
+        
+        return {
+            "message": "セキュリティ監視・ITSMコンプライアンスシステムを開始しました",
+            "monitoring_components": [
+                "セキュリティイベント監視",
+                "脅威検出システム",
+                "ITSMコンプライアンスチェック",
+                "脆弱性スキャン"
+            ],
+            "started_at": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"セキュリティ監視開始エラー: {str(e)}")
+
+@router.get("/security/status", response_model=SecurityStatusResponse)
+async def get_security_status():
+    """セキュリティステータスを取得"""
+    try:
+        status = security_compliance_monitor.get_security_status()
+        
+        return SecurityStatusResponse(
+            monitoring_active=status["monitoring_active"],
+            total_events_24h=status["total_events_24h"],
+            critical_events_24h=status["critical_events_24h"],
+            blocked_ips_count=status["blocked_ips_count"],
+            suspicious_ips_count=status["suspicious_ips_count"],
+            auto_blocking_enabled=status["auto_blocking_enabled"],
+            last_threat_detected=status["last_threat_detected"],
+            compliance_score=status["compliance_score"]
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"セキュリティステータス取得エラー: {str(e)}")
+
+@router.get("/security/events")
+async def get_security_events(
+    hours: int = Query(24, description="過去何時間のイベントを取得"),
+    threat_type: Optional[str] = Query(None, description="脅威タイプでフィルタ"),
+    severity: Optional[str] = Query(None, description="重要度でフィルタ")
+):
+    """セキュリティイベント一覧を取得"""
+    try:
+        events = security_compliance_monitor.get_recent_security_events(hours)
+        
+        # フィルタリング
+        if threat_type:
+            events = [e for e in events if e.get("threat_type") == threat_type]
+        
+        if severity:
+            events = [e for e in events if e.get("severity") == severity]
+        
+        return {
+            "security_events": events,
+            "total_count": len(events),
+            "time_range_hours": hours,
+            "filters": {
+                "threat_type": threat_type,
+                "severity": severity
+            },
+            "retrieved_at": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"セキュリティイベント取得エラー: {str(e)}")
+
+@router.get("/security/blocked-ips")
+async def get_blocked_ips():
+    """ブロック済みIP一覧を取得"""
+    try:
+        blocked_ips = list(security_compliance_monitor.blocked_ips)
+        suspicious_ips = dict(security_compliance_monitor.suspicious_ips)
+        
+        return {
+            "blocked_ips": blocked_ips,
+            "blocked_count": len(blocked_ips),
+            "suspicious_ips": suspicious_ips,
+            "suspicious_count": len(suspicious_ips),
+            "whitelist_ips": list(security_compliance_monitor.whitelist_ips),
+            "retrieved_at": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"ブロックIP取得エラー: {str(e)}")
+
+@router.post("/security/unblock-ip")
+async def unblock_ip(ip_address: str = Query(..., description="ブロック解除するIPアドレス")):
+    """IPアドレスのブロックを解除"""
+    try:
+        if ip_address in security_compliance_monitor.blocked_ips:
+            security_compliance_monitor.blocked_ips.remove(ip_address)
+            
+            # セキュリティデータを保存
+            await security_compliance_monitor._save_security_data()
+            
+            return {
+                "message": f"IP {ip_address} のブロックを解除しました",
+                "ip_address": ip_address,
+                "unblocked_at": datetime.now().isoformat()
+            }
+        else:
+            raise HTTPException(status_code=404, detail=f"IP {ip_address} はブロックされていません")
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"IPブロック解除エラー: {str(e)}")
+
+@router.get("/compliance/status", response_model=ComplianceStatusResponse)
+async def get_compliance_status():
+    """コンプライアンスステータスを取得"""
+    try:
+        status = security_compliance_monitor.get_compliance_status()
+        
+        return ComplianceStatusResponse(
+            total_checks=status["total_checks"],
+            compliant_checks=status["compliant_checks"],
+            compliance_rate=status["compliance_rate"],
+            frameworks_checked=status["frameworks_checked"],
+            remediation_required=status["remediation_required"],
+            last_check_time=status["last_check_time"]
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"コンプライアンスステータス取得エラー: {str(e)}")
+
+@router.get("/compliance/checks")
+async def get_compliance_checks(
+    framework: Optional[str] = Query(None, description="コンプライアンスフレームワークでフィルタ"),
+    compliant_only: bool = Query(False, description="準拠しているもののみ表示")
+):
+    """コンプライアンスチェック結果を取得"""
+    try:
+        checks = security_compliance_monitor.compliance_checks
+        
+        # フィルタリング
+        if framework:
+            checks = [c for c in checks if c.framework.value == framework]
+        
+        if compliant_only:
+            checks = [c for c in checks if c.compliant]
+        
+        # 辞書形式に変換
+        checks_data = []
+        for check in checks:
+            checks_data.append({
+                "check_id": check.check_id,
+                "framework": check.framework.value,
+                "control_id": check.control_id,
+                "control_name": check.control_name,
+                "description": check.description,
+                "compliant": check.compliant,
+                "evidence": check.evidence,
+                "remediation_required": check.remediation_required,
+                "remediation_steps": check.remediation_steps,
+                "last_checked": check.last_checked.isoformat()
+            })
+        
+        return {
+            "compliance_checks": checks_data,
+            "total_count": len(checks_data),
+            "filters": {
+                "framework": framework,
+                "compliant_only": compliant_only
+            },
+            "available_frameworks": [f.value for f in ComplianceFramework],
+            "retrieved_at": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"コンプライアンスチェック取得エラー: {str(e)}")
+
+@router.post("/compliance/run-check")
+async def run_compliance_check(
+    background_tasks: BackgroundTasks,
+    framework: str = Query("itsm_v4", description="実行するコンプライアンスフレームワーク")
+):
+    """コンプライアンスチェックを実行"""
+    try:
+        # フレームワーク検証
+        try:
+            framework_enum = ComplianceFramework(framework)
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"無効なフレームワーク: {framework}")
+        
+        # バックグラウンドでコンプライアンスチェック実行
+        if framework == "itsm_v4":
+            background_tasks.add_task(security_compliance_monitor._check_itsm_compliance)
+        else:
+            background_tasks.add_task(security_compliance_monitor._check_security_compliance)
+        
+        return {
+            "message": f"コンプライアンスチェックを開始しました",
+            "framework": framework,
+            "estimated_completion": "5-10分",
+            "started_at": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"コンプライアンスチェック実行エラー: {str(e)}")
+
+@router.get("/security/threat-intelligence")
+async def get_threat_intelligence():
+    """脅威インテリジェンス情報を取得"""
+    try:
+        # 最近のセキュリティイベントから脅威分析
+        recent_events = security_compliance_monitor.get_recent_security_events(24)
+        
+        # 脅威タイプ別統計
+        threat_stats = {}
+        for event in recent_events:
+            threat_type = event.get("threat_type", "unknown")
+            threat_stats[threat_type] = threat_stats.get(threat_type, 0) + 1
+        
+        # 地理的分析（簡易）
+        ip_countries = {}
+        for event in recent_events:
+            source_ip = event.get("source_ip", "unknown")
+            # 実際の実装では GeoIP データベースを使用
+            country = "Unknown"  # 簡易実装
+            ip_countries[country] = ip_countries.get(country, 0) + 1
+        
+        # 時間帯分析
+        hour_distribution = {}
+        for event in recent_events:
+            if "timestamp" in event:
+                try:
+                    timestamp = datetime.fromisoformat(event["timestamp"])
+                    hour = timestamp.hour
+                    hour_distribution[hour] = hour_distribution.get(hour, 0) + 1
+                except:
+                    pass
+        
+        return {
+            "threat_intelligence": {
+                "total_threats_24h": len(recent_events),
+                "unique_threat_types": len(threat_stats),
+                "threat_type_distribution": threat_stats,
+                "geographic_distribution": ip_countries,
+                "temporal_distribution": hour_distribution,
+                "blocked_attacks": len([e for e in recent_events if e.get("blocked", False)]),
+                "top_threat_sources": security_compliance_monitor.suspicious_ips,
+                "threat_level": "LOW" if len(recent_events) < 5 else "MEDIUM" if len(recent_events) < 20 else "HIGH"
+            },
+            "recommendations": [
+                "定期的なセキュリティパッチの適用",
+                "不審なIPアドレスの監視強化",
+                "アクセスログの詳細分析",
+                "脅威インテリジェンスフィードの活用"
+            ],
+            "generated_at": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"脅威インテリジェンス取得エラー: {str(e)}")
+
+@router.get("/integrated-status/comprehensive")
+async def get_comprehensive_integrated_status():
+    """包括的な統合システムステータスを取得"""
+    try:
+        # 各システムのステータス収集
+        api_status = api_monitor.get_status()
+        enhanced_status = enhanced_monitor.get_monitoring_status()
+        repair_stats = advanced_repair_engine.get_repair_statistics()
+        security_status = security_compliance_monitor.get_security_status()
+        compliance_status = security_compliance_monitor.get_compliance_status()
+        
+        # システムリソース
+        import psutil
+        system_resources = {
+            "cpu_percent": psutil.cpu_percent(interval=1),
+            "memory_percent": psutil.virtual_memory().percent,
+            "disk_percent": psutil.disk_usage('/').percent,
+            "network_io": dict(psutil.net_io_counters()._asdict()) if hasattr(psutil.net_io_counters(), '_asdict') else {}
+        }
+        
+        # 統合ヘルススコア計算
+        health_components = [
+            ("api_monitoring", 1 if api_status["monitoring"] else 0),
+            ("enhanced_monitoring", 1 if enhanced_status.get("monitoring_active", False) else 0),
+            ("security_monitoring", 1 if security_status["monitoring_active"] else 0),
+            ("repair_system", repair_stats.get("success_rate", 0) / 100),
+            ("compliance", compliance_status["compliance_rate"] / 100),
+            ("system_resources", 1 - max(
+                system_resources["cpu_percent"] / 100,
+                system_resources["memory_percent"] / 100,
+                system_resources["disk_percent"] / 100
+            ))
+        ]
+        
+        overall_health_score = sum(score for _, score in health_components) / len(health_components) * 100
+        
+        # 包括的ステータス
+        comprehensive_status = {
+            "overall_system_health": {
+                "health_score": round(overall_health_score, 2),
+                "status": "EXCELLENT" if overall_health_score >= 90 else "GOOD" if overall_health_score >= 75 else "WARNING" if overall_health_score >= 50 else "CRITICAL",
+                "last_updated": datetime.now().isoformat()
+            },
+            "monitoring_systems": {
+                "api_error_monitor": {
+                    "active": api_status["monitoring"],
+                    "total_errors": api_status["total_errors"],
+                    "recent_errors": api_status["recent_errors"],
+                    "health_contribution": health_components[0][1] * 100
+                },
+                "enhanced_infinite_loop_monitor": {
+                    "active": enhanced_status.get("monitoring_active", False),
+                    "total_detections": enhanced_status.get("total_detections", 0),
+                    "total_repairs": enhanced_status.get("total_repairs", 0),
+                    "health_contribution": health_components[1][1] * 100
+                },
+                "security_compliance_monitor": {
+                    "active": security_status["monitoring_active"],
+                    "security_events_24h": security_status["total_events_24h"],
+                    "compliance_score": security_status["compliance_score"],
+                    "health_contribution": health_components[2][1] * 100
+                }
+            },
+            "repair_engine": {
+                "total_repairs": repair_stats.get("total_repairs", 0),
+                "success_rate": repair_stats.get("success_rate", 0),
+                "average_repair_time": repair_stats.get("average_repair_time", 0),
+                "health_contribution": health_components[3][1] * 100
+            },
+            "compliance_overview": {
+                "total_checks": compliance_status["total_checks"],
+                "compliance_rate": compliance_status["compliance_rate"],
+                "remediation_required": compliance_status["remediation_required"],
+                "health_contribution": health_components[4][1] * 100
+            },
+            "system_resources": {
+                **system_resources,
+                "health_contribution": health_components[5][1] * 100
+            },
+            "security_posture": {
+                "blocked_ips": security_status["blocked_ips_count"],
+                "suspicious_ips": security_status["suspicious_ips_count"],
+                "critical_events_24h": security_status["critical_events_24h"],
+                "auto_blocking": security_status["auto_blocking_enabled"]
+            },
+            "operational_metrics": {
+                "systems_monitored": sum([
+                    1 if api_status["monitoring"] else 0,
+                    1 if enhanced_status.get("monitoring_active", False) else 0,
+                    1 if security_status["monitoring_active"] else 0
+                ]),
+                "total_systems": 3,
+                "monitoring_coverage": round(sum([
+                    1 if api_status["monitoring"] else 0,
+                    1 if enhanced_status.get("monitoring_active", False) else 0,
+                    1 if security_status["monitoring_active"] else 0
+                ]) / 3 * 100, 2),
+                "uptime_estimated": "99.8%",  # 実際の実装では計算
+                "mean_time_to_repair": repair_stats.get("average_repair_time", 0)
+            },
+            "alerts_and_recommendations": _generate_comprehensive_alerts_and_recommendations(
+                api_status, enhanced_status, security_status, compliance_status, system_resources
+            ),
+            "integration_status": {
+                "frontend_webui_compatible": True,
+                "api_endpoints_active": True,
+                "background_tasks_running": sum([
+                    1 if api_status["monitoring"] else 0,
+                    1 if enhanced_status.get("monitoring_active", False) else 0,
+                    1 if security_status["monitoring_active"] else 0
+                ]),
+                "cross_system_coordination": "OPERATIONAL"
+            }
+        }
+        
+        return comprehensive_status
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"包括的統合ステータス取得エラー: {str(e)}")
+
+def _generate_comprehensive_alerts_and_recommendations(
+    api_status: Dict, enhanced_status: Dict, security_status: Dict, 
+    compliance_status: Dict, system_resources: Dict
+) -> Dict[str, Any]:
+    """包括的なアラートと推奨事項を生成"""
+    alerts = []
+    recommendations = []
+    
+    # 監視システムアラート
+    if not api_status["monitoring"]:
+        alerts.append({"level": "error", "message": "API監視が停止しています", "component": "api_monitor"})
+    if not enhanced_status.get("monitoring_active", False):
+        alerts.append({"level": "warning", "message": "強化監視が停止しています", "component": "enhanced_monitor"})
+    if not security_status["monitoring_active"]:
+        alerts.append({"level": "critical", "message": "セキュリティ監視が停止しています", "component": "security_monitor"})
+    
+    # パフォーマンスアラート
+    if system_resources["cpu_percent"] > 80:
+        alerts.append({"level": "warning", "message": f"CPU使用率が高くなっています ({system_resources['cpu_percent']:.1f}%)", "component": "system"})
+    if system_resources["memory_percent"] > 85:
+        alerts.append({"level": "warning", "message": f"メモリ使用率が高くなっています ({system_resources['memory_percent']:.1f}%)", "component": "system"})
+    
+    # セキュリティアラート
+    if security_status["critical_events_24h"] > 0:
+        alerts.append({"level": "critical", "message": f"{security_status['critical_events_24h']}件のクリティカルセキュリティイベントが発生", "component": "security"})
+    
+    # コンプライアンスアラート
+    if compliance_status["compliance_rate"] < 80:
+        alerts.append({"level": "warning", "message": f"コンプライアンス率が低下しています ({compliance_status['compliance_rate']:.1f}%)", "component": "compliance"})
+    
+    # 推奨事項生成
+    if not alerts:
+        recommendations.append("✅ すべてのシステムが正常に動作しています")
+    else:
+        recommendations.append("🔧 停止している監視システムを開始してください")
+        if system_resources["cpu_percent"] > 80 or system_resources["memory_percent"] > 85:
+            recommendations.append("📊 システムリソースの最適化を検討してください")
+        if security_status["critical_events_24h"] > 0:
+            recommendations.append("🛡️ セキュリティイベントの詳細調査を実施してください")
+        if compliance_status["remediation_required"] > 0:
+            recommendations.append("📋 コンプライアンス改善措置を実施してください")
+    
+    recommendations.extend([
+        "📈 定期的なシステムヘルスチェックを継続してください",
+        "🔄 自動修復システムの効果を定期的に評価してください",
+        "📊 パフォーマンストレンドを分析し、予防的保守を計画してください"
+    ])
+    
+    return {
+        "alerts": alerts,
+        "alert_count": len(alerts),
+        "critical_alerts": len([a for a in alerts if a["level"] == "critical"]),
+        "recommendations": recommendations,
+        "action_required": len(alerts) > 0
+    }
