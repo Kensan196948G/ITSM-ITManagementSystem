@@ -16,143 +16,155 @@ import time
 import random
 import math
 
+
 class EnterpriseITSMDashboard:
     """企業レベル ITSM統合ダッシュボード"""
-    
+
     def __init__(self):
         self.base_dir = Path.cwd()
         self.reports_dir = self.base_dir / "enterprise-dashboard-reports"
         self.coordination_dir = self.base_dir / "coordination"
         self.validation_dir = self.base_dir / "validation-reports"
-        
+
         # 出力ディレクトリの作成
         self.reports_dir.mkdir(exist_ok=True)
-        
+
         # システムURL設定
         self.urls = {
-            'webui': 'http://192.168.3.135:3000',
-            'api': 'http://192.168.3.135:8000',
-            'admin': 'http://192.168.3.135:3000/admin',
-            'docs': 'http://192.168.3.135:8000/docs'
+            "webui": "http://192.168.3.135:3000",
+            "api": "http://192.168.3.135:8000",
+            "admin": "http://192.168.3.135:3000/admin",
+            "docs": "http://192.168.3.135:8000/docs",
         }
-        
+
         # SLA基準設定
         self.sla_targets = {
-            'availability': 99.9,      # 可用性目標 99.9%
-            'response_time': 2.0,      # 応答時間目標 2秒以下
-            'error_rate': 0.1,         # エラー率目標 0.1%以下
-            'resolution_time': 240     # インシデント解決時間目標 4時間以内
+            "availability": 99.9,  # 可用性目標 99.9%
+            "response_time": 2.0,  # 応答時間目標 2秒以下
+            "error_rate": 0.1,  # エラー率目標 0.1%以下
+            "resolution_time": 240,  # インシデント解決時間目標 4時間以内
         }
-        
+
         # ビジネス指標設定
         self.business_metrics = {
-            'user_satisfaction': 4.5,  # ユーザー満足度目標 4.5/5.0
-            'cost_per_incident': 500,  # インシデント当たりコスト目標
-            'automation_rate': 80,     # 自動化率目標 80%
-            'compliance_score': 95     # コンプライアンススコア目標 95%
+            "user_satisfaction": 4.5,  # ユーザー満足度目標 4.5/5.0
+            "cost_per_incident": 500,  # インシデント当たりコスト目標
+            "automation_rate": 80,  # 自動化率目標 80%
+            "compliance_score": 95,  # コンプライアンススコア目標 95%
         }
-    
+
     def collect_comprehensive_metrics(self) -> Dict[str, Any]:
         """包括的メトリクス収集"""
         print("📊 包括的システム・ビジネス メトリクス収集中...")
-        
+
         metrics = {
-            'timestamp': datetime.now().isoformat(),
-            'system_performance': self._get_system_performance(),
-            'infinite_loop_state': self._get_infinite_loop_state(),
-            'url_health': self._check_url_health(),
-            'sla_metrics': self._calculate_sla_metrics(),
-            'business_metrics': self._calculate_business_metrics(),
-            'incident_analytics': self._analyze_incidents(),
-            'capacity_planning': self._analyze_capacity(),
-            'security_posture': self._assess_security(),
-            'compliance_status': self._check_compliance(),
-            'user_experience': self._measure_user_experience(),
-            'financial_metrics': self._calculate_financial_metrics()
+            "timestamp": datetime.now().isoformat(),
+            "system_performance": self._get_system_performance(),
+            "infinite_loop_state": self._get_infinite_loop_state(),
+            "url_health": self._check_url_health(),
+            "sla_metrics": self._calculate_sla_metrics(),
+            "business_metrics": self._calculate_business_metrics(),
+            "incident_analytics": self._analyze_incidents(),
+            "capacity_planning": self._analyze_capacity(),
+            "security_posture": self._assess_security(),
+            "compliance_status": self._check_compliance(),
+            "user_experience": self._measure_user_experience(),
+            "financial_metrics": self._calculate_financial_metrics(),
         }
-        
+
         return metrics
-    
+
     def _get_infinite_loop_state(self) -> Dict[str, Any]:
         """無限ループ状態の取得"""
         state_file = self.coordination_dir / "infinite_loop_state.json"
         if state_file.exists():
             try:
-                with open(state_file, 'r', encoding='utf-8') as f:
+                with open(state_file, "r", encoding="utf-8") as f:
                     return json.load(f)
             except Exception as e:
                 print(f"⚠️ 無限ループ状態読み込みエラー: {e}")
         return {}
-    
+
     def _get_system_performance(self) -> Dict[str, Any]:
         """システムパフォーマンス取得（強化版）"""
         try:
             # CPU使用率
-            cpu_result = subprocess.run(['top', '-bn1'], capture_output=True, text=True, timeout=5)
-            cpu_line = [line for line in cpu_result.stdout.split('\n') if 'Cpu(s)' in line]
+            cpu_result = subprocess.run(
+                ["top", "-bn1"], capture_output=True, text=True, timeout=5
+            )
+            cpu_line = [
+                line for line in cpu_result.stdout.split("\n") if "Cpu(s)" in line
+            ]
             cpu_percent = 0
             if cpu_line:
                 import re
-                match = re.search(r'(\d+\.?\d*)\s*us', cpu_line[0])
+
+                match = re.search(r"(\d+\.?\d*)\s*us", cpu_line[0])
                 if match:
                     cpu_percent = float(match.group(1))
-            
+
             # メモリ使用率
-            mem_result = subprocess.run(['free'], capture_output=True, text=True, timeout=5)
-            mem_lines = mem_result.stdout.split('\n')
+            mem_result = subprocess.run(
+                ["free"], capture_output=True, text=True, timeout=5
+            )
+            mem_lines = mem_result.stdout.split("\n")
             mem_percent = 0
             for line in mem_lines:
-                if 'Mem:' in line:
+                if "Mem:" in line:
                     parts = line.split()
                     if len(parts) >= 3:
                         total = int(parts[1])
                         used = int(parts[2])
                         mem_percent = (used / total) * 100 if total > 0 else 0
                     break
-            
+
             # ディスク使用率
-            disk_result = subprocess.run(['df', '/'], capture_output=True, text=True, timeout=5)
-            disk_lines = disk_result.stdout.split('\n')
+            disk_result = subprocess.run(
+                ["df", "/"], capture_output=True, text=True, timeout=5
+            )
+            disk_lines = disk_result.stdout.split("\n")
             disk_percent = 0
             if len(disk_lines) > 1:
                 parts = disk_lines[1].split()
                 if len(parts) >= 5:
-                    disk_percent_str = parts[4].replace('%', '')
-                    disk_percent = float(disk_percent_str) if disk_percent_str.isdigit() else 0
-            
+                    disk_percent_str = parts[4].replace("%", "")
+                    disk_percent = (
+                        float(disk_percent_str) if disk_percent_str.isdigit() else 0
+                    )
+
             # 計算されたパフォーマンススコア
             performance_score = 100 - ((cpu_percent + mem_percent + disk_percent) / 3)
-            
+
             return {
-                'cpu_percent': cpu_percent,
-                'memory_percent': mem_percent,
-                'disk_percent': disk_percent,
-                'performance_score': max(0, performance_score),
-                'load_average': self._get_load_average(),
-                'network_throughput': self._estimate_network_throughput(),
-                'timestamp': datetime.now().isoformat()
+                "cpu_percent": cpu_percent,
+                "memory_percent": mem_percent,
+                "disk_percent": disk_percent,
+                "performance_score": max(0, performance_score),
+                "load_average": self._get_load_average(),
+                "network_throughput": self._estimate_network_throughput(),
+                "timestamp": datetime.now().isoformat(),
             }
         except Exception as e:
             print(f"⚠️ システムパフォーマンス取得エラー: {e}")
             return {
-                'cpu_percent': 0,
-                'memory_percent': 0,
-                'disk_percent': 0,
-                'performance_score': 100,
-                'load_average': [0, 0, 0],
-                'network_throughput': 0,
-                'timestamp': datetime.now().isoformat()
+                "cpu_percent": 0,
+                "memory_percent": 0,
+                "disk_percent": 0,
+                "performance_score": 100,
+                "load_average": [0, 0, 0],
+                "network_throughput": 0,
+                "timestamp": datetime.now().isoformat(),
             }
-    
+
     def _get_load_average(self) -> List[float]:
         """ロードアベレージ取得"""
         try:
-            with open('/proc/loadavg', 'r') as f:
+            with open("/proc/loadavg", "r") as f:
                 load_data = f.read().strip().split()
                 return [float(load_data[0]), float(load_data[1]), float(load_data[2])]
         except:
             return [0.0, 0.0, 0.0]
-    
+
     def _estimate_network_throughput(self) -> float:
         """ネットワーク throughput推定"""
         try:
@@ -160,331 +172,381 @@ class EnterpriseITSMDashboard:
             return random.uniform(50, 100)  # Mbps
         except:
             return 0.0
-    
+
     def _check_url_health(self) -> Dict[str, Dict[str, Any]]:
         """URL健全性チェック（詳細版）"""
         health_status = {}
-        
+
         for name, url in self.urls.items():
             try:
                 start_time = time.time()
                 response = requests.get(url, timeout=10)
                 end_time = time.time()
-                
+
                 response_time = end_time - start_time
                 is_healthy = response.status_code == 200
-                
+
                 # パフォーマンス評価
                 if response_time < 1.0:
-                    performance = 'excellent'
+                    performance = "excellent"
                 elif response_time < 2.0:
-                    performance = 'good'
+                    performance = "good"
                 elif response_time < 5.0:
-                    performance = 'fair'
+                    performance = "fair"
                 else:
-                    performance = 'poor'
-                
+                    performance = "poor"
+
                 health_status[name] = {
-                    'url': url,
-                    'status_code': response.status_code,
-                    'response_time': response_time,
-                    'is_healthy': is_healthy,
-                    'performance': performance,
-                    'uptime_score': 100 if is_healthy else 0,
-                    'timestamp': datetime.now().isoformat()
+                    "url": url,
+                    "status_code": response.status_code,
+                    "response_time": response_time,
+                    "is_healthy": is_healthy,
+                    "performance": performance,
+                    "uptime_score": 100 if is_healthy else 0,
+                    "timestamp": datetime.now().isoformat(),
                 }
             except Exception as e:
                 health_status[name] = {
-                    'url': url,
-                    'status_code': 0,
-                    'response_time': None,
-                    'is_healthy': False,
-                    'performance': 'critical',
-                    'uptime_score': 0,
-                    'error': str(e),
-                    'timestamp': datetime.now().isoformat()
+                    "url": url,
+                    "status_code": 0,
+                    "response_time": None,
+                    "is_healthy": False,
+                    "performance": "critical",
+                    "uptime_score": 0,
+                    "error": str(e),
+                    "timestamp": datetime.now().isoformat(),
                 }
-        
+
         return health_status
-    
+
     def _calculate_sla_metrics(self) -> Dict[str, Any]:
         """SLA メトリクス計算"""
         url_health = self._check_url_health()
-        
+
         # 可用性計算
-        healthy_services = sum(1 for status in url_health.values() if status['is_healthy'])
+        healthy_services = sum(
+            1 for status in url_health.values() if status["is_healthy"]
+        )
         total_services = len(url_health)
-        availability = (healthy_services / total_services * 100) if total_services > 0 else 0
-        
+        availability = (
+            (healthy_services / total_services * 100) if total_services > 0 else 0
+        )
+
         # 平均応答時間計算
-        response_times = [status['response_time'] for status in url_health.values() 
-                         if status['response_time'] is not None]
-        avg_response_time = sum(response_times) / len(response_times) if response_times else 0
-        
+        response_times = [
+            status["response_time"]
+            for status in url_health.values()
+            if status["response_time"] is not None
+        ]
+        avg_response_time = (
+            sum(response_times) / len(response_times) if response_times else 0
+        )
+
         # エラー率計算
-        error_services = sum(1 for status in url_health.values() if not status['is_healthy'])
-        error_rate = (error_services / total_services * 100) if total_services > 0 else 0
-        
+        error_services = sum(
+            1 for status in url_health.values() if not status["is_healthy"]
+        )
+        error_rate = (
+            (error_services / total_services * 100) if total_services > 0 else 0
+        )
+
         # SLAスコア計算
-        availability_score = min(100, (availability / self.sla_targets['availability']) * 100)
-        response_time_score = max(0, 100 - ((avg_response_time / self.sla_targets['response_time']) * 100))
-        error_rate_score = max(0, 100 - ((error_rate / self.sla_targets['error_rate']) * 100))
-        
-        overall_sla_score = (availability_score + response_time_score + error_rate_score) / 3
-        
+        availability_score = min(
+            100, (availability / self.sla_targets["availability"]) * 100
+        )
+        response_time_score = max(
+            0, 100 - ((avg_response_time / self.sla_targets["response_time"]) * 100)
+        )
+        error_rate_score = max(
+            0, 100 - ((error_rate / self.sla_targets["error_rate"]) * 100)
+        )
+
+        overall_sla_score = (
+            availability_score + response_time_score + error_rate_score
+        ) / 3
+
         return {
-            'availability': availability,
-            'avg_response_time': avg_response_time,
-            'error_rate': error_rate,
-            'availability_score': availability_score,
-            'response_time_score': response_time_score,
-            'error_rate_score': error_rate_score,
-            'overall_sla_score': overall_sla_score,
-            'sla_status': 'excellent' if overall_sla_score >= 95 else 
-                         'good' if overall_sla_score >= 85 else 
-                         'warning' if overall_sla_score >= 70 else 'critical',
-            'targets': self.sla_targets
+            "availability": availability,
+            "avg_response_time": avg_response_time,
+            "error_rate": error_rate,
+            "availability_score": availability_score,
+            "response_time_score": response_time_score,
+            "error_rate_score": error_rate_score,
+            "overall_sla_score": overall_sla_score,
+            "sla_status": (
+                "excellent"
+                if overall_sla_score >= 95
+                else (
+                    "good"
+                    if overall_sla_score >= 85
+                    else "warning" if overall_sla_score >= 70 else "critical"
+                )
+            ),
+            "targets": self.sla_targets,
         }
-    
+
     def _calculate_business_metrics(self) -> Dict[str, Any]:
         """ビジネス メトリクス計算"""
         loop_state = self._get_infinite_loop_state()
-        
+
         # 自動化率（修復成功率から推定）
-        total_fixes = loop_state.get('total_errors_fixed', 0)
-        loop_count = loop_state.get('loop_count', 1)
+        total_fixes = loop_state.get("total_errors_fixed", 0)
+        loop_count = loop_state.get("loop_count", 1)
         automation_rate = min(100, (total_fixes / max(loop_count * 3, 1)) * 100)
-        
+
         # ユーザー満足度（システムパフォーマンスから推定）
         sys_perf = self._get_system_performance()
-        user_satisfaction = 5.0 - ((sys_perf['cpu_percent'] + sys_perf['memory_percent']) / 200 * 2)
+        user_satisfaction = 5.0 - (
+            (sys_perf["cpu_percent"] + sys_perf["memory_percent"]) / 200 * 2
+        )
         user_satisfaction = max(1.0, min(5.0, user_satisfaction))
-        
+
         # コスト効率（自動修復による推定削減）
         estimated_cost_savings = total_fixes * 500  # 1修復あたり500円の削減と仮定
-        
+
         # コンプライアンススコア（SLAメトリクスから推定）
         sla_metrics = self._calculate_sla_metrics()
-        compliance_score = sla_metrics['overall_sla_score']
-        
+        compliance_score = sla_metrics["overall_sla_score"]
+
         return {
-            'automation_rate': automation_rate,
-            'user_satisfaction': user_satisfaction,
-            'estimated_cost_savings': estimated_cost_savings,
-            'compliance_score': compliance_score,
-            'operational_efficiency': (automation_rate + compliance_score) / 2,
-            'business_continuity_score': sla_metrics['availability_score'],
-            'targets': self.business_metrics
+            "automation_rate": automation_rate,
+            "user_satisfaction": user_satisfaction,
+            "estimated_cost_savings": estimated_cost_savings,
+            "compliance_score": compliance_score,
+            "operational_efficiency": (automation_rate + compliance_score) / 2,
+            "business_continuity_score": sla_metrics["availability_score"],
+            "targets": self.business_metrics,
         }
-    
+
     def _analyze_incidents(self) -> Dict[str, Any]:
         """インシデント分析"""
         loop_state = self._get_infinite_loop_state()
-        repair_history = loop_state.get('repair_history', [])
-        
+        repair_history = loop_state.get("repair_history", [])
+
         # 最近24時間のインシデント
         now = datetime.now()
         recent_incidents = []
-        
+
         for repair in repair_history[-50:]:  # 最新50件を確認
             try:
-                repair_time = datetime.fromisoformat(repair['timestamp'])
+                repair_time = datetime.fromisoformat(repair["timestamp"])
                 if (now - repair_time).total_seconds() < 86400:  # 24時間以内
                     recent_incidents.append(repair)
             except:
                 continue
-        
+
         # インシデント統計
         incident_count_24h = len(recent_incidents)
         mttr = 120 if recent_incidents else 0  # 平均復旧時間（分）
-        
+
         # インシデントカテゴリ分析
         categories = {}
         for incident in recent_incidents:
-            category = incident.get('target', 'unknown')
+            category = incident.get("target", "unknown")
             categories[category] = categories.get(category, 0) + 1
-        
+
         return {
-            'total_incidents_24h': incident_count_24h,
-            'mttr_minutes': mttr,
-            'incident_categories': categories,
-            'severity_distribution': {
-                'critical': incident_count_24h // 4,
-                'high': incident_count_24h // 3,
-                'medium': incident_count_24h // 2,
-                'low': incident_count_24h - (incident_count_24h // 4) - (incident_count_24h // 3) - (incident_count_24h // 2)
+            "total_incidents_24h": incident_count_24h,
+            "mttr_minutes": mttr,
+            "incident_categories": categories,
+            "severity_distribution": {
+                "critical": incident_count_24h // 4,
+                "high": incident_count_24h // 3,
+                "medium": incident_count_24h // 2,
+                "low": incident_count_24h
+                - (incident_count_24h // 4)
+                - (incident_count_24h // 3)
+                - (incident_count_24h // 2),
             },
-            'resolution_rate': 100 if incident_count_24h > 0 else 0
+            "resolution_rate": 100 if incident_count_24h > 0 else 0,
         }
-    
+
     def _analyze_capacity(self) -> Dict[str, Any]:
         """キャパシティ分析"""
         sys_perf = self._get_system_performance()
-        
+
         # 使用率から将来予測
-        cpu_trend = 'increasing' if sys_perf['cpu_percent'] > 70 else 'stable'
-        memory_trend = 'increasing' if sys_perf['memory_percent'] > 80 else 'stable'
-        
+        cpu_trend = "increasing" if sys_perf["cpu_percent"] > 70 else "stable"
+        memory_trend = "increasing" if sys_perf["memory_percent"] > 80 else "stable"
+
         # 推奨アクション
         recommendations = []
-        if sys_perf['cpu_percent'] > 80:
-            recommendations.append('CPU リソースの増強を検討')
-        if sys_perf['memory_percent'] > 85:
-            recommendations.append('メモリ増設を推奨')
-        if sys_perf['disk_percent'] > 90:
-            recommendations.append('ストレージ拡張が必要')
-        
+        if sys_perf["cpu_percent"] > 80:
+            recommendations.append("CPU リソースの増強を検討")
+        if sys_perf["memory_percent"] > 85:
+            recommendations.append("メモリ増設を推奨")
+        if sys_perf["disk_percent"] > 90:
+            recommendations.append("ストレージ拡張が必要")
+
         return {
-            'cpu_capacity_usage': sys_perf['cpu_percent'],
-            'memory_capacity_usage': sys_perf['memory_percent'],
-            'storage_capacity_usage': sys_perf['disk_percent'],
-            'capacity_score': 100 - max(sys_perf['cpu_percent'], sys_perf['memory_percent'], sys_perf['disk_percent']),
-            'trends': {
-                'cpu': cpu_trend,
-                'memory': memory_trend,
-                'storage': 'stable'
-            },
-            'recommendations': recommendations,
-            'forecast_days': 30
+            "cpu_capacity_usage": sys_perf["cpu_percent"],
+            "memory_capacity_usage": sys_perf["memory_percent"],
+            "storage_capacity_usage": sys_perf["disk_percent"],
+            "capacity_score": 100
+            - max(
+                sys_perf["cpu_percent"],
+                sys_perf["memory_percent"],
+                sys_perf["disk_percent"],
+            ),
+            "trends": {"cpu": cpu_trend, "memory": memory_trend, "storage": "stable"},
+            "recommendations": recommendations,
+            "forecast_days": 30,
         }
-    
+
     def _assess_security(self) -> Dict[str, Any]:
         """セキュリティ評価"""
         # セキュリティスコア算出
         url_health = self._check_url_health()
         security_incidents = 0  # 実際のプロジェクトでは適切な検出を実装
-        
+
         # HTTPSチェック
-        https_compliance = sum(1 for url in self.urls.values() if url.startswith('https://'))
+        https_compliance = sum(
+            1 for url in self.urls.values() if url.startswith("https://")
+        )
         https_score = (https_compliance / len(self.urls)) * 100
-        
+
         # 全体セキュリティスコア
         base_score = 85  # ベースラインセキュリティスコア
         incident_penalty = security_incidents * 10
-        security_score = max(0, base_score + https_score/4 - incident_penalty)
-        
+        security_score = max(0, base_score + https_score / 4 - incident_penalty)
+
         return {
-            'security_score': security_score,
-            'https_compliance': https_score,
-            'security_incidents_24h': security_incidents,
-            'vulnerability_count': 0,
-            'compliance_status': 'compliant' if security_score >= 80 else 'non-compliant',
-            'last_security_scan': datetime.now().isoformat(),
-            'recommendations': [
-                'HTTPS証明書の更新確認',
-                '定期的なセキュリティスキャン実施',
-                'アクセスログの監視強化'
-            ]
+            "security_score": security_score,
+            "https_compliance": https_score,
+            "security_incidents_24h": security_incidents,
+            "vulnerability_count": 0,
+            "compliance_status": (
+                "compliant" if security_score >= 80 else "non-compliant"
+            ),
+            "last_security_scan": datetime.now().isoformat(),
+            "recommendations": [
+                "HTTPS証明書の更新確認",
+                "定期的なセキュリティスキャン実施",
+                "アクセスログの監視強化",
+            ],
         }
-    
+
     def _check_compliance(self) -> Dict[str, Any]:
         """コンプライアンス チェック"""
         sla_metrics = self._calculate_sla_metrics()
         security = self._assess_security()
-        
+
         # ITSM準拠チェック
         itsm_compliance = {
-            'incident_management': 95,
-            'change_management': 90,
-            'service_level_management': sla_metrics['overall_sla_score'],
-            'availability_management': sla_metrics['availability_score']
+            "incident_management": 95,
+            "change_management": 90,
+            "service_level_management": sla_metrics["overall_sla_score"],
+            "availability_management": sla_metrics["availability_score"],
         }
-        
+
         overall_compliance = sum(itsm_compliance.values()) / len(itsm_compliance)
-        
+
         return {
-            'itsm_compliance': itsm_compliance,
-            'overall_compliance_score': overall_compliance,
-            'iso_20000_ready': overall_compliance >= 90,
-            'itil_compliance': overall_compliance >= 85,
-            'audit_status': 'passed' if overall_compliance >= 80 else 'needs_improvement',
-            'last_audit_date': (datetime.now() - timedelta(days=30)).isoformat(),
-            'next_audit_date': (datetime.now() + timedelta(days=90)).isoformat()
+            "itsm_compliance": itsm_compliance,
+            "overall_compliance_score": overall_compliance,
+            "iso_20000_ready": overall_compliance >= 90,
+            "itil_compliance": overall_compliance >= 85,
+            "audit_status": (
+                "passed" if overall_compliance >= 80 else "needs_improvement"
+            ),
+            "last_audit_date": (datetime.now() - timedelta(days=30)).isoformat(),
+            "next_audit_date": (datetime.now() + timedelta(days=90)).isoformat(),
         }
-    
+
     def _measure_user_experience(self) -> Dict[str, Any]:
         """ユーザーエクスペリエンス測定"""
         url_health = self._check_url_health()
-        
+
         # ページロード時間からUXスコア算出
-        response_times = [status['response_time'] for status in url_health.values() 
-                         if status['response_time'] is not None]
-        avg_load_time = sum(response_times) / len(response_times) if response_times else 0
-        
+        response_times = [
+            status["response_time"]
+            for status in url_health.values()
+            if status["response_time"] is not None
+        ]
+        avg_load_time = (
+            sum(response_times) / len(response_times) if response_times else 0
+        )
+
         # UXスコア計算
         ux_score = max(0, 100 - (avg_load_time * 20))  # 1秒増加で20点減点
-        
+
         # Net Promoter Score (推定)
         nps = max(0, ux_score - 40)  # UXスコアからNPSを推定
-        
+
         return {
-            'ux_score': ux_score,
-            'avg_page_load_time': avg_load_time,
-            'user_satisfaction_rating': min(5.0, max(1.0, ux_score / 20)),
-            'net_promoter_score': nps,
-            'bounce_rate': max(0, 100 - ux_score),
-            'conversion_rate': min(100, ux_score),
-            'accessibility_score': 85  # 基本的なアクセシビリティスコア
+            "ux_score": ux_score,
+            "avg_page_load_time": avg_load_time,
+            "user_satisfaction_rating": min(5.0, max(1.0, ux_score / 20)),
+            "net_promoter_score": nps,
+            "bounce_rate": max(0, 100 - ux_score),
+            "conversion_rate": min(100, ux_score),
+            "accessibility_score": 85,  # 基本的なアクセシビリティスコア
         }
-    
+
     def _calculate_financial_metrics(self) -> Dict[str, Any]:
         """財務指標計算"""
         loop_state = self._get_infinite_loop_state()
         business_metrics = self._calculate_business_metrics()
-        
+
         # ROI計算
-        automation_savings = business_metrics['estimated_cost_savings']
+        automation_savings = business_metrics["estimated_cost_savings"]
         estimated_investment = 1000000  # 100万円の投資と仮定
-        roi = ((automation_savings - estimated_investment) / estimated_investment) * 100 if estimated_investment > 0 else 0
-        
+        roi = (
+            ((automation_savings - estimated_investment) / estimated_investment) * 100
+            if estimated_investment > 0
+            else 0
+        )
+
         # TCO（総所有コスト）
         monthly_operational_cost = 500000  # 月間運用コスト50万円と仮定
         downtime_cost = 0  # ダウンタイムコスト
-        
+
         return {
-            'roi_percentage': roi,
-            'cost_savings_monthly': automation_savings / 12,
-            'operational_cost_monthly': monthly_operational_cost,
-            'downtime_cost_avoided': downtime_cost,
-            'cost_per_transaction': 10,  # 1トランザクションあたり10円
-            'budget_utilization': 75,  # 予算使用率75%
-            'cost_optimization_score': min(100, max(0, 100 - (monthly_operational_cost / 1000000 * 100)))
+            "roi_percentage": roi,
+            "cost_savings_monthly": automation_savings / 12,
+            "operational_cost_monthly": monthly_operational_cost,
+            "downtime_cost_avoided": downtime_cost,
+            "cost_per_transaction": 10,  # 1トランザクションあたり10円
+            "budget_utilization": 75,  # 予算使用率75%
+            "cost_optimization_score": min(
+                100, max(0, 100 - (monthly_operational_cost / 1000000 * 100))
+            ),
         }
-    
+
     def create_enterprise_dashboard(self) -> str:
         """企業レベルダッシュボード作成"""
         print("🎯 企業レベル統合ダッシュボード生成中...")
-        
+
         # メトリクス収集
         metrics = self.collect_comprehensive_metrics()
-        
+
         # HTMLダッシュボード生成
         html_path = self._generate_enterprise_html(metrics)
-        
+
         # JSONデータ保存
         self._save_metrics_data(metrics)
-        
+
         print(f"✅ 企業レベルダッシュボード生成完了: {html_path}")
         return html_path
-    
+
     def _generate_enterprise_html(self, metrics: Dict[str, Any]) -> str:
         """企業レベルHTMLダッシュボード生成"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         html_file = self.reports_dir / f"enterprise_dashboard_{timestamp}.html"
-        
+
         # データ準備
-        sys_perf = metrics['system_performance']
-        sla_metrics = metrics['sla_metrics']
-        business_metrics = metrics['business_metrics']
-        url_health = metrics['url_health']
-        incidents = metrics['incident_analytics']
-        capacity = metrics['capacity_planning']
-        security = metrics['security_posture']
-        compliance = metrics['compliance_status']
-        ux = metrics['user_experience']
-        financial = metrics['financial_metrics']
-        loop_state = metrics['infinite_loop_state']
-        
+        sys_perf = metrics["system_performance"]
+        sla_metrics = metrics["sla_metrics"]
+        business_metrics = metrics["business_metrics"]
+        url_health = metrics["url_health"]
+        incidents = metrics["incident_analytics"]
+        capacity = metrics["capacity_planning"]
+        security = metrics["security_posture"]
+        compliance = metrics["compliance_status"]
+        ux = metrics["user_experience"]
+        financial = metrics["financial_metrics"]
+        loop_state = metrics["infinite_loop_state"]
+
         html_content = f"""
 <!DOCTYPE html>
 <html lang="ja">
@@ -1086,10 +1148,10 @@ class EnterpriseITSMDashboard:
 
         # サービス状態表示
         for name, status in url_health.items():
-            is_healthy = status.get('is_healthy', False)
-            response_time = status.get('response_time', 0)
-            status_class = 'status-healthy' if is_healthy else 'status-unhealthy'
-            
+            is_healthy = status.get("is_healthy", False)
+            response_time = status.get("response_time", 0)
+            status_class = "status-healthy" if is_healthy else "status-unhealthy"
+
             html_content += f"""
                         <div class="service-item">
                             <div class="service-info">
@@ -1337,35 +1399,37 @@ class EnterpriseITSMDashboard:
 </body>
 </html>
 """
-        
-        with open(html_file, 'w', encoding='utf-8') as f:
+
+        with open(html_file, "w", encoding="utf-8") as f:
             f.write(html_content)
-        
+
         return str(html_file)
-    
+
     def _save_metrics_data(self, metrics: Dict[str, Any]):
         """メトリクスデータ保存"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         json_file = self.reports_dir / f"enterprise_metrics_{timestamp}.json"
-        
-        with open(json_file, 'w', encoding='utf-8') as f:
+
+        with open(json_file, "w", encoding="utf-8") as f:
             json.dump(metrics, f, ensure_ascii=False, indent=2)
-        
+
         print(f"📊 エンタープライズメトリクス保存完了: {json_file}")
+
 
 def main():
     """メイン実行関数"""
     print("🚀 ITSM Enterprise Dashboard System 開始")
-    
+
     # ダッシュボード作成
     dashboard = EnterpriseITSMDashboard()
     html_path = dashboard.create_enterprise_dashboard()
-    
+
     print(f"\n🎉 エンタープライズダッシュボード生成完了!")
     print(f"📊 HTMLダッシュボード: {html_path}")
     print(f"📁 全ての生成ファイル: {dashboard.reports_dir}")
     print(f"\n💡 ブラウザで以下のファイルを開いてください:")
     print(f"   file://{html_path}")
+
 
 if __name__ == "__main__":
     main()

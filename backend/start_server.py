@@ -18,7 +18,7 @@ def setup_logging():
     """ログ設定"""
     logging.basicConfig(
         level=getattr(logging, settings.LOG_LEVEL),
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
 
@@ -37,28 +37,28 @@ def main():
     """メイン処理"""
     print(f"🚀 {settings.PROJECT_NAME} v{settings.PROJECT_VERSION} を起動します")
     print(f"🌍 環境: {settings.ENVIRONMENT}")
-    
+
     setup_logging()
-    
+
     # データベース初期化
     initialize_database()
-    
+
     # パフォーマンス最適化システム初期化
     print("🔧 パフォーマンス最適化システムを初期化しています...")
     if initialize_performance_system():
         print("✅ パフォーマンス最適化システム初期化完了")
     else:
         print("⚠️ パフォーマンス最適化システムの初期化に問題がありましたが、続行します")
-    
+
     # サーバー設定
     host = "0.0.0.0"
     port = 8000
     reload = settings.ENVIRONMENT == "development"
-    
+
     print(f"📡 サーバー起動中... http://{host}:{port}")
     print(f"📚 API文書: http://{host}:{port}{settings.API_V1_STR}/docs")
     print(f"🔄 リロード: {'有効' if reload else '無効'}")
-    
+
     # Uvicornサーバー起動
     uvicorn.run(
         "app.main:app",
@@ -66,7 +66,7 @@ def main():
         port=port,
         reload=reload,
         log_level=settings.LOG_LEVEL.lower(),
-        access_log=True
+        access_log=True,
     )
 
 

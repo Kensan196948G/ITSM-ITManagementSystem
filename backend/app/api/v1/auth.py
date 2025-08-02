@@ -25,53 +25,55 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class AuthService:
     """認証サービス"""
-    
+
     @staticmethod
     def verify_password(plain_password: str, hashed_password: str) -> bool:
         """パスワード検証"""
         return pwd_context.verify(plain_password, hashed_password)
-    
+
     @staticmethod
     def get_password_hash(password: str) -> str:
         """パスワードハッシュ化"""
         return pwd_context.hash(password)
-    
+
     @staticmethod
-    def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    def create_access_token(
+        data: dict, expires_delta: Optional[timedelta] = None
+    ) -> str:
         """アクセストークン作成"""
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.utcnow() + expires_delta
         else:
-            expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-        
-        to_encode.update({
-            "exp": expire,
-            "iat": datetime.utcnow(),
-            "type": "access"
-        })
-        encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+            expire = datetime.utcnow() + timedelta(
+                minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+            )
+
+        to_encode.update({"exp": expire, "iat": datetime.utcnow(), "type": "access"})
+        encoded_jwt = jwt.encode(
+            to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
+        )
         return encoded_jwt
-    
+
     @staticmethod
     def create_refresh_token(data: dict) -> str:
         """リフレッシュトークン作成"""
         to_encode = data.copy()
         expire = datetime.utcnow() + timedelta(days=7)  # 7日間有効
-        
-        to_encode.update({
-            "exp": expire,
-            "iat": datetime.utcnow(),
-            "type": "refresh"
-        })
-        encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+        to_encode.update({"exp": expire, "iat": datetime.utcnow(), "type": "refresh"})
+        encoded_jwt = jwt.encode(
+            to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
+        )
         return encoded_jwt
-    
+
     @staticmethod
     def decode_token(token: str) -> dict:
         """トークンデコード"""
         try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+            payload = jwt.decode(
+                token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+            )
             return payload
         except JWTError:
             raise HTTPException(
@@ -83,12 +85,12 @@ class AuthService:
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ) -> User:
     """現在のユーザーを取得"""
     token = credentials.credentials
     payload = AuthService.decode_token(token)
-    
+
     user_id: str = payload.get("sub")
     if user_id is None:
         raise HTTPException(
@@ -96,7 +98,7 @@ def get_current_user(
             detail="無効なトークンです",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     user = db.query(User).filter(User.id == UUID(user_id)).first()
     if user is None:
         raise HTTPException(
@@ -104,14 +106,14 @@ def get_current_user(
             detail="ユーザーが見つかりません",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="非アクティブなユーザーです",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     return user
 
 
@@ -124,33 +126,36 @@ def get_current_active_user(current_user: User = Depends(get_current_user)) -> U
     """現在のアクティブユーザーを取得"""
     if not current_user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="非アクティブなユーザーです"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="非アクティブなユーザーです"
         )
     return current_user
 
 
 def require_role(allowed_roles: List[UserRole]):
     """指定されたロールが必要な権限チェック"""
+
     def role_checker(current_user: User = Depends(get_current_active_user)):
         if current_user.role not in allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="この操作を実行する権限がありません"
+                detail="この操作を実行する権限がありません",
             )
         return current_user
+
     return role_checker
 
 
 def require_permission(resource: str, action: str):
     """指定されたリソース・アクションの権限チェック"""
+
     def permission_checker(current_user: User = Depends(get_current_active_user)):
         if not check_user_permission(current_user, resource, action):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"{resource}に対する{action}権限がありません"
+                detail=f"{resource}に対する{action}権限がありません",
             )
         return current_user
+
     return permission_checker
 
 
@@ -158,20 +163,20 @@ def check_user_permission(user: User, resource: str, action: str) -> bool:
     """ユーザーの権限をチェックする"""
     # ロールベースの権限チェック
     role_permissions = get_role_permissions(user.role)
-    
+
     # 管理者は全権限
     if user.role == UserRole.ADMIN:
         return True
-    
+
     # リソース別権限チェック
     for permission in role_permissions:
         perm_resource = permission.get("resource")
         perm_actions = permission.get("actions", [])
-        
+
         # ワイルドカード権限
         if perm_resource == "*" and "*" in perm_actions:
             return True
-        
+
         # リソースマッチング
         if perm_resource == resource or perm_resource == "*":
             if action in perm_actions or "*" in perm_actions:
@@ -180,7 +185,7 @@ def check_user_permission(user: User, resource: str, action: str) -> bool:
                 if conditions and not check_permission_conditions(user, conditions):
                     continue
                 return True
-    
+
     return False
 
 
@@ -191,10 +196,17 @@ def get_role_permissions(role: UserRole) -> List[Dict[str, Any]]:
             {"resource": "*", "actions": ["*"]},
         ],
         UserRole.MANAGER: [
-            {"resource": "incidents", "actions": ["create", "read", "update", "delete"]},
+            {
+                "resource": "incidents",
+                "actions": ["create", "read", "update", "delete"],
+            },
             {"resource": "problems", "actions": ["create", "read", "update", "delete"]},
             {"resource": "changes", "actions": ["create", "read", "update", "delete"]},
-            {"resource": "users", "actions": ["read", "update"], "conditions": {"department": "own"}},
+            {
+                "resource": "users",
+                "actions": ["read", "update"],
+                "conditions": {"department": "own"},
+            },
             {"resource": "reports", "actions": ["read"]},
             {"resource": "dashboard", "actions": ["read"]},
             {"resource": "notifications", "actions": ["read", "send"]},
@@ -203,10 +215,18 @@ def get_role_permissions(role: UserRole) -> List[Dict[str, Any]]:
             {"resource": "incidents", "actions": ["create", "read", "update"]},
             {"resource": "problems", "actions": ["create", "read", "update"]},
             {"resource": "changes", "actions": ["read", "update"]},
-            {"resource": "users", "actions": ["read"], "conditions": {"own_only": True}},
+            {
+                "resource": "users",
+                "actions": ["read"],
+                "conditions": {"own_only": True},
+            },
             {"resource": "dashboard", "actions": ["read"]},
             {"resource": "notifications", "actions": ["read"]},
-            {"resource": "attachments", "actions": ["create", "read", "delete"], "conditions": {"own_only": True}},
+            {
+                "resource": "attachments",
+                "actions": ["create", "read", "delete"],
+                "conditions": {"own_only": True},
+            },
         ],
         UserRole.VIEWER: [
             {"resource": "incidents", "actions": ["read"]},
@@ -215,9 +235,9 @@ def get_role_permissions(role: UserRole) -> List[Dict[str, Any]]:
             {"resource": "reports", "actions": ["read"]},
             {"resource": "dashboard", "actions": ["read"]},
             {"resource": "notifications", "actions": ["read"]},
-        ]
+        ],
     }
-    
+
     return role_permissions.get(role, [])
 
 
@@ -226,7 +246,7 @@ def check_permission_conditions(user: User, conditions: Dict[str, Any]) -> bool:
     if conditions.get("own_only"):
         # 自分自身のリソースのみアクセス可能
         return True  # 実際の実装では、リソースの所有者チェックが必要
-    
+
     if "department" in conditions:
         # 部署制限
         allowed_departments = conditions["department"]
@@ -234,7 +254,7 @@ def check_permission_conditions(user: User, conditions: Dict[str, Any]) -> bool:
             return True  # 同じ部署のみ
         elif isinstance(allowed_departments, list):
             return user.department in allowed_departments
-    
+
     return True
 
 
@@ -242,8 +262,7 @@ def require_admin(current_user: User = Depends(get_current_active_user)):
     """管理者権限が必要"""
     if current_user.role != UserRole.ADMIN:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="管理者権限が必要です"
+            status_code=status.HTTP_403_FORBIDDEN, detail="管理者権限が必要です"
         )
     return current_user
 
@@ -253,46 +272,51 @@ def require_manager_or_admin(current_user: User = Depends(get_current_active_use
     if current_user.role not in [UserRole.ADMIN, UserRole.MANAGER]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="マネージャー以上の権限が必要です"
+            detail="マネージャー以上の権限が必要です",
         )
     return current_user
 
 
 @router.post("/login", response_model=LoginResponse, summary="ログイン")
 async def login(
-    login_data: LoginRequest,
-    db: Session = Depends(get_db)
+    login_data: LoginRequest, db: Session = Depends(get_db)
 ) -> LoginResponse:
     """ユーザーログイン"""
     # ユーザー検索（emailまたはusernameで）
-    user = db.query(User).filter(
-        (User.email == login_data.username) | (User.username == login_data.username)
-    ).first()
-    
-    if not user or not AuthService.verify_password(login_data.password, user.password_hash):
+    user = (
+        db.query(User)
+        .filter(
+            (User.email == login_data.username) | (User.username == login_data.username)
+        )
+        .first()
+    )
+
+    if not user or not AuthService.verify_password(
+        login_data.password, user.password_hash
+    ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="ユーザー名またはパスワードが間違っています",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="アカウントが無効です",
         )
-    
+
     # アクセストークン作成
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = AuthService.create_access_token(
         data={"sub": str(user.id), "username": user.username},
-        expires_delta=access_token_expires
+        expires_delta=access_token_expires,
     )
-    
+
     # ログイン時刻を更新
     user.last_login_at = datetime.utcnow()
     db.commit()
-    
+
     return LoginResponse(
         access_token=access_token,
         token_type="bearer",
@@ -302,8 +326,8 @@ async def login(
             username=user.username,
             email=user.email,
             display_name=user.display_name or user.full_name,
-            is_active=user.is_active
-        )
+            is_active=user.is_active,
+        ),
     )
 
 
@@ -315,7 +339,7 @@ async def get_user_info(current_user: User = Depends(get_current_user)) -> UserI
         username=current_user.username,
         email=current_user.email,
         display_name=current_user.display_name or current_user.full_name,
-        is_active=current_user.is_active
+        is_active=current_user.is_active,
     )
 
 
@@ -327,12 +351,10 @@ async def logout(current_user: User = Depends(get_current_user)):
 
 
 @router.post("/register", response_model=LoginResponse, summary="ユーザー登録")
-async def register(
-    user_data: dict,
-    db: Session = Depends(get_db)
-):
+async def register(user_data: dict, db: Session = Depends(get_db)):
     """ユーザー登録"""
     import uuid
+
     # 基本的な登録処理（テスト用）
     return LoginResponse(
         access_token="test-token",
@@ -343,15 +365,14 @@ async def register(
             username=user_data.get("username", "testuser"),
             email=user_data.get("email", "test@example.com"),
             display_name=user_data.get("display_name", "Test User"),
-            is_active=True
-        )
+            is_active=True,
+        ),
     )
 
 
 @router.post("/refresh", response_model=LoginResponse, summary="トークン更新")
 async def refresh_token(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     """トークン更新"""
     return LoginResponse(
@@ -363,8 +384,8 @@ async def refresh_token(
             username=current_user.username,
             email=current_user.email,
             display_name=current_user.display_name or current_user.full_name,
-            is_active=current_user.is_active
-        )
+            is_active=current_user.is_active,
+        ),
     )
 
 
@@ -372,55 +393,50 @@ async def refresh_token(
 async def change_password(
     password_data: dict,
     current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """パスワード変更"""
     # パスワード変更処理（テスト用）
     current_password = password_data.get("current_password")
     new_password = password_data.get("new_password")
-    
-    if not current_password or not AuthService.verify_password(current_password, current_user.password_hash):
+
+    if not current_password or not AuthService.verify_password(
+        current_password, current_user.password_hash
+    ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="現在のパスワードが正しくありません"
+            detail="現在のパスワードが正しくありません",
         )
-    
+
     return {"message": "パスワードが正常に変更されました"}
 
 
 @router.post("/forgot-password", summary="パスワードリセット要求")
-async def forgot_password(
-    email_data: dict,
-    db: Session = Depends(get_db)
-):
+async def forgot_password(email_data: dict, db: Session = Depends(get_db)):
     """パスワードリセット要求"""
     # パスワードリセット要求処理（テスト用）
     return {"message": "パスワードリセットメールを送信しました"}
 
 
 @router.post("/reset-password", summary="パスワードリセット")
-async def reset_password(
-    reset_data: dict,
-    db: Session = Depends(get_db)
-):
+async def reset_password(reset_data: dict, db: Session = Depends(get_db)):
     """パスワードリセット"""
     # パスワードリセット処理（テスト用）
     token = reset_data.get("token")
     new_password = reset_data.get("new_password")
-    
+
     if not token or not new_password:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="トークンまたは新しいパスワードが提供されていません"
+            detail="トークンまたは新しいパスワードが提供されていません",
         )
-    
+
     return {"message": "パスワードがリセットされました"}
 
 
 @router.post("/verify-token", summary="トークン検証")
 async def verify_token(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     """トークン検証"""
     return {"valid": True, "user_id": str(current_user.id)}
@@ -428,8 +444,7 @@ async def verify_token(
 
 @router.get("/verify-token", summary="トークン検証(GET)")
 async def verify_token_get(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     """トークン検証 (GET版)"""
     try:

@@ -11,11 +11,11 @@ from app.core.config import settings
 
 def setup_logging() -> None:
     """ログ設定を初期化する"""
-    
+
     # ログディレクトリを作成
     log_dir = Path("logs")
     log_dir.mkdir(exist_ok=True)
-    
+
     # ログ設定
     logging_config: Dict[str, Any] = {
         "version": 1,
@@ -105,26 +105,26 @@ def setup_logging() -> None:
             "handlers": ["console"],
         },
     }
-    
+
     # 開発環境では詳細なログを出力
     if settings.ENVIRONMENT == "development":
         logging_config["loggers"]["sqlalchemy.engine"]["level"] = "INFO"
         logging_config["handlers"]["console"]["level"] = "DEBUG"
-    
+
     # 本番環境ではコンソール出力を制限
     if settings.ENVIRONMENT == "production":
         logging_config["handlers"]["console"]["level"] = "WARNING"
         logging_config["loggers"]["sqlalchemy.engine"]["level"] = "ERROR"
-    
+
     logging.config.dictConfig(logging_config)
 
 
 class AuditLogger:
     """監査ログ専用クラス"""
-    
+
     def __init__(self):
         self.logger = logging.getLogger("app.audit")
-    
+
     def log_user_action(
         self,
         user_id: str,
@@ -133,7 +133,7 @@ class AuditLogger:
         resource_id: str,
         details: Dict[str, Any] = None,
         client_ip: str = None,
-        user_agent: str = None
+        user_agent: str = None,
     ):
         """ユーザーアクションを監査ログに記録"""
         audit_data = {
@@ -144,26 +144,23 @@ class AuditLogger:
             "resource_id": resource_id,
             "client_ip": client_ip,
             "user_agent": user_agent,
-            "details": details or {}
+            "details": details or {},
         }
-        
+
         self.logger.info("User action logged", extra=audit_data)
-    
+
     def log_system_event(
-        self,
-        event_type: str,
-        description: str,
-        details: Dict[str, Any] = None
+        self, event_type: str, description: str, details: Dict[str, Any] = None
     ):
         """システムイベントを監査ログに記録"""
         audit_data = {
             "event_type": event_type,
             "description": description,
-            "details": details or {}
+            "details": details or {},
         }
-        
+
         self.logger.info("System event logged", extra=audit_data)
-    
+
     def log_security_event(
         self,
         event_type: str,
@@ -171,7 +168,7 @@ class AuditLogger:
         description: str,
         severity: str = "medium",
         client_ip: str = None,
-        details: Dict[str, Any] = None
+        details: Dict[str, Any] = None,
     ):
         """セキュリティイベントを監査ログに記録"""
         audit_data = {
@@ -181,9 +178,9 @@ class AuditLogger:
             "description": description,
             "severity": severity,
             "client_ip": client_ip,
-            "details": details or {}
+            "details": details or {},
         }
-        
+
         self.logger.warning("Security event logged", extra=audit_data)
 
 

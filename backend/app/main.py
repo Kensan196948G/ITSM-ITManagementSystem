@@ -16,7 +16,7 @@ from app.core.middleware import (
     LoggingMiddleware,
     SecurityHeadersMiddleware,
     RateLimitMiddleware,
-    AuditMiddleware
+    AuditMiddleware,
 )
 from app.middleware.performance import setup_performance_middleware
 from app.api import api_router
@@ -60,16 +60,16 @@ app.add_middleware(RequestContextMiddleware)
 async def itsm_exception_handler(request: Request, exc: ITSMException):
     """ITSMカスタム例外ハンドラー"""
     request_id = getattr(request.state, "request_id", "unknown")
-    
+
     logger.error(
         f"ITSM Exception: {exc.error_code} - {exc.message}",
         extra={
             "request_id": request_id,
             "error_code": exc.error_code,
-            "details": exc.details
-        }
+            "details": exc.details,
+        },
     )
-    
+
     return JSONResponse(
         status_code=exc.status_code,
         content={
@@ -77,9 +77,9 @@ async def itsm_exception_handler(request: Request, exc: ITSMException):
                 "code": exc.error_code,
                 "message": exc.message,
                 "details": exc.details,
-                "request_id": request_id
+                "request_id": request_id,
             }
-        }
+        },
     )
 
 
@@ -87,24 +87,21 @@ async def itsm_exception_handler(request: Request, exc: ITSMException):
 async def http_exception_handler(request: Request, exc: HTTPException):
     """HTTP例外ハンドラー"""
     request_id = getattr(request.state, "request_id", "unknown")
-    
+
     logger.warning(
         f"HTTP Exception: {exc.status_code} - {exc.detail}",
-        extra={
-            "request_id": request_id,
-            "status_code": exc.status_code
-        }
+        extra={"request_id": request_id, "status_code": exc.status_code},
     )
-    
+
     return JSONResponse(
         status_code=exc.status_code,
         content={
             "error": {
                 "code": "HTTP_ERROR",
                 "message": exc.detail,
-                "request_id": request_id
+                "request_id": request_id,
             }
-        }
+        },
     )
 
 
@@ -112,24 +109,18 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     """バリデーション例外ハンドラー"""
     request_id = getattr(request.state, "request_id", "unknown")
-    
+
     # バリデーションエラーの詳細を整形
     details = []
     for error in exc.errors():
         field = ".".join(str(loc) for loc in error["loc"])
-        details.append({
-            "field": field,
-            "message": error["msg"]
-        })
-    
+        details.append({"field": field, "message": error["msg"]})
+
     logger.warning(
         f"Validation Error: {len(details)} field(s) failed validation",
-        extra={
-            "request_id": request_id,
-            "validation_errors": details
-        }
+        extra={"request_id": request_id, "validation_errors": details},
     )
-    
+
     return JSONResponse(
         status_code=422,
         content={
@@ -137,9 +128,9 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
                 "code": "VALIDATION_ERROR",
                 "message": "入力データが不正です",
                 "details": details,
-                "request_id": request_id
+                "request_id": request_id,
             }
-        }
+        },
     )
 
 
@@ -147,25 +138,22 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 async def general_exception_handler(request: Request, exc: Exception):
     """一般的な例外ハンドラー"""
     request_id = getattr(request.state, "request_id", "unknown")
-    
+
     logger.error(
         f"Unhandled Exception: {type(exc).__name__} - {str(exc)}",
-        extra={
-            "request_id": request_id,
-            "exception_type": type(exc).__name__
-        },
-        exc_info=True
+        extra={"request_id": request_id, "exception_type": type(exc).__name__},
+        exc_info=True,
     )
-    
+
     return JSONResponse(
         status_code=500,
         content={
             "error": {
                 "code": "INTERNAL_SERVER_ERROR",
                 "message": "内部サーバーエラーが発生しました",
-                "request_id": request_id
+                "request_id": request_id,
             }
-        }
+        },
     )
 
 
@@ -176,10 +164,10 @@ async def health_check():
     from app.core.performance import perf_monitor
     from app.core.cache import cache_manager
     import time
-    
+
     performance_stats = perf_monitor.get_stats()
     cache_stats = cache_manager.get_stats()
-    
+
     return {
         "status": "healthy",
         "service": settings.PROJECT_NAME,
@@ -187,7 +175,7 @@ async def health_check():
         "environment": settings.ENVIRONMENT,
         "timestamp": time.time(),
         "performance": performance_stats,
-        "cache": cache_stats
+        "cache": cache_stats,
     }
 
 
@@ -199,7 +187,7 @@ async def version_info():
         "name": settings.PROJECT_NAME,
         "version": settings.PROJECT_VERSION,
         "api_version": "1.0",
-        "environment": settings.ENVIRONMENT
+        "environment": settings.ENVIRONMENT,
     }
 
 
@@ -210,7 +198,7 @@ async def handle_nonexistent():
     return {
         "message": "This endpoint exists for testing purposes",
         "status": "ok",
-        "timestamp": time.time()
+        "timestamp": time.time(),
     }
 
 
@@ -236,12 +224,12 @@ async def shutdown_event():
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
         port=8000,
         reload=settings.ENVIRONMENT == "development",
         log_level=settings.LOG_LEVEL.lower(),
-        access_log=True
+        access_log=True,
     )

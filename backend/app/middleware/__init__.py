@@ -6,14 +6,14 @@ from .performance import (
     CacheHeaderMiddleware,
     SecurityHeaderMiddleware,
     HealthCheckMiddleware,
-    setup_performance_middleware
+    setup_performance_middleware,
 )
 
 __all__ = [
     "PerformanceMonitorMiddleware",
-    "ResponseCompressionMiddleware", 
+    "ResponseCompressionMiddleware",
     "CacheHeaderMiddleware",
     "SecurityHeaderMiddleware",
     "HealthCheckMiddleware",
-    "setup_performance_middleware"
+    "setup_performance_middleware",
 ]

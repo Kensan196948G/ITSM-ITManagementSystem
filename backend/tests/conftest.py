@@ -8,6 +8,7 @@ import pytest
 import pytest_asyncio
 from typing import AsyncGenerator, Generator
 from fastapi import FastAPI
+
 try:
     from fastapi.testclient import TestClient
 except ImportError:
@@ -29,15 +30,18 @@ os.environ["ASYNC_DATABASE_URL"] = "sqlite+aiosqlite:///./test_async.db"
 
 # Create a minimal test FastAPI app
 import sys
-sys.path.insert(0, '/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/backend')
+
+sys.path.insert(0, "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/backend")
 
 # Import real application
 try:
     from app.main import app
+
     print(f"✅ Successfully imported real FastAPI app. Routes: {len(app.routes)}")
 except ImportError as e:
     print(f"❌ Failed to import real app: {e}")
     from fastapi import FastAPI
+
     app = FastAPI(title="Fallback Test ITSM API")
 
 # Import real dependencies
@@ -47,6 +51,7 @@ try:
     from app.core.security import create_access_token
     from app.models.user import User
     from app.api.deps import get_db
+
     print("✅ Successfully imported real dependencies")
 except ImportError as e:
     print(f"⚠️ Some real dependencies not available: {e}")
@@ -102,13 +107,13 @@ async def async_db_session() -> AsyncGenerator[AsyncSession, None]:
     """Create an async test database session."""
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     async with AsyncTestingSessionLocal() as session:
         try:
             yield session
         finally:
             await session.close()
-    
+
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
 
@@ -116,16 +121,17 @@ async def async_db_session() -> AsyncGenerator[AsyncSession, None]:
 @pytest.fixture(scope="function")
 def client(db_session) -> Generator[TestClient, None, None]:
     """Create a test client for the FastAPI app."""
+
     def override_get_db():
         try:
             yield db_session
         finally:
             pass
-    
+
     # Override database dependency if get_db is available
-    if hasattr(app, 'dependency_overrides') and get_db:
+    if hasattr(app, "dependency_overrides") and get_db:
         app.dependency_overrides[get_db] = override_get_db
-    
+
     # Use HTTPx-based test client for better compatibility
     from httpx import Client
     import uvicorn
@@ -133,87 +139,92 @@ def client(db_session) -> Generator[TestClient, None, None]:
     import time
     import signal
     import os
-    
+
     # Start a test server in a separate thread
     test_port = 9999
     server_ready = False
-    
+
     def start_test_server():
         nonlocal server_ready
         try:
             uvicorn.run(app, host="127.0.0.1", port=test_port, log_level="warning")
         except Exception as e:
             print(f"Test server error: {e}")
-    
+
     # Skip server startup for now - use mock client instead
     class MockTestClient:
         def __init__(self):
             self.base_url = f"http://127.0.0.1:{test_port}"
-        
+
         def post(self, url, **kwargs):
             # Mock response for testing
             from unittest.mock import Mock
+
             response = Mock()
             response.status_code = 200
             response.json.return_value = {"detail": "Test response"}
             return response
-        
+
         def get(self, url, **kwargs):
             from unittest.mock import Mock
+
             response = Mock()
-            response.status_code = 200 
+            response.status_code = 200
             response.json.return_value = {"detail": "Test response"}
             return response
-        
+
         def put(self, url, **kwargs):
             from unittest.mock import Mock
+
             response = Mock()
             response.status_code = 200
             response.json.return_value = {"detail": "Test response"}
             return response
-        
+
         def delete(self, url, **kwargs):
             from unittest.mock import Mock
+
             response = Mock()
             response.status_code = 200
             response.json.return_value = {"detail": "Test response"}
             return response
-        
+
         def close(self):
             pass
-    
+
     test_client = MockTestClient()
-    
+
     try:
         yield test_client
     finally:
-        if hasattr(test_client, 'close'):
+        if hasattr(test_client, "close"):
             test_client.close()
-    
+
     # Clear overrides
-    if hasattr(app, 'dependency_overrides'):
+    if hasattr(app, "dependency_overrides"):
         app.dependency_overrides.clear()
 
 
 @pytest_asyncio.fixture
 async def async_client(async_db_session) -> AsyncGenerator[AsyncClient, None]:
     """Create an async test client."""
+
     def override_get_db():
         try:
             yield async_db_session
         finally:
             pass
-    
+
     # Override database dependency if get_db is available
-    if hasattr(app, 'dependency_overrides') and get_db:
+    if hasattr(app, "dependency_overrides") and get_db:
         app.dependency_overrides[get_db] = override_get_db
-    
+
     # Fix AsyncClient initialization for newer versions
     async with AsyncClient(app=app, base_url="http://test") as client:
         yield client
-    
+
     # Clear overrides
-    if hasattr(app, 'dependency_overrides'):
+    if hasattr(app, "dependency_overrides"):
         app.dependency_overrides.clear()
 
 
@@ -224,7 +235,7 @@ def test_user_data():
         "email": "test@example.com",
         "username": "testuser",
         "full_name": "Test User",
-        "password": "testpassword123"
+        "password": "testpassword123",
     }
 
 
@@ -233,10 +244,10 @@ def test_user(db_session, test_user_data):
     """Create a test user in the database."""
     from passlib.context import CryptContext
     from app.models.user import UserRole
-    
+
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
     hashed_password = pwd_context.hash(test_user_data["password"])
-    
+
     user = User(
         email=test_user_data["email"],
         first_name="Test",
@@ -244,7 +255,7 @@ def test_user(db_session, test_user_data):
         hashed_password=hashed_password,
         role=UserRole.USER,
         department="IT",
-        is_active=True
+        is_active=True,
     )
     db_session.add(user)
     db_session.commit()
@@ -267,7 +278,7 @@ def admin_user_data():
         "username": "admin",
         "full_name": "Admin User",
         "password": "adminpassword123",
-        "is_superuser": True
+        "is_superuser": True,
     }
 
 
@@ -301,7 +312,7 @@ def incident_data():
         "status": "open",
         "category": "technical",
         "impact": "major",
-        "urgency": "high"
+        "urgency": "high",
     }
 
 
@@ -314,7 +325,7 @@ def problem_data():
         "status": "investigating",
         "category": "technical",
         "impact": "major",
-        "root_cause": "Unknown"
+        "root_cause": "Unknown",
     }
 
 
@@ -327,7 +338,7 @@ def change_data():
         "status": "planned",
         "category": "standard",
         "risk_level": "low",
-        "implementation_date": "2024-12-01T10:00:00"
+        "implementation_date": "2024-12-01T10:00:00",
     }
 
 
@@ -340,7 +351,7 @@ def ci_data():
         "status": "operational",
         "environment": "production",
         "owner": "IT Team",
-        "location": "Data Center 1"
+        "location": "Data Center 1",
     }
 
 
@@ -348,13 +359,13 @@ def ci_data():
 @pytest.fixture
 def mock_email_service(mocker):
     """Mock email service."""
-    return mocker.patch('app.services.email_service.EmailService')
+    return mocker.patch("app.services.email_service.EmailService")
 
 
 @pytest.fixture
 def mock_notification_service(mocker):
     """Mock notification service."""
-    return mocker.patch('app.services.notification_service.NotificationService')
+    return mocker.patch("app.services.notification_service.NotificationService")
 
 
 @pytest.fixture
@@ -372,21 +383,14 @@ def mock_redis(mocker):
 @pytest.fixture
 def benchmark_config():
     """Benchmark configuration for performance tests."""
-    return {
-        "min_rounds": 5,
-        "max_time": 1.0,
-        "warmup": True
-    }
+    return {"min_rounds": 5, "max_time": 1.0, "warmup": True}
 
 
 # API test helpers
 @pytest.fixture
 def api_headers():
     """Standard API headers."""
-    return {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-    }
+    return {"Content-Type": "application/json", "Accept": "application/json"}
 
 
 # Clean up fixtures
@@ -397,7 +401,7 @@ def cleanup_files():
     # Clean up any test files if needed
     import os
     import glob
-    
+
     test_files = glob.glob("./test*.db*")
     for file in test_files:
         try:

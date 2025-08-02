@@ -11,6 +11,7 @@ from app.models.change import ChangeType, ChangeStatus, RiskLevel
 
 class ChangeBase(BaseModel):
     """変更基底スキーマ"""
+
     title: str = Field(..., min_length=1, max_length=500, description="変更タイトル")
     type: ChangeType = Field(ChangeType.NORMAL, description="変更タイプ")
     description: Optional[str] = Field(None, description="変更詳細")
@@ -27,6 +28,7 @@ class ChangeBase(BaseModel):
 
 class ChangeCreate(ChangeBase):
     """変更作成スキーマ"""
+
     requester_id: UUID = Field(..., description="要求者ID")
     affected_ci_ids: Optional[List[UUID]] = Field([], description="影響するCI ID一覧")
     approvers: Optional[List[UUID]] = Field([], description="承認者ID一覧")
@@ -34,6 +36,7 @@ class ChangeCreate(ChangeBase):
 
 class ChangeUpdate(BaseModel):
     """変更更新スキーマ"""
+
     title: Optional[str] = Field(None, min_length=1, max_length=500)
     description: Optional[str] = None
     status: Optional[ChangeStatus] = None
@@ -50,6 +53,7 @@ class ChangeUpdate(BaseModel):
 
 class ChangeApprovalRequest(BaseModel):
     """変更承認リクエストスキーマ"""
+
     decision: str = Field(..., description="承認決定（approved, rejected）")
     comments: Optional[str] = Field(None, description="承認コメント")
     conditions: Optional[List[str]] = Field([], description="承認条件")
@@ -57,6 +61,7 @@ class ChangeApprovalRequest(BaseModel):
 
 class UserInfo(BaseModel):
     """ユーザー情報スキーマ"""
+
     id: UUID
     display_name: Optional[str]
     email: str
@@ -67,6 +72,7 @@ class UserInfo(BaseModel):
 
 class ChangeApprovalResponse(BaseModel):
     """変更承認レスポンススキーマ"""
+
     id: UUID
     approver: UserInfo
     decision: Optional[str]
@@ -80,6 +86,7 @@ class ChangeApprovalResponse(BaseModel):
 
 class ChangeTaskResponse(BaseModel):
     """変更タスクレスポンススキーマ"""
+
     id: UUID
     task_name: str
     description: Optional[str]
@@ -97,6 +104,7 @@ class ChangeTaskResponse(BaseModel):
 
 class RiskAssessment(BaseModel):
     """リスク評価スキーマ"""
+
     level: RiskLevel
     impact: Optional[str]
     likelihood: Optional[str]
@@ -104,6 +112,7 @@ class RiskAssessment(BaseModel):
 
 class ChangeResponse(ChangeBase):
     """変更レスポンススキーマ"""
+
     id: UUID
     change_number: str
     status: ChangeStatus
@@ -122,6 +131,7 @@ class ChangeResponse(ChangeBase):
 
 class ChangeListResponse(BaseModel):
     """変更一覧レスポンススキーマ"""
+
     data: List[ChangeResponse]
     meta: dict
     links: Optional[dict] = None
@@ -129,6 +139,7 @@ class ChangeListResponse(BaseModel):
 
 class ChangeCalendarItem(BaseModel):
     """変更カレンダーアイテムスキーマ"""
+
     id: UUID
     change_number: str
     title: str
@@ -142,11 +153,13 @@ class ChangeCalendarItem(BaseModel):
 
 class ChangeCalendarResponse(BaseModel):
     """変更カレンダーレスポンススキーマ"""
+
     data: List[ChangeCalendarItem]
 
 
 class ChangeTaskCreate(BaseModel):
     """変更タスク作成スキーマ"""
+
     task_name: str = Field(..., min_length=1, max_length=500, description="タスク名")
     description: Optional[str] = Field(None, description="タスク詳細")
     assignee_id: Optional[UUID] = Field(None, description="担当者ID")

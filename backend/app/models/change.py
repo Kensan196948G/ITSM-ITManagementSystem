@@ -1,6 +1,14 @@
 """変更管理モデル"""
 
-from sqlalchemy import Column, String, Text, DateTime, ForeignKey, Enum as SQLEnum, Integer
+from sqlalchemy import (
+    Column,
+    String,
+    Text,
+    DateTime,
+    ForeignKey,
+    Enum as SQLEnum,
+    Integer,
+)
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 import enum
@@ -13,6 +21,7 @@ from app.models.common import UUID
 
 class ChangeType(str, enum.Enum):
     """変更タイプ"""
+
     STANDARD = "standard"
     NORMAL = "normal"
     EMERGENCY = "emergency"
@@ -20,6 +29,7 @@ class ChangeType(str, enum.Enum):
 
 class ChangeStatus(str, enum.Enum):
     """変更ステータス"""
+
     DRAFT = "draft"
     SUBMITTED = "submitted"
     UNDER_REVIEW = "under_review"
@@ -33,6 +43,7 @@ class ChangeStatus(str, enum.Enum):
 
 class RiskLevel(str, enum.Enum):
     """リスクレベル"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -41,6 +52,7 @@ class RiskLevel(str, enum.Enum):
 
 class Change(Base):
     """変更要求モデル"""
+
     __tablename__ = "changes"
 
     id = Column(UUID(), primary_key=True, default=uuid.uuid4)
@@ -55,33 +67,40 @@ class Change(Base):
     implementation_plan = Column(Text)
     rollback_plan = Column(Text)
     test_plan = Column(Text)
-    
+
     # スケジュール
     scheduled_start = Column(DateTime(timezone=True))
     scheduled_end = Column(DateTime(timezone=True))
     actual_start = Column(DateTime(timezone=True))
     actual_end = Column(DateTime(timezone=True))
-    
+
     # 担当者
     requester_id = Column(UUID(), ForeignKey("users.id"), nullable=False)
     implementer_id = Column(UUID(), ForeignKey("users.id"))
-    
+
     # CAB（Change Advisory Board）
     cab_required = Column(String(1), default="N")  # Y/N
-    
+
     # 監査情報
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
     # リレーション
     requester = relationship("User", foreign_keys=[requester_id])
     implementer = relationship("User", foreign_keys=[implementer_id])
-    approvals = relationship("ChangeApproval", back_populates="change", cascade="all, delete-orphan")
-    tasks = relationship("ChangeTask", back_populates="change", cascade="all, delete-orphan")
+    approvals = relationship(
+        "ChangeApproval", back_populates="change", cascade="all, delete-orphan"
+    )
+    tasks = relationship(
+        "ChangeTask", back_populates="change", cascade="all, delete-orphan"
+    )
 
 
 class ChangeApproval(Base):
     """変更承認モデル"""
+
     __tablename__ = "change_approvals"
 
     id = Column(UUID(), primary_key=True, default=uuid.uuid4)
@@ -99,6 +118,7 @@ class ChangeApproval(Base):
 
 class ChangeTask(Base):
     """変更タスクモデル"""
+
     __tablename__ = "change_tasks"
 
     id = Column(UUID(), primary_key=True, default=uuid.uuid4)

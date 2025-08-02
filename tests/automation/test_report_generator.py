@@ -15,9 +15,10 @@ import sys
 import os
 import base64
 
+
 class TestReportGenerator:
     """テストレポート生成クラス"""
-    
+
     def __init__(self):
         self.base_path = Path(__file__).parent
         self.project_root = self.base_path.parent.parent
@@ -257,11 +258,11 @@ class TestReportGenerator:
         # ステータスクラスマッピング
         status_class_map = {
             "PASS": "pass",
-            "FAIL": "fail", 
+            "FAIL": "fail",
             "WARN": "warn",
-            "ERROR": "error"
+            "ERROR": "error",
         }
-        
+
         # 基本メトリクス
         executive_summary = report_data.get("executive_summary", {})
         overall_status = executive_summary.get("overall_status", "UNKNOWN")
@@ -269,36 +270,49 @@ class TestReportGenerator:
         passed_tests = executive_summary.get("passed_tests", 0)
         failed_tests = executive_summary.get("failed_tests", 0)
         success_rate = executive_summary.get("success_rate", 0)
-        
+
         # 実行時間の計算
-        duration_seconds = report_data.get("report_metadata", {}).get("duration_seconds", 0)
+        duration_seconds = report_data.get("report_metadata", {}).get(
+            "duration_seconds", 0
+        )
         duration_str = f"{duration_seconds:.1f}秒"
         if duration_seconds > 60:
             minutes = duration_seconds // 60
             seconds = duration_seconds % 60
             duration_str = f"{minutes:.0f}分{seconds:.0f}秒"
-        
+
         # 品質ゲートHTML生成
-        quality_gates_html = self.generate_quality_gates_html(report_data.get("quality_gates", {}))
-        
+        quality_gates_html = self.generate_quality_gates_html(
+            report_data.get("quality_gates", {})
+        )
+
         # テストスイートHTML生成
-        test_suites_html = self.generate_test_suites_html(report_data.get("test_suites", {}))
-        
+        test_suites_html = self.generate_test_suites_html(
+            report_data.get("test_suites", {})
+        )
+
         # 改善提案HTML生成
         recommendations = report_data.get("recommendations", [])
         recommendations_html = "<ul>"
         for rec in recommendations:
             recommendations_html += f"<li>{rec}</li>"
         recommendations_html += "</ul>"
-        
+
         if not recommendations:
-            recommendations_html = "<p>現在のところ、改善提案はありません。優秀な結果です！</p>"
-        
+            recommendations_html = (
+                "<p>現在のところ、改善提案はありません。優秀な結果です！</p>"
+            )
+
         # テンプレート変数置換（safer approach）
         html_template = self.templates["html_template"]
         html_content = html_template.replace("{overall_status}", overall_status)
-        html_content = html_content.replace("{overall_status_class}", status_class_map.get(overall_status, "error"))
-        html_content = html_content.replace("{execution_time}", report_data.get("report_metadata", {}).get("generated_at", "N/A"))
+        html_content = html_content.replace(
+            "{overall_status_class}", status_class_map.get(overall_status, "error")
+        )
+        html_content = html_content.replace(
+            "{execution_time}",
+            report_data.get("report_metadata", {}).get("generated_at", "N/A"),
+        )
         html_content = html_content.replace("{duration}", duration_str)
         html_content = html_content.replace("{total_tests}", str(total_tests))
         html_content = html_content.replace("{passed_tests}", str(passed_tests))
@@ -306,87 +320,95 @@ class TestReportGenerator:
         html_content = html_content.replace("{success_rate}", f"{success_rate:.1%}")
         html_content = html_content.replace("{quality_gates_html}", quality_gates_html)
         html_content = html_content.replace("{test_suites_html}", test_suites_html)
-        html_content = html_content.replace("{recommendations_html}", recommendations_html)
-        html_content = html_content.replace("{generation_time}", datetime.now().isoformat())
-        
+        html_content = html_content.replace(
+            "{recommendations_html}", recommendations_html
+        )
+        html_content = html_content.replace(
+            "{generation_time}", datetime.now().isoformat()
+        )
+
         return html_content
 
     def generate_quality_gates_html(self, quality_gates: Dict[str, Any]) -> str:
         """品質ゲートHTML生成"""
         if not quality_gates or "checks" not in quality_gates:
             return "<p>品質ゲート情報がありません。</p>"
-        
+
         html = '<div class="details-table-container">'
         html += '<table class="details-table">'
-        html += '<tr><th>品質ゲート</th><th>基準</th><th>実際の値</th><th>ステータス</th></tr>'
-        
+        html += "<tr><th>品質ゲート</th><th>基準</th><th>実際の値</th><th>ステータス</th></tr>"
+
         for check in quality_gates["checks"]:
             status = check.get("status", "UNKNOWN")
-            status_emoji = "✅" if status == "PASS" else "⚠️" if status == "WARN" else "❌"
-            
-            html += f'<tr>'
+            status_emoji = (
+                "✅" if status == "PASS" else "⚠️" if status == "WARN" else "❌"
+            )
+
+            html += f"<tr>"
             html += f'<td>{check.get("gate", "N/A")}</td>'
             html += f'<td>{check.get("threshold", "N/A")}</td>'
             html += f'<td>{check.get("actual", "N/A")}</td>'
-            html += f'<td>{status_emoji} {status}</td>'
-            html += f'</tr>'
-        
-        html += '</table></div>'
+            html += f"<td>{status_emoji} {status}</td>"
+            html += f"</tr>"
+
+        html += "</table></div>"
         return html
 
     def generate_test_suites_html(self, test_suites: Dict[str, Any]) -> str:
         """テストスイートHTML生成"""
         if not test_suites:
             return "<p>テストスイート情報がありません。</p>"
-        
+
         html = ""
-        
+
         for suite_name, suite_data in test_suites.items():
             if not isinstance(suite_data, dict):
                 continue
-                
+
             suite_title = suite_data.get("test_suite", suite_name)
             status = suite_data.get("status", "UNKNOWN")
-            
+
             # ステータスバッジ
             status_class = {
                 "PASS": "status-pass",
-                "FAIL": "status-fail", 
+                "FAIL": "status-fail",
                 "WARN": "status-warn",
                 "ERROR": "status-error",
-                "SKIP": "status-warn"
+                "SKIP": "status-warn",
             }.get(status, "status-error")
-            
+
             html += '<div class="test-suite">'
             html += '<div class="test-suite-header">'
             html += f'<div class="test-suite-title">{suite_title}</div>'
             html += f'<div class="status-badge {status_class}">{status}</div>'
-            html += '</div>'
-            
+            html += "</div>"
+
             # 成功率バー（該当する場合）
             if "total_tests" in suite_data and suite_data["total_tests"] > 0:
                 success_rate = suite_data.get("passed", 0) / suite_data["total_tests"]
                 html += f'<div class="progress-bar">'
                 html += f'<div class="progress-fill" style="width: {success_rate * 100}%"></div>'
-                html += f'</div>'
+                html += f"</div>"
                 html += f'<p>成功率: {success_rate:.1%} ({suite_data.get("passed", 0)}/{suite_data["total_tests"]})</p>'
-            
+
             # 詳細情報
             if "message" in suite_data:
                 html += f'<p><strong>メッセージ:</strong> {suite_data["message"]}</p>'
-            
+
             if "duration" in suite_data:
-                html += f'<p><strong>実行時間:</strong> {suite_data["duration"]:.1f}秒</p>'
-            
-            html += '</div>'
-        
+                html += (
+                    f'<p><strong>実行時間:</strong> {suite_data["duration"]:.1f}秒</p>'
+                )
+
+            html += "</div>"
+
         return html
 
     def generate_manager_summary(self, report_data: Dict[str, Any]) -> str:
         """マネージャー向けサマリー生成"""
         executive_summary = report_data.get("executive_summary", {})
         quality_gates = report_data.get("quality_gates", {})
-        
+
         summary = f"""
 # GitHub Actions自動化システム - マネージャーサマリー
 
@@ -403,7 +425,7 @@ class TestReportGenerator:
 
 ## 🚪 リリース判定
 """
-        
+
         overall_status = quality_gates.get("overall_status", "UNKNOWN")
         if overall_status == "PASS":
             summary += """
@@ -423,44 +445,45 @@ class TestReportGenerator:
 - 品質ゲート失敗により修正が必要
 - 本番デプロイは推奨されません
 """
-        
+
         # 改善提案があれば追加
         recommendations = report_data.get("recommendations", [])
         if recommendations:
             summary += "\n## 🔧 改善提案\n"
             for i, rec in enumerate(recommendations, 1):
                 summary += f"{i}. {rec}\n"
-        
+
         summary += f"\n---\n*レポート生成時刻: {datetime.now().isoformat()}*\n"
-        
+
         return summary
 
     def generate_ci_cd_artifact(self, report_data: Dict[str, Any]) -> Dict[str, Any]:
         """CI/CD連携用アーティファクト生成"""
         executive_summary = report_data.get("executive_summary", {})
         quality_gates = report_data.get("quality_gates", {})
-        
+
         artifact = {
             "build_metadata": {
                 "timestamp": datetime.now().isoformat(),
                 "report_version": "1.0",
-                "system": "github_actions_automation"
+                "system": "github_actions_automation",
             },
             "quality_assessment": {
                 "overall_status": quality_gates.get("overall_status", "UNKNOWN"),
                 "success_rate": executive_summary.get("success_rate", 0),
                 "total_tests": executive_summary.get("total_tests", 0),
-                "critical_failures": executive_summary.get("error_tests", 0)
+                "critical_failures": executive_summary.get("error_tests", 0),
             },
             "deployment_recommendation": {
                 "approved": quality_gates.get("overall_status") == "PASS",
                 "risk_level": self.calculate_risk_level(report_data),
-                "manual_review_required": quality_gates.get("overall_status") in ["FAIL", "ERROR"]
+                "manual_review_required": quality_gates.get("overall_status")
+                in ["FAIL", "ERROR"],
             },
             "test_coverage": self.extract_test_coverage(report_data),
-            "performance_metrics": self.extract_performance_metrics(report_data)
+            "performance_metrics": self.extract_performance_metrics(report_data),
         }
-        
+
         return artifact
 
     def calculate_risk_level(self, report_data: Dict[str, Any]) -> str:
@@ -468,7 +491,7 @@ class TestReportGenerator:
         executive_summary = report_data.get("executive_summary", {})
         success_rate = executive_summary.get("success_rate", 0)
         error_tests = executive_summary.get("error_tests", 0)
-        
+
         if success_rate >= 0.95 and error_tests == 0:
             return "LOW"
         elif success_rate >= 0.80 and error_tests <= 1:
@@ -479,88 +502,99 @@ class TestReportGenerator:
     def extract_test_coverage(self, report_data: Dict[str, Any]) -> Dict[str, Any]:
         """テストカバレッジ情報抽出"""
         test_suites = report_data.get("test_suites", {})
-        
+
         coverage = {
             "api_tests": "github_actions" in test_suites,
             "integration_tests": "pytest_integration" in test_suites,
             "e2e_tests": "playwright_e2e" in test_suites,
             "performance_tests": "load_performance" in test_suites,
-            "health_checks": "api_health" in test_suites
+            "health_checks": "api_health" in test_suites,
         }
-        
+
         coverage["overall_coverage"] = sum(coverage.values()) / len(coverage)
-        
+
         return coverage
 
-    def extract_performance_metrics(self, report_data: Dict[str, Any]) -> Dict[str, Any]:
+    def extract_performance_metrics(
+        self, report_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """パフォーマンスメトリクス抽出"""
         duration = report_data.get("report_metadata", {}).get("duration_seconds", 0)
-        
+
         performance = {
             "total_execution_time": duration,
-            "average_test_time": duration / max(report_data.get("executive_summary", {}).get("total_tests", 1), 1),
-            "performance_grade": "A" if duration < 300 else "B" if duration < 600 else "C"
+            "average_test_time": duration
+            / max(report_data.get("executive_summary", {}).get("total_tests", 1), 1),
+            "performance_grade": (
+                "A" if duration < 300 else "B" if duration < 600 else "C"
+            ),
         }
-        
+
         # 負荷テスト結果があれば追加
-        load_performance = report_data.get("test_suites", {}).get("load_performance", {})
+        load_performance = report_data.get("test_suites", {}).get(
+            "load_performance", {}
+        )
         if "performance_results" in load_performance:
             performance["load_test_results"] = load_performance["performance_results"]
-        
+
         return performance
 
     def save_all_reports(self, report_data: Dict[str, Any]) -> Dict[str, str]:
         """全形式のレポート保存"""
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         reports_dir = self.base_path / "reports"
         reports_dir.mkdir(exist_ok=True)
-        
+
         saved_files = {}
-        
+
         # HTMLレポート
         html_content = self.generate_html_report(report_data)
         html_file = reports_dir / f"github_actions_automation_report_{timestamp}.html"
-        with open(html_file, 'w', encoding='utf-8') as f:
+        with open(html_file, "w", encoding="utf-8") as f:
             f.write(html_content)
         saved_files["html"] = str(html_file)
-        
+
         # JSONレポート（詳細）
         json_file = reports_dir / f"github_actions_automation_report_{timestamp}.json"
-        with open(json_file, 'w', encoding='utf-8') as f:
+        with open(json_file, "w", encoding="utf-8") as f:
             json.dump(report_data, f, indent=2, ensure_ascii=False)
         saved_files["json"] = str(json_file)
-        
+
         # マネージャーサマリー
         manager_summary = self.generate_manager_summary(report_data)
         manager_file = reports_dir / f"manager_summary_{timestamp}.md"
-        with open(manager_file, 'w', encoding='utf-8') as f:
+        with open(manager_file, "w", encoding="utf-8") as f:
             f.write(manager_summary)
         saved_files["manager_summary"] = str(manager_file)
-        
+
         # CI/CDアーティファクト
         ci_cd_artifact = self.generate_ci_cd_artifact(report_data)
         artifact_file = reports_dir / f"ci_cd_artifact_{timestamp}.json"
-        with open(artifact_file, 'w', encoding='utf-8') as f:
+        with open(artifact_file, "w", encoding="utf-8") as f:
             json.dump(ci_cd_artifact, f, indent=2, ensure_ascii=False)
         saved_files["ci_cd_artifact"] = str(artifact_file)
-        
+
         return saved_files
 
     def print_summary_to_console(self, report_data: Dict[str, Any]):
         """コンソールサマリー出力"""
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("📊 GITHUB ACTIONS自動化システム テストレポート")
-        print("="*80)
-        
+        print("=" * 80)
+
         executive_summary = report_data.get("executive_summary", {})
         quality_gates = report_data.get("quality_gates", {})
-        
+
         # 基本メトリクス
-        print(f"実行日時: {report_data.get('report_metadata', {}).get('generated_at', 'N/A')}")
-        print(f"実行時間: {report_data.get('report_metadata', {}).get('duration_seconds', 0):.1f}秒")
+        print(
+            f"実行日時: {report_data.get('report_metadata', {}).get('generated_at', 'N/A')}"
+        )
+        print(
+            f"実行時間: {report_data.get('report_metadata', {}).get('duration_seconds', 0):.1f}秒"
+        )
         print(f"全体ステータス: {executive_summary.get('overall_status', 'UNKNOWN')}")
         print()
-        
+
         # テスト結果
         print("📈 テスト結果:")
         print(f"  総テスト数: {executive_summary.get('total_tests', 0)}")
@@ -569,14 +603,18 @@ class TestReportGenerator:
         print(f"  💥 エラー: {executive_summary.get('error_tests', 0)}")
         print(f"  📊 成功率: {executive_summary.get('success_rate', 0):.1%}")
         print()
-        
+
         # 品質ゲート
         print("🚪 品質ゲート結果:")
         for check in quality_gates.get("checks", []):
-            status_emoji = "✅" if check["status"] == "PASS" else "⚠️" if check["status"] == "WARN" else "❌"
+            status_emoji = (
+                "✅"
+                if check["status"] == "PASS"
+                else "⚠️" if check["status"] == "WARN" else "❌"
+            )
             print(f"  {status_emoji} {check['gate']}: {check['actual']}")
         print()
-        
+
         # 最終判定
         overall_status = quality_gates.get("overall_status", "UNKNOWN")
         if overall_status == "PASS":
@@ -585,21 +623,21 @@ class TestReportGenerator:
             print("⚠️ 結果: 条件付き承認 - 注意してデプロイ")
         else:
             print("❌ 結果: リリース保留 - 修正が必要")
-        
-        print("="*80)
+
+        print("=" * 80)
 
 
 def main():
     """テスト実行"""
     generator = TestReportGenerator()
-    
+
     # サンプルレポートデータ
     sample_report = {
         "report_metadata": {
             "generated_at": datetime.now().isoformat(),
             "duration_seconds": 245.5,
             "test_environment": "integration",
-            "report_version": "1.0"
+            "report_version": "1.0",
         },
         "executive_summary": {
             "overall_status": "PASS",
@@ -608,7 +646,7 @@ def main():
             "passed_tests": 23,
             "failed_tests": 1,
             "error_tests": 0,
-            "success_rate": 0.92
+            "success_rate": 0.92,
         },
         "quality_gates": {
             "overall_status": "PASS",
@@ -617,15 +655,15 @@ def main():
                     "gate": "Minimum Success Rate",
                     "threshold": ">= 80%",
                     "actual": "92%",
-                    "status": "PASS"
+                    "status": "PASS",
                 },
                 {
                     "gate": "Maximum Duration",
                     "threshold": "<= 15 minutes",
                     "actual": "4.1 minutes",
-                    "status": "PASS"
-                }
-            ]
+                    "status": "PASS",
+                },
+            ],
         },
         "test_suites": {
             "github_actions": {
@@ -634,32 +672,32 @@ def main():
                 "total_tests": 8,
                 "passed": 8,
                 "failed": 0,
-                "success_rate": 1.0
+                "success_rate": 1.0,
             },
             "pytest_integration": {
-                "test_suite": "Pytest Integration Suite", 
+                "test_suite": "Pytest Integration Suite",
                 "status": "PASS",
                 "total_tests": 15,
                 "passed": 14,
                 "failed": 1,
-                "success_rate": 0.93
-            }
+                "success_rate": 0.93,
+            },
         },
         "recommendations": [
             "1つのテスト失敗があります。詳細な調査を推奨します。",
-            "全体的に優秀な結果です。この品質を維持してください。"
-        ]
+            "全体的に優秀な結果です。この品質を維持してください。",
+        ],
     }
-    
+
     print("🧪 Testing Report Generator...")
-    
+
     # 全形式のレポート生成
     saved_files = generator.save_all_reports(sample_report)
-    
+
     print("📄 Generated reports:")
     for format_type, file_path in saved_files.items():
         print(f"  {format_type}: {file_path}")
-    
+
     # コンソールサマリー出力
     generator.print_summary_to_console(sample_report)
 

@@ -1,6 +1,7 @@
 """
 Simple health check API tests for ITSM system
 """
+
 import pytest
 from unittest.mock import patch, Mock
 
@@ -15,16 +16,17 @@ class TestHealthCheck:
             "status": "healthy",
             "service": "ITSM System",
             "version": "1.0.0",
-            "environment": "development"
+            "environment": "development",
         }
-        
-        with patch('requests.get') as mock_get:
+
+        with patch("requests.get") as mock_get:
             mock_get.return_value.status_code = 200
             mock_get.return_value.json.return_value = mock_response
-            
+
             import requests
+
             response = requests.get(f"{test_config['base_url']}/health")
-            
+
             assert response.status_code == 200
             health_data = response.json()
             assert health_data["status"] == "healthy"
@@ -37,16 +39,17 @@ class TestHealthCheck:
             "name": "ITSM System",
             "version": "1.0.0",
             "api_version": "1.0",
-            "environment": "development"
+            "environment": "development",
         }
-        
-        with patch('requests.get') as mock_get:
+
+        with patch("requests.get") as mock_get:
             mock_get.return_value.status_code = 200
             mock_get.return_value.json.return_value = mock_response
-            
+
             import requests
+
             response = requests.get(f"{test_config['base_url']}/version")
-            
+
             assert response.status_code == 200
             version_data = response.json()
             assert version_data["name"] == "ITSM System"
@@ -61,14 +64,15 @@ class TestAPIPerformance:
 
     def test_health_endpoint_performance(self, test_config, benchmark):
         """Benchmark health endpoint response time"""
-        with patch('requests.get') as mock_get:
+        with patch("requests.get") as mock_get:
             mock_get.return_value.status_code = 200
             mock_get.return_value.json.return_value = {"status": "healthy"}
-            
+
             def make_request():
                 import requests
+
                 return requests.get(f"{test_config['base_url']}/health")
-            
+
             result = benchmark(make_request)
             assert result.status_code == 200
 
@@ -77,26 +81,26 @@ class TestAPIPerformance:
         import threading
         import requests
         from unittest.mock import patch
-        
+
         results = []
-        
+
         def make_request():
-            with patch('requests.get') as mock_get:
+            with patch("requests.get") as mock_get:
                 mock_get.return_value.status_code = 200
                 mock_get.return_value.json.return_value = {"status": "healthy"}
-                
+
                 response = requests.get(f"{test_config['base_url']}/health")
                 results.append(response.status_code)
-        
+
         threads = []
         for i in range(10):
             thread = threading.Thread(target=make_request)
             threads.append(thread)
             thread.start()
-        
+
         for thread in threads:
             thread.join()
-        
+
         # All requests should succeed
         assert len(results) == 10
         assert all(status == 200 for status in results)

@@ -37,12 +37,7 @@ class TestBasicSetup:
         assert data.get("value") == 123
         assert "name" in data
 
-    @pytest.mark.parametrize("input,expected", [
-        (1, 2),
-        (2, 4),
-        (3, 6),
-        (4, 8)
-    ])
+    @pytest.mark.parametrize("input,expected", [(1, 2), (2, 4), (3, 6), (4, 8)])
     def test_parametrized(self, input, expected):
         """Test parametrized test case"""
         result = input * 2
@@ -62,8 +57,9 @@ class TestBasicSetup:
     @pytest.mark.asyncio
     async def test_async_basic(self):
         """Test async functionality"""
+
         async def async_add(a, b):
             return a + b
-        
+
         result = await async_add(2, 3)
         assert result == 5

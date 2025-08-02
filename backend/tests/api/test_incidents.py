@@ -36,7 +36,7 @@ class TestIncidentAPI:
         # Create incident first
         create_response = client.post("/api/v1/incidents/", json=incident_data)
         incident_id = create_response.json()["id"]
-        
+
         # Get incident by ID
         response = client.get(f"/api/v1/incidents/{incident_id}")
         assert response.status_code == 200
@@ -50,7 +50,7 @@ class TestIncidentAPI:
         # Create incident first
         create_response = client.post("/api/v1/incidents/", json=incident_data)
         incident_id = create_response.json()["id"]
-        
+
         # Update incident
         update_data = {"title": "Updated Incident Title", "status": "in_progress"}
         response = client.put(f"/api/v1/incidents/{incident_id}", json=update_data)
@@ -65,11 +65,11 @@ class TestIncidentAPI:
         # Create incident first
         create_response = client.post("/api/v1/incidents/", json=incident_data)
         incident_id = create_response.json()["id"]
-        
+
         # Delete incident
         response = client.delete(f"/api/v1/incidents/{incident_id}")
         assert response.status_code == 204
-        
+
         # Verify incident is deleted
         get_response = client.get(f"/api/v1/incidents/{incident_id}")
         assert get_response.status_code == 404
@@ -100,7 +100,10 @@ class TestIncidentAPI:
         data = response.json()
         # Results should contain search term in title or description
         for incident in data:
-            assert "server" in incident["title"].lower() or "server" in incident["description"].lower()
+            assert (
+                "server" in incident["title"].lower()
+                or "server" in incident["description"].lower()
+            )
 
     @pytest.mark.api
     def test_assign_incident(self, client: TestClient, incident_data: dict, test_user):
@@ -108,10 +111,12 @@ class TestIncidentAPI:
         # Create incident first
         create_response = client.post("/api/v1/incidents/", json=incident_data)
         incident_id = create_response.json()["id"]
-        
+
         # Assign incident
         assign_data = {"assignee_id": test_user.id}
-        response = client.patch(f"/api/v1/incidents/{incident_id}/assign", json=assign_data)
+        response = client.patch(
+            f"/api/v1/incidents/{incident_id}/assign", json=assign_data
+        )
         assert response.status_code == 200
         data = response.json()
         assert data["assignee_id"] == test_user.id
@@ -122,12 +127,12 @@ class TestIncidentAPI:
         # Test missing required fields
         response = client.post("/api/v1/incidents/", json={})
         assert response.status_code == 422
-        
+
         # Test invalid priority
         invalid_data = {
             "title": "Test",
             "description": "Test",
-            "priority": "invalid_priority"
+            "priority": "invalid_priority",
         }
         response = client.post("/api/v1/incidents/", json=invalid_data)
         assert response.status_code == 422
@@ -138,21 +143,23 @@ class TestIncidentAPI:
         """Test that incident endpoints require authentication"""
         # Remove auth headers
         client.headers.clear()
-        
+
         response = client.get("/api/v1/incidents/")
         assert response.status_code == 401
 
     @pytest.mark.api
     @pytest.mark.auth
-    def test_incident_crud_with_auth(self, client: TestClient, auth_headers: dict, incident_data: dict):
+    def test_incident_crud_with_auth(
+        self, client: TestClient, auth_headers: dict, incident_data: dict
+    ):
         """Test incident CRUD operations with authentication"""
         # Set auth headers
         client.headers.update(auth_headers)
-        
+
         # Test authenticated access
         response = client.get("/api/v1/incidents/")
         assert response.status_code == 200
-        
+
         # Test authenticated creation
         response = client.post("/api/v1/incidents/", json=incident_data)
         assert response.status_code == 201
@@ -172,7 +179,9 @@ class TestIncidentAPIAsync:
 
     @pytest.mark.asyncio
     @pytest.mark.api
-    async def test_async_create_incident(self, async_client: AsyncClient, incident_data: dict):
+    async def test_async_create_incident(
+        self, async_client: AsyncClient, incident_data: dict
+    ):
         """Test async incident creation"""
         response = await async_client.post("/api/v1/incidents/", json=incident_data)
         assert response.status_code == 201

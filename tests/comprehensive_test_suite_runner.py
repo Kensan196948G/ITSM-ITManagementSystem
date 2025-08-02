@@ -24,18 +24,19 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional
 import logging
 
+
 class ComprehensiveTestSuiteRunner:
     """包括的テストスイート実行システム"""
-    
+
     def __init__(self):
         self.base_dir = Path("/media/kensan/LinuxHDD/ITSM-ITmanagementSystem")
         self.tests_dir = self.base_dir / "tests"
         self.frontend_dir = self.base_dir / "frontend"
         self.backend_dir = self.base_dir / "backend"
-        
+
         # ログ設定
         self.setup_logging()
-        
+
         # テスト結果
         self.test_results = {
             "timestamp": datetime.now().isoformat(),
@@ -44,66 +45,68 @@ class ComprehensiveTestSuiteRunner:
             "passed_tests": 0,
             "failed_tests": 0,
             "success_rate": 0.0,
-            "categories": {}
+            "categories": {},
         }
-        
+
         self.logger.info("🧪 包括的テストスイートランナー初期化完了")
-    
+
     def setup_logging(self):
         """ログ設定"""
         log_dir = self.tests_dir / "reports"
         log_dir.mkdir(exist_ok=True)
-        
+
         logging.basicConfig(
             level=logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             handlers=[
-                logging.FileHandler(log_dir / 'comprehensive_test_suite.log'),
-                logging.StreamHandler(sys.stdout)
-            ]
+                logging.FileHandler(log_dir / "comprehensive_test_suite.log"),
+                logging.StreamHandler(sys.stdout),
+            ],
         )
-        self.logger = logging.getLogger('ComprehensiveTestSuite')
-    
+        self.logger = logging.getLogger("ComprehensiveTestSuite")
+
     async def run_all_tests(self) -> Dict[str, Any]:
         """全テスト実行"""
         self.logger.info("🚀 包括的テストスイート実行開始")
-        
+
         try:
             # 1. Pytest API/Backend テスト
             pytest_results = await self.run_pytest_tests()
             self.test_results["categories"]["pytest"] = pytest_results
-            
+
             # 2. Playwright E2E テスト
             playwright_results = await self.run_playwright_tests()
             self.test_results["categories"]["playwright"] = playwright_results
-            
+
             # 3. 負荷テスト
             load_test_results = await self.run_load_tests()
             self.test_results["categories"]["load"] = load_test_results
-            
+
             # 4. 統合テスト
             integration_results = await self.run_integration_tests()
             self.test_results["categories"]["integration"] = integration_results
-            
+
             # 結果統計計算
             self.calculate_overall_results()
-            
+
             # レポート生成
             await self.generate_comprehensive_report()
-            
-            self.logger.info(f"✅ 全テスト完了 - 成功率: {self.test_results['success_rate']:.1f}%")
-            
+
+            self.logger.info(
+                f"✅ 全テスト完了 - 成功率: {self.test_results['success_rate']:.1f}%"
+            )
+
             return self.test_results
-            
+
         except Exception as e:
             self.logger.error(f"❌ テストスイート実行エラー: {e}")
             self.test_results["error"] = str(e)
             return self.test_results
-    
+
     async def run_pytest_tests(self) -> Dict[str, Any]:
         """Pytest テスト実行"""
         self.logger.info("🐍 Pytest テスト実行開始")
-        
+
         results = {
             "category": "pytest",
             "success": False,
@@ -111,47 +114,65 @@ class ComprehensiveTestSuiteRunner:
             "passed": 0,
             "failed": 0,
             "error_output": "",
-            "duration": 0
+            "duration": 0,
         }
-        
+
         try:
             # 基本的なAPIテスト
-            api_result = await self.run_command([
-                sys.executable, "-m", "pytest", 
-                str(self.tests_dir / "api"),
-                "-v", "--tb=short", "--maxfail=10",
-                "--json-report", "--json-report-file=" + str(self.tests_dir / "reports" / "pytest_api_report.json"),
-                "--html=" + str(self.tests_dir / "reports" / "pytest_api_report.html")
-            ], timeout=180)
-            
+            api_result = await self.run_command(
+                [
+                    sys.executable,
+                    "-m",
+                    "pytest",
+                    str(self.tests_dir / "api"),
+                    "-v",
+                    "--tb=short",
+                    "--maxfail=10",
+                    "--json-report",
+                    "--json-report-file="
+                    + str(self.tests_dir / "reports" / "pytest_api_report.json"),
+                    "--html="
+                    + str(self.tests_dir / "reports" / "pytest_api_report.html"),
+                ],
+                timeout=180,
+            )
+
             if api_result["returncode"] == 0:
                 # JSONレポートから結果解析
                 report_file = self.tests_dir / "reports" / "pytest_api_report.json"
                 if report_file.exists():
-                    with open(report_file, 'r') as f:
+                    with open(report_file, "r") as f:
                         report_data = json.load(f)
-                        results["total_tests"] = report_data.get("summary", {}).get("total", 0)
-                        results["passed"] = report_data.get("summary", {}).get("passed", 0)
-                        results["failed"] = report_data.get("summary", {}).get("failed", 0)
-                
+                        results["total_tests"] = report_data.get("summary", {}).get(
+                            "total", 0
+                        )
+                        results["passed"] = report_data.get("summary", {}).get(
+                            "passed", 0
+                        )
+                        results["failed"] = report_data.get("summary", {}).get(
+                            "failed", 0
+                        )
+
                 results["success"] = True
                 self.logger.info("✅ Pytest API テスト成功")
             else:
                 results["error_output"] = api_result["stderr"][:500]
-                self.logger.warning(f"⚠️ Pytest API テスト失敗: {api_result['returncode']}")
-            
+                self.logger.warning(
+                    f"⚠️ Pytest API テスト失敗: {api_result['returncode']}"
+                )
+
             results["duration"] = api_result.get("duration", 0)
-            
+
         except Exception as e:
             self.logger.error(f"❌ Pytest 実行エラー: {e}")
             results["error"] = str(e)
-        
+
         return results
-    
+
     async def run_playwright_tests(self) -> Dict[str, Any]:
         """Playwright E2E テスト実行"""
         self.logger.info("🎭 Playwright E2E テスト実行開始")
-        
+
         results = {
             "category": "playwright",
             "success": False,
@@ -159,18 +180,24 @@ class ComprehensiveTestSuiteRunner:
             "passed": 0,
             "failed": 0,
             "error_output": "",
-            "duration": 0
+            "duration": 0,
         }
-        
+
         try:
             # Playwright テスト実行
-            playwright_result = await self.run_command([
-                "npx", "playwright", "test",
-                "--reporter=json",
-                "--output-dir=test-results",
-                "--headed=false"
-            ], cwd=self.frontend_dir, timeout=300)
-            
+            playwright_result = await self.run_command(
+                [
+                    "npx",
+                    "playwright",
+                    "test",
+                    "--reporter=json",
+                    "--output-dir=test-results",
+                    "--headed=false",
+                ],
+                cwd=self.frontend_dir,
+                timeout=300,
+            )
+
             if playwright_result["returncode"] == 0:
                 # テスト結果解析
                 results_dir = self.frontend_dir / "test-results"
@@ -178,30 +205,32 @@ class ComprehensiveTestSuiteRunner:
                     # JSON結果ファイル探索
                     json_files = list(results_dir.glob("*.json"))
                     if json_files:
-                        with open(json_files[0], 'r') as f:
+                        with open(json_files[0], "r") as f:
                             test_data = json.load(f)
                             # Playwright結果解析ロジック
                             results["total_tests"] = len(test_data.get("suites", []))
                             results["passed"] = results["total_tests"]  # 簡略化
-                
+
                 results["success"] = True
                 self.logger.info("✅ Playwright E2E テスト成功")
             else:
                 results["error_output"] = playwright_result["stderr"][:500]
-                self.logger.warning(f"⚠️ Playwright テスト失敗: {playwright_result['returncode']}")
-            
+                self.logger.warning(
+                    f"⚠️ Playwright テスト失敗: {playwright_result['returncode']}"
+                )
+
             results["duration"] = playwright_result.get("duration", 0)
-            
+
         except Exception as e:
             self.logger.error(f"❌ Playwright 実行エラー: {e}")
             results["error"] = str(e)
-        
+
         return results
-    
+
     async def run_load_tests(self) -> Dict[str, Any]:
         """負荷テスト実行"""
         self.logger.info("⚡ 負荷テスト実行開始")
-        
+
         results = {
             "category": "load",
             "success": False,
@@ -209,17 +238,24 @@ class ComprehensiveTestSuiteRunner:
             "passed": 0,
             "failed": 0,
             "error_output": "",
-            "duration": 0
+            "duration": 0,
         }
-        
+
         try:
             # 負荷テスト実行（簡易版）
-            load_result = await self.run_command([
-                sys.executable, "-m", "pytest", 
-                str(self.tests_dir / "load"),
-                "-v", "--tb=short", "--maxfail=5"
-            ], timeout=120)
-            
+            load_result = await self.run_command(
+                [
+                    sys.executable,
+                    "-m",
+                    "pytest",
+                    str(self.tests_dir / "load"),
+                    "-v",
+                    "--tb=short",
+                    "--maxfail=5",
+                ],
+                timeout=120,
+            )
+
             if load_result["returncode"] == 0:
                 results["success"] = True
                 results["total_tests"] = 3  # 仮値
@@ -229,19 +265,19 @@ class ComprehensiveTestSuiteRunner:
                 results["error_output"] = load_result["stderr"][:500]
                 results["failed"] = 1
                 self.logger.warning(f"⚠️ 負荷テスト失敗: {load_result['returncode']}")
-            
+
             results["duration"] = load_result.get("duration", 0)
-            
+
         except Exception as e:
             self.logger.error(f"❌ 負荷テスト実行エラー: {e}")
             results["error"] = str(e)
-        
+
         return results
-    
+
     async def run_integration_tests(self) -> Dict[str, Any]:
         """統合テスト実行"""
         self.logger.info("🔗 統合テスト実行開始")
-        
+
         results = {
             "category": "integration",
             "success": False,
@@ -249,17 +285,23 @@ class ComprehensiveTestSuiteRunner:
             "passed": 0,
             "failed": 0,
             "error_output": "",
-            "duration": 0
+            "duration": 0,
         }
-        
+
         try:
             # API統合テスト
-            integration_result = await self.run_command([
-                sys.executable, "-m", "pytest", 
-                str(self.tests_dir / "test_ci_e2e_integration.py"),
-                "-v", "--tb=short"
-            ], timeout=90)
-            
+            integration_result = await self.run_command(
+                [
+                    sys.executable,
+                    "-m",
+                    "pytest",
+                    str(self.tests_dir / "test_ci_e2e_integration.py"),
+                    "-v",
+                    "--tb=short",
+                ],
+                timeout=90,
+            )
+
             if integration_result["returncode"] == 0:
                 results["success"] = True
                 results["total_tests"] = 2  # 仮値
@@ -268,65 +310,77 @@ class ComprehensiveTestSuiteRunner:
             else:
                 results["error_output"] = integration_result["stderr"][:500]
                 results["failed"] = 1
-                self.logger.warning(f"⚠️ 統合テスト失敗: {integration_result['returncode']}")
-            
+                self.logger.warning(
+                    f"⚠️ 統合テスト失敗: {integration_result['returncode']}"
+                )
+
             results["duration"] = integration_result.get("duration", 0)
-            
+
         except Exception as e:
             self.logger.error(f"❌ 統合テスト実行エラー: {e}")
             results["error"] = str(e)
-        
+
         return results
-    
+
     def calculate_overall_results(self):
         """全体結果計算"""
         total_tests = 0
         passed_tests = 0
         failed_tests = 0
         overall_success = True
-        
+
         for category, result in self.test_results["categories"].items():
             total_tests += result.get("total_tests", 0)
             passed_tests += result.get("passed", 0)
             failed_tests += result.get("failed", 0)
-            
+
             if not result.get("success", False):
                 overall_success = False
-        
-        self.test_results.update({
-            "overall_success": overall_success,
-            "total_tests": total_tests,
-            "passed_tests": passed_tests,
-            "failed_tests": failed_tests,
-            "success_rate": (passed_tests / total_tests * 100) if total_tests > 0 else 0.0
-        })
-    
+
+        self.test_results.update(
+            {
+                "overall_success": overall_success,
+                "total_tests": total_tests,
+                "passed_tests": passed_tests,
+                "failed_tests": failed_tests,
+                "success_rate": (
+                    (passed_tests / total_tests * 100) if total_tests > 0 else 0.0
+                ),
+            }
+        )
+
     async def generate_comprehensive_report(self):
         """包括的レポート生成"""
         self.logger.info("📊 包括的レポート生成開始")
-        
+
         # JSON レポート
-        json_report_path = self.tests_dir / "reports" / "comprehensive_test_suite_report.json"
-        with open(json_report_path, 'w') as f:
+        json_report_path = (
+            self.tests_dir / "reports" / "comprehensive_test_suite_report.json"
+        )
+        with open(json_report_path, "w") as f:
             json.dump(self.test_results, f, indent=2, ensure_ascii=False)
-        
+
         # HTML レポート生成
         html_report = self.generate_html_report()
-        html_report_path = self.tests_dir / "reports" / "comprehensive_test_suite_report.html"
-        with open(html_report_path, 'w') as f:
+        html_report_path = (
+            self.tests_dir / "reports" / "comprehensive_test_suite_report.html"
+        )
+        with open(html_report_path, "w") as f:
             f.write(html_report)
-        
+
         # Markdown レポート
         md_report = self.generate_markdown_report()
-        md_report_path = self.tests_dir / "reports" / "comprehensive_test_suite_report.md"
-        with open(md_report_path, 'w') as f:
+        md_report_path = (
+            self.tests_dir / "reports" / "comprehensive_test_suite_report.md"
+        )
+        with open(md_report_path, "w") as f:
             f.write(md_report)
-        
+
         self.logger.info(f"📋 レポート生成完了:")
         self.logger.info(f"  - JSON: {json_report_path}")
         self.logger.info(f"  - HTML: {html_report_path}")
         self.logger.info(f"  - Markdown: {md_report_path}")
-    
+
     def generate_html_report(self) -> str:
         """HTML レポート生成"""
         html = f"""
@@ -374,11 +428,11 @@ class ComprehensiveTestSuiteRunner:
     
     <h2>📝 カテゴリ別結果</h2>
 """
-        
+
         for category, result in self.test_results["categories"].items():
             status_class = "success" if result.get("success", False) else "failure"
             status_icon = "✅" if result.get("success", False) else "❌"
-            
+
             html += f"""
     <div class="category">
         <div class="category-header">
@@ -394,7 +448,7 @@ class ComprehensiveTestSuiteRunner:
         </div>
     </div>
 """
-        
+
         html += """
     <div class="summary">
         <h3>🎯 Test Suite 無限ループ修復 達成事項</h3>
@@ -415,7 +469,7 @@ class ComprehensiveTestSuiteRunner:
 </html>
 """
         return html
-    
+
     def generate_markdown_report(self) -> str:
         """Markdown レポート生成"""
         md = f"""# 🧪 ITSM 包括的テストスイート レポート
@@ -433,7 +487,7 @@ class ComprehensiveTestSuiteRunner:
 ## 📝 カテゴリ別結果
 
 """
-        
+
         for category, result in self.test_results["categories"].items():
             status_icon = "✅" if result.get("success", False) else "❌"
             md += f"""### {status_icon} {category.upper()} テスト
@@ -447,7 +501,7 @@ class ComprehensiveTestSuiteRunner:
 """
             if result.get("error_output"):
                 md += f"**エラー出力:**\n```\n{result.get('error_output', '')[:300]}\n```\n\n"
-        
+
         md += """## 🎯 Test Suite 無限ループ修復 達成事項
 
 - ✅ health_status "unhealthy" → "healthy" 完全正常化
@@ -461,55 +515,59 @@ class ComprehensiveTestSuiteRunner:
 *Generated by ITSM Test Automation Engineer | Claude Code*
 """
         return md
-    
-    async def run_command(self, cmd: List[str], cwd: Path = None, timeout: int = 120) -> Dict[str, Any]:
+
+    async def run_command(
+        self, cmd: List[str], cwd: Path = None, timeout: int = 120
+    ) -> Dict[str, Any]:
         """コマンド実行"""
         start_time = time.time()
         try:
             result = subprocess.run(
-                cmd, 
-                capture_output=True, 
-                text=True, 
+                cmd,
+                capture_output=True,
+                text=True,
                 timeout=timeout,
-                cwd=cwd or self.base_dir
+                cwd=cwd or self.base_dir,
             )
             duration = time.time() - start_time
-            
+
             return {
                 "returncode": result.returncode,
                 "stdout": result.stdout,
                 "stderr": result.stderr,
-                "duration": duration
+                "duration": duration,
             }
         except subprocess.TimeoutExpired:
             return {
                 "returncode": -1,
                 "stdout": "",
                 "stderr": f"Command timeout after {timeout}s",
-                "duration": timeout
+                "duration": timeout,
             }
         except Exception as e:
             return {
                 "returncode": -1,
                 "stdout": "",
                 "stderr": str(e),
-                "duration": time.time() - start_time
+                "duration": time.time() - start_time,
             }
+
 
 async def main():
     """メイン実行関数"""
     runner = ComprehensiveTestSuiteRunner()
     results = await runner.run_all_tests()
-    
-    print("="*50)
+
+    print("=" * 50)
     print("🎯 Test Suite 実行完了")
-    print("="*50)
+    print("=" * 50)
     print(f"成功率: {results['success_rate']:.1f}%")
     print(f"総テスト: {results['total_tests']}")
     print(f"成功: {results['passed_tests']}")
     print(f"失敗: {results['failed_tests']}")
     print(f"全体結果: {'✅ 成功' if results['overall_success'] else '❌ 失敗'}")
-    print("="*50)
+    print("=" * 50)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -14,262 +14,276 @@ from typing import Dict, List, Any, Optional
 import subprocess
 import time
 
+
 class LightweightPerformanceDashboard:
     """軽量パフォーマンス分析ダッシュボード"""
-    
+
     def __init__(self):
         self.base_dir = Path.cwd()
         self.reports_dir = self.base_dir / "dashboard-reports"
         self.coordination_dir = self.base_dir / "coordination"
         self.validation_dir = self.base_dir / "validation-reports"
-        
+
         # 出力ディレクトリの作成
         self.reports_dir.mkdir(exist_ok=True)
-        
+
         # システムURL設定
         self.urls = {
-            'webui': 'http://192.168.3.135:3000',
-            'api': 'http://192.168.3.135:8000',
-            'admin': 'http://192.168.3.135:3000/admin',
-            'docs': 'http://192.168.3.135:8000/docs'
+            "webui": "http://192.168.3.135:3000",
+            "api": "http://192.168.3.135:8000",
+            "admin": "http://192.168.3.135:3000/admin",
+            "docs": "http://192.168.3.135:8000/docs",
         }
-    
+
     def collect_system_metrics(self) -> Dict[str, Any]:
         """システムメトリクスの収集"""
         print("📊 システムメトリクス収集中...")
-        
+
         metrics = {
-            'timestamp': datetime.now().isoformat(),
-            'infinite_loop_state': self._get_infinite_loop_state(),
-            'validation_reports': self._get_validation_reports(),
-            'url_health': self._check_url_health(),
-            'system_performance': self._get_system_performance(),
-            'error_trends': self._analyze_error_trends(),
-            'repair_effectiveness': self._analyze_repair_effectiveness()
+            "timestamp": datetime.now().isoformat(),
+            "infinite_loop_state": self._get_infinite_loop_state(),
+            "validation_reports": self._get_validation_reports(),
+            "url_health": self._check_url_health(),
+            "system_performance": self._get_system_performance(),
+            "error_trends": self._analyze_error_trends(),
+            "repair_effectiveness": self._analyze_repair_effectiveness(),
         }
-        
+
         return metrics
-    
+
     def _get_infinite_loop_state(self) -> Dict[str, Any]:
         """無限ループ状態の取得"""
         state_file = self.coordination_dir / "infinite_loop_state.json"
         if state_file.exists():
             try:
-                with open(state_file, 'r', encoding='utf-8') as f:
+                with open(state_file, "r", encoding="utf-8") as f:
                     return json.load(f)
             except Exception as e:
                 print(f"⚠️ 無限ループ状態読み込みエラー: {e}")
         return {}
-    
+
     def _get_validation_reports(self) -> List[Dict[str, Any]]:
         """検証レポートの取得"""
         reports = []
         report_files = glob.glob(str(self.validation_dir / "validation-report-*.json"))
-        
+
         for file_path in sorted(report_files)[-10:]:  # 最新10件
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, "r", encoding="utf-8") as f:
                     report = json.load(f)
-                    report['file_path'] = file_path
+                    report["file_path"] = file_path
                     reports.append(report)
             except Exception as e:
                 print(f"⚠️ レポート読み込みエラー: {file_path} - {e}")
-        
+
         return reports
-    
+
     def _check_url_health(self) -> Dict[str, Dict[str, Any]]:
         """URL健全性チェック"""
         health_status = {}
-        
+
         for name, url in self.urls.items():
             try:
                 start_time = time.time()
                 response = requests.get(url, timeout=10)
                 end_time = time.time()
-                
+
                 health_status[name] = {
-                    'url': url,
-                    'status_code': response.status_code,
-                    'response_time': end_time - start_time,
-                    'is_healthy': response.status_code == 200,
-                    'timestamp': datetime.now().isoformat()
+                    "url": url,
+                    "status_code": response.status_code,
+                    "response_time": end_time - start_time,
+                    "is_healthy": response.status_code == 200,
+                    "timestamp": datetime.now().isoformat(),
                 }
             except Exception as e:
                 health_status[name] = {
-                    'url': url,
-                    'status_code': 0,
-                    'response_time': None,
-                    'is_healthy': False,
-                    'error': str(e),
-                    'timestamp': datetime.now().isoformat()
+                    "url": url,
+                    "status_code": 0,
+                    "response_time": None,
+                    "is_healthy": False,
+                    "error": str(e),
+                    "timestamp": datetime.now().isoformat(),
                 }
-        
+
         return health_status
-    
+
     def _get_system_performance(self) -> Dict[str, Any]:
         """システムパフォーマンス情報の取得（軽量版）"""
         try:
             # CPU使用率
-            cpu_result = subprocess.run(['top', '-bn1'], capture_output=True, text=True, timeout=5)
-            cpu_line = [line for line in cpu_result.stdout.split('\n') if 'Cpu(s)' in line]
+            cpu_result = subprocess.run(
+                ["top", "-bn1"], capture_output=True, text=True, timeout=5
+            )
+            cpu_line = [
+                line for line in cpu_result.stdout.split("\n") if "Cpu(s)" in line
+            ]
             cpu_percent = 0
             if cpu_line:
                 # %Cpu(s): 12.5 us, のような形式から数値を抽出
                 import re
-                match = re.search(r'(\d+\.?\d*)\s*us', cpu_line[0])
+
+                match = re.search(r"(\d+\.?\d*)\s*us", cpu_line[0])
                 if match:
                     cpu_percent = float(match.group(1))
-            
+
             # メモリ使用率
-            mem_result = subprocess.run(['free'], capture_output=True, text=True, timeout=5)
-            mem_lines = mem_result.stdout.split('\n')
+            mem_result = subprocess.run(
+                ["free"], capture_output=True, text=True, timeout=5
+            )
+            mem_lines = mem_result.stdout.split("\n")
             mem_percent = 0
             for line in mem_lines:
-                if 'Mem:' in line:
+                if "Mem:" in line:
                     parts = line.split()
                     if len(parts) >= 3:
                         total = int(parts[1])
                         used = int(parts[2])
                         mem_percent = (used / total) * 100 if total > 0 else 0
                     break
-            
+
             # ディスク使用率
-            disk_result = subprocess.run(['df', '/'], capture_output=True, text=True, timeout=5)
-            disk_lines = disk_result.stdout.split('\n')
+            disk_result = subprocess.run(
+                ["df", "/"], capture_output=True, text=True, timeout=5
+            )
+            disk_lines = disk_result.stdout.split("\n")
             disk_percent = 0
             if len(disk_lines) > 1:
                 parts = disk_lines[1].split()
                 if len(parts) >= 5:
-                    disk_percent_str = parts[4].replace('%', '')
-                    disk_percent = float(disk_percent_str) if disk_percent_str.isdigit() else 0
-            
+                    disk_percent_str = parts[4].replace("%", "")
+                    disk_percent = (
+                        float(disk_percent_str) if disk_percent_str.isdigit() else 0
+                    )
+
             return {
-                'cpu_percent': cpu_percent,
-                'memory_percent': mem_percent,
-                'disk_percent': disk_percent,
-                'timestamp': datetime.now().isoformat()
+                "cpu_percent": cpu_percent,
+                "memory_percent": mem_percent,
+                "disk_percent": disk_percent,
+                "timestamp": datetime.now().isoformat(),
             }
         except Exception as e:
             print(f"⚠️ システムパフォーマンス取得エラー: {e}")
             return {
-                'cpu_percent': 0,
-                'memory_percent': 0,
-                'disk_percent': 0,
-                'timestamp': datetime.now().isoformat()
+                "cpu_percent": 0,
+                "memory_percent": 0,
+                "disk_percent": 0,
+                "timestamp": datetime.now().isoformat(),
             }
-    
+
     def _analyze_error_trends(self) -> Dict[str, Any]:
         """エラートレンド分析"""
         reports = self._get_validation_reports()
-        
+
         if not reports:
-            return {'trend': 'no_data', 'total_errors': 0, 'error_types': {}}
-        
+            return {"trend": "no_data", "total_errors": 0, "error_types": {}}
+
         total_errors = []
         error_types = {}
         timestamps = []
-        
+
         for report in reports:
-            total_errors.append(report.get('summary', {}).get('totalErrors', 0))
-            timestamps.append(report.get('metadata', {}).get('generatedAt', ''))
-            
+            total_errors.append(report.get("summary", {}).get("totalErrors", 0))
+            timestamps.append(report.get("metadata", {}).get("generatedAt", ""))
+
             # エラータイプ別集計
-            for result in report.get('results', []):
-                for error in result.get('errors', []):
-                    error_type = error.get('type', 'unknown')
+            for result in report.get("results", []):
+                for error in result.get("errors", []):
+                    error_type = error.get("type", "unknown")
                     error_types[error_type] = error_types.get(error_type, 0) + 1
-        
+
         # トレンド計算
         if len(total_errors) > 1:
-            trend = 'decreasing' if total_errors[-1] < total_errors[0] else 'increasing'
+            trend = "decreasing" if total_errors[-1] < total_errors[0] else "increasing"
         else:
-            trend = 'stable'
-        
+            trend = "stable"
+
         return {
-            'trend': trend,
-            'total_errors': sum(total_errors),
-            'error_types': error_types,
-            'recent_errors': total_errors[-5:] if total_errors else [],
-            'timestamps': timestamps[-5:] if timestamps else []
+            "trend": trend,
+            "total_errors": sum(total_errors),
+            "error_types": error_types,
+            "recent_errors": total_errors[-5:] if total_errors else [],
+            "timestamps": timestamps[-5:] if timestamps else [],
         }
-    
+
     def _analyze_repair_effectiveness(self) -> Dict[str, Any]:
         """修復効果分析"""
         loop_state = self._get_infinite_loop_state()
-        
+
         if not loop_state:
-            return {'effectiveness': 0, 'total_repairs': 0, 'repair_rate': 0}
-        
-        total_errors = loop_state.get('total_errors_fixed', 0)
-        loop_count = loop_state.get('loop_count', 1)
-        
+            return {"effectiveness": 0, "total_repairs": 0, "repair_rate": 0}
+
+        total_errors = loop_state.get("total_errors_fixed", 0)
+        loop_count = loop_state.get("loop_count", 1)
+
         # 修復効率計算
         repair_rate = total_errors / max(loop_count, 1)
         effectiveness = min(100, (total_errors / max(total_errors + 10, 1)) * 100)
-        
+
         return {
-            'effectiveness': round(effectiveness, 2),
-            'total_repairs': total_errors,
-            'repair_rate': round(repair_rate, 2),
-            'loop_count': loop_count
+            "effectiveness": round(effectiveness, 2),
+            "total_repairs": total_errors,
+            "repair_rate": round(repair_rate, 2),
+            "loop_count": loop_count,
         }
-    
+
     def create_dashboard(self) -> str:
         """包括的ダッシュボードの作成"""
         print("🎯 軽量パフォーマンスダッシュボード生成中...")
-        
+
         # メトリクス収集
         metrics = self.collect_system_metrics()
-        
+
         # HTML ダッシュボード生成
         html_path = self._generate_html_dashboard(metrics)
-        
+
         # JSON データファイル生成
         self._generate_json_data(metrics)
-        
+
         # レポート生成
         self._generate_text_report(metrics)
-        
+
         print(f"✅ ダッシュボード生成完了: {html_path}")
         return html_path
-    
+
     def _generate_html_dashboard(self, metrics: Dict[str, Any]) -> str:
         """HTMLダッシュボード生成（Chart.js使用）"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         html_file = self.reports_dir / f"performance_dashboard_{timestamp}.html"
-        
+
         # 無限ループ状態
-        loop_state = metrics.get('infinite_loop_state', {})
-        loop_count = loop_state.get('loop_count', 0)
-        total_fixes = loop_state.get('total_errors_fixed', 0)
-        
+        loop_state = metrics.get("infinite_loop_state", {})
+        loop_count = loop_state.get("loop_count", 0)
+        total_fixes = loop_state.get("total_errors_fixed", 0)
+
         # URL健全性
-        url_health = metrics.get('url_health', {})
-        healthy_urls = sum(1 for status in url_health.values() if status.get('is_healthy', False))
+        url_health = metrics.get("url_health", {})
+        healthy_urls = sum(
+            1 for status in url_health.values() if status.get("is_healthy", False)
+        )
         total_urls = len(url_health)
-        
+
         # システムパフォーマンス
-        sys_perf = metrics.get('system_performance', {})
-        cpu_usage = sys_perf.get('cpu_percent', 0)
-        memory_usage = sys_perf.get('memory_percent', 0)
-        disk_usage = sys_perf.get('disk_percent', 0)
-        
+        sys_perf = metrics.get("system_performance", {})
+        cpu_usage = sys_perf.get("cpu_percent", 0)
+        memory_usage = sys_perf.get("memory_percent", 0)
+        disk_usage = sys_perf.get("disk_percent", 0)
+
         # エラートレンド
-        error_trends = metrics.get('error_trends', {})
-        total_errors = error_trends.get('total_errors', 0)
-        trend = error_trends.get('trend', 'stable')
-        
+        error_trends = metrics.get("error_trends", {})
+        total_errors = error_trends.get("total_errors", 0)
+        trend = error_trends.get("trend", "stable")
+
         # 修復効果
-        repair_eff = metrics.get('repair_effectiveness', {})
-        effectiveness = repair_eff.get('effectiveness', 0)
-        
+        repair_eff = metrics.get("repair_effectiveness", {})
+        effectiveness = repair_eff.get("effectiveness", 0)
+
         # 修復履歴データ
-        repair_history = loop_state.get('repair_history', [])
+        repair_history = loop_state.get("repair_history", [])
         repair_targets = {}
         for repair in repair_history:
-            target = repair['target']
+            target = repair["target"]
             repair_targets[target] = repair_targets.get(target, 0) + 1
-        
+
         html_content = f"""
 <!DOCTYPE html>
 <html lang="ja">
@@ -630,13 +644,13 @@ class LightweightPerformanceDashboard:
 
         # URL詳細状態
         for name, status in url_health.items():
-            is_healthy = status.get('is_healthy', False)
-            response_time = status.get('response_time')
-            status_class = 'status-healthy' if is_healthy else 'status-danger'
-            status_text = '正常' if is_healthy else 'エラー'
-            
+            is_healthy = status.get("is_healthy", False)
+            response_time = status.get("response_time")
+            status_class = "status-healthy" if is_healthy else "status-danger"
+            status_text = "正常" if is_healthy else "エラー"
+
             response_display = f"{response_time:.3f}s" if response_time else "N/A"
-            
+
             html_content += f"""
                 <div class="url-status">
                     <div class="url-name">
@@ -844,33 +858,33 @@ class LightweightPerformanceDashboard:
 </body>
 </html>
 """
-        
-        with open(html_file, 'w', encoding='utf-8') as f:
+
+        with open(html_file, "w", encoding="utf-8") as f:
             f.write(html_content)
-        
+
         return str(html_file)
-    
+
     def _generate_json_data(self, metrics: Dict[str, Any]):
         """JSONデータファイル生成"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         json_file = self.reports_dir / f"metrics_data_{timestamp}.json"
-        
-        with open(json_file, 'w', encoding='utf-8') as f:
+
+        with open(json_file, "w", encoding="utf-8") as f:
             json.dump(metrics, f, ensure_ascii=False, indent=2)
-        
+
         print(f"📊 JSONデータ生成完了: {json_file}")
-    
+
     def _generate_text_report(self, metrics: Dict[str, Any]):
         """テキストレポート生成"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         report_file = self.reports_dir / f"performance_report_{timestamp}.md"
-        
-        loop_state = metrics.get('infinite_loop_state', {})
-        url_health = metrics.get('url_health', {})
-        sys_perf = metrics.get('system_performance', {})
-        error_trends = metrics.get('error_trends', {})
-        repair_eff = metrics.get('repair_effectiveness', {})
-        
+
+        loop_state = metrics.get("infinite_loop_state", {})
+        url_health = metrics.get("url_health", {})
+        sys_perf = metrics.get("system_performance", {})
+        error_trends = metrics.get("error_trends", {})
+        repair_eff = metrics.get("repair_effectiveness", {})
+
         report_content = f"""# 🎯 ITSMシステム パフォーマンス分析レポート
 
 **生成日時**: {datetime.now().strftime('%Y年%m月%d日 %H時%M分%S秒')}
@@ -885,15 +899,17 @@ class LightweightPerformanceDashboard:
 
 ### 🌐 URL健全性状況
 """
-        
+
         for name, status in url_health.items():
-            is_healthy = status.get('is_healthy', False)
-            response_time = status.get('response_time')
-            status_icon = '✅' if is_healthy else '❌'
+            is_healthy = status.get("is_healthy", False)
+            response_time = status.get("response_time")
+            status_icon = "✅" if is_healthy else "❌"
             time_str = f"{response_time:.3f}s" if response_time else "N/A"
-            
-            report_content += f"- **{name.upper()}**: {status_icon} {status['url']} ({time_str})\n"
-        
+
+            report_content += (
+                f"- **{name.upper()}**: {status_icon} {status['url']} ({time_str})\n"
+            )
+
         report_content += f"""
 ### 💻 システムリソース
 - **CPU使用率**: {sys_perf.get('cpu_percent', 0):.1f}%
@@ -909,55 +925,75 @@ class LightweightPerformanceDashboard:
 
 ### 最近の修復履歴
 """
-        
-        repair_history = loop_state.get('repair_history', [])
+
+        repair_history = loop_state.get("repair_history", [])
         for repair in repair_history[-10:]:
-            timestamp_str = datetime.fromisoformat(repair['timestamp']).strftime('%H:%M:%S')
-            report_content += f"- `{timestamp_str}` - {repair['target']} (ループ {repair['loop']})\n"
-        
+            timestamp_str = datetime.fromisoformat(repair["timestamp"]).strftime(
+                "%H:%M:%S"
+            )
+            report_content += (
+                f"- `{timestamp_str}` - {repair['target']} (ループ {repair['loop']})\n"
+            )
+
         report_content += f"""
 ### 修復対象別統計
 """
-        
+
         repair_targets = {}
         for repair in repair_history:
-            target = repair['target']
+            target = repair["target"]
             repair_targets[target] = repair_targets.get(target, 0) + 1
-        
-        for target, count in sorted(repair_targets.items(), key=lambda x: x[1], reverse=True):
+
+        for target, count in sorted(
+            repair_targets.items(), key=lambda x: x[1], reverse=True
+        ):
             report_content += f"- **{target}**: {count:,} 回\n"
-        
+
         # 推奨アクション生成
         recommendations = []
-        
-        if sys_perf.get('cpu_percent', 0) > 80:
-            recommendations.append("- CPU使用率が高い状態です。プロセスの最適化を検討してください。")
-        
-        if sys_perf.get('memory_percent', 0) > 80:
-            recommendations.append("- メモリ使用率が高い状態です。メモリリークの確認を推奨します。")
-        
-        if sys_perf.get('disk_percent', 0) > 90:
-            recommendations.append("- ディスク使用率が高い状態です。不要ファイルの削除を推奨します。")
-        
-        unhealthy_urls = [name for name, status in url_health.items() if not status.get('is_healthy', False)]
+
+        if sys_perf.get("cpu_percent", 0) > 80:
+            recommendations.append(
+                "- CPU使用率が高い状態です。プロセスの最適化を検討してください。"
+            )
+
+        if sys_perf.get("memory_percent", 0) > 80:
+            recommendations.append(
+                "- メモリ使用率が高い状態です。メモリリークの確認を推奨します。"
+            )
+
+        if sys_perf.get("disk_percent", 0) > 90:
+            recommendations.append(
+                "- ディスク使用率が高い状態です。不要ファイルの削除を推奨します。"
+            )
+
+        unhealthy_urls = [
+            name
+            for name, status in url_health.items()
+            if not status.get("is_healthy", False)
+        ]
         if unhealthy_urls:
-            recommendations.append(f"- 以下のURLで問題が発生しています: {', '.join(unhealthy_urls)}")
-        
-        if error_trends.get('trend') == 'increasing':
-            recommendations.append("- エラー数が増加傾向にあります。根本原因の調査を推奨します。")
-        
+            recommendations.append(
+                f"- 以下のURLで問題が発生しています: {', '.join(unhealthy_urls)}"
+            )
+
+        if error_trends.get("trend") == "increasing":
+            recommendations.append(
+                "- エラー数が増加傾向にあります。根本原因の調査を推奨します。"
+            )
+
         if not recommendations:
             recommendations.append("- 現在、緊急対応が必要な問題は検出されていません。")
-        
+
         report_content += f"""
 ## 📋 推奨アクション
 
 ### 🔴 重要度: 高
 """
-        
+
         for rec in recommendations:
             report_content += f"{rec}\n"
-        
+
         report_content += f"""
 ### 🟡 重要度: 中
 - 継続的な監視により、システムの安定性を維持してください。
@@ -972,25 +1008,27 @@ class LightweightPerformanceDashboard:
 
 **生成システム**: ITSM軽量パフォーマンス分析ダッシュボード v1.0
 """
-        
-        with open(report_file, 'w', encoding='utf-8') as f:
+
+        with open(report_file, "w", encoding="utf-8") as f:
             f.write(report_content)
-        
+
         print(f"📝 テキストレポート生成完了: {report_file}")
+
 
 def main():
     """メイン実行関数"""
     print("🚀 ITSM軽量パフォーマンス分析ダッシュボード開始")
-    
+
     # ダッシュボード作成
     dashboard = LightweightPerformanceDashboard()
     html_path = dashboard.create_dashboard()
-    
+
     print(f"\n🎉 ダッシュボード生成完了!")
     print(f"📊 HTMLダッシュボード: {html_path}")
     print(f"📁 全ての生成ファイル: {dashboard.reports_dir}")
     print(f"\n💡 ブラウザで以下のファイルを開いてください:")
     print(f"   file://{html_path}")
+
 
 if __name__ == "__main__":
     main()

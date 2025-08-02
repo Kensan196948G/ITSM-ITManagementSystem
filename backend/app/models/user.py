@@ -12,6 +12,7 @@ from app.models.common import UUID
 
 class UserRole(str, Enum):
     """ユーザー役割"""
+
     ADMIN = "admin"
     MANAGER = "manager"
     TECHNICIAN = "technician"
@@ -22,6 +23,7 @@ class UserRole(str, Enum):
 
 class User(Base):
     """ユーザーモデル"""
+
     __tablename__ = "users"
 
     id = Column(UUID(), primary_key=True, default=uuid.uuid4)
@@ -45,15 +47,23 @@ class User(Base):
     mfa_enabled = Column(Boolean, default=False)
     mfa_secret = Column(String(255))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
     deleted_at = Column(DateTime(timezone=True))
 
     # リレーション
-    reported_incidents = relationship("Incident", back_populates="reporter", foreign_keys="Incident.reporter_id")
-    assigned_incidents = relationship("Incident", back_populates="assignee", foreign_keys="Incident.assignee_id")
+    reported_incidents = relationship(
+        "Incident", back_populates="reporter", foreign_keys="Incident.reporter_id"
+    )
+    assigned_incidents = relationship(
+        "Incident", back_populates="assignee", foreign_keys="Incident.assignee_id"
+    )
     problems = relationship("Problem", back_populates="assignee")
-    uploaded_attachments = relationship("Attachment", back_populates="uploader", foreign_keys="Attachment.uploaded_by")
-    
+    uploaded_attachments = relationship(
+        "Attachment", back_populates="uploader", foreign_keys="Attachment.uploaded_by"
+    )
+
     @property
     def full_name(self) -> str:
         """フルネームを返す"""

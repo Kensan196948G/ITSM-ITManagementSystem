@@ -11,6 +11,7 @@ from app.models.common import UUID
 
 class Team(Base):
     """チームモデル"""
+
     __tablename__ = "teams"
 
     id = Column(UUID(), primary_key=True, default=uuid.uuid4)
@@ -20,12 +21,14 @@ class Team(Base):
     manager_id = Column(UUID(), ForeignKey("users.id"))
     parent_team_id = Column(UUID(), ForeignKey("teams.id"))
     is_active = Column(Boolean, default=True)
-    
+
     # 監査情報
     created_by = Column(UUID(), ForeignKey("users.id"))
     updated_by = Column(UUID(), ForeignKey("users.id"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
     deleted_at = Column(DateTime(timezone=True))
 
     # リレーション
@@ -37,6 +40,7 @@ class Team(Base):
 
 class TeamMember(Base):
     """チームメンバーモデル"""
+
     __tablename__ = "team_members"
 
     id = Column(UUID(), primary_key=True, default=uuid.uuid4)

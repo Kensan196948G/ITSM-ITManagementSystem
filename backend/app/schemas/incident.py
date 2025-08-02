@@ -11,7 +11,10 @@ from app.models.incident import IncidentStatus, Priority, Impact
 
 class IncidentBase(BaseModel):
     """インシデント基底スキーマ"""
-    title: str = Field(..., min_length=1, max_length=500, description="インシデントタイトル")
+
+    title: str = Field(
+        ..., min_length=1, max_length=500, description="インシデントタイトル"
+    )
     description: Optional[str] = Field(None, description="インシデント詳細")
     priority: Priority = Field(Priority.MEDIUM, description="優先度")
     impact: Impact = Field(Impact.LOW, description="影響度")
@@ -23,11 +26,13 @@ class IncidentBase(BaseModel):
 
 class IncidentCreate(IncidentBase):
     """インシデント作成スキーマ"""
+
     reporter_id: UUID = Field(..., description="報告者ID")
 
 
 class IncidentUpdate(BaseModel):
     """インシデント更新スキーマ"""
+
     title: Optional[str] = Field(None, min_length=1, max_length=500)
     description: Optional[str] = None
     status: Optional[IncidentStatus] = None
@@ -41,6 +46,7 @@ class IncidentUpdate(BaseModel):
 
 class UserInfo(BaseModel):
     """ユーザー情報スキーマ"""
+
     id: UUID
     display_name: Optional[str]
     email: str
@@ -50,6 +56,7 @@ class UserInfo(BaseModel):
 
 class CategoryInfo(BaseModel):
     """カテゴリ情報スキーマ"""
+
     id: UUID
     name: str
 
@@ -58,6 +65,7 @@ class CategoryInfo(BaseModel):
 
 class TeamInfo(BaseModel):
     """チーム情報スキーマ"""
+
     id: UUID
     name: str
 
@@ -66,6 +74,7 @@ class TeamInfo(BaseModel):
 
 class SLAInfo(BaseModel):
     """SLA情報スキーマ"""
+
     response_due: Optional[datetime]
     resolution_due: Optional[datetime]
     response_met: Optional[bool]
@@ -74,6 +83,7 @@ class SLAInfo(BaseModel):
 
 class IncidentResponse(IncidentBase):
     """インシデントレスポンススキーマ"""
+
     id: UUID
     incident_number: str
     status: IncidentStatus
@@ -96,6 +106,7 @@ class IncidentResponse(IncidentBase):
 
 class IncidentListResponse(BaseModel):
     """インシデント一覧レスポンススキーマ"""
+
     data: List[IncidentResponse]
     meta: dict
     links: Optional[dict] = None
@@ -103,6 +114,7 @@ class IncidentListResponse(BaseModel):
 
 class IncidentWorkNoteBase(BaseModel):
     """作業ノート基底スキーマ"""
+
     content: str = Field(..., min_length=1, description="ノート内容")
     note_type: str = Field("work_note", description="ノートタイプ")
     is_public: bool = Field(False, description="公開フラグ")
@@ -110,11 +122,13 @@ class IncidentWorkNoteBase(BaseModel):
 
 class IncidentWorkNoteCreate(IncidentWorkNoteBase):
     """作業ノート作成スキーマ"""
+
     pass
 
 
 class IncidentWorkNoteResponse(IncidentWorkNoteBase):
     """作業ノートレスポンススキーマ"""
+
     id: UUID
     incident_id: UUID
     user: UserInfo
@@ -126,6 +140,7 @@ class IncidentWorkNoteResponse(IncidentWorkNoteBase):
 
 class IncidentHistoryResponse(BaseModel):
     """インシデント履歴レスポンススキーマ"""
+
     id: UUID
     incident_id: UUID
     field_name: str
@@ -139,6 +154,7 @@ class IncidentHistoryResponse(BaseModel):
 
 class IncidentAttachmentResponse(BaseModel):
     """インシデント添付ファイルレスポンススキーマ"""
+
     id: UUID
     incident_id: UUID
     file_name: str
@@ -152,6 +168,7 @@ class IncidentAttachmentResponse(BaseModel):
 
 class RelatedIncidentInfo(BaseModel):
     """関連インシデント情報スキーマ"""
+
     id: UUID
     incident_number: str
     title: str
@@ -164,26 +181,28 @@ class RelatedIncidentInfo(BaseModel):
 
 class IncidentDetailResponse(IncidentResponse):
     """インシデント詳細レスポンススキーマ（詳細パネル用）"""
+
     # 基本情報は IncidentResponse から継承
-    
+
     # 詳細情報
     work_notes: List[IncidentWorkNoteResponse] = Field(default_factory=list)
     histories: List[IncidentHistoryResponse] = Field(default_factory=list)
     attachments: List[IncidentAttachmentResponse] = Field(default_factory=list)
     related_incidents: List[RelatedIncidentInfo] = Field(default_factory=list)
-    
+
     # 統計情報
     stats: dict = Field(default_factory=dict)
-    
+
     # カスタムフィールド
     custom_fields: dict = Field(default_factory=dict)
-    
+
     # メタデータ
     metadata: dict = Field(default_factory=dict)
 
 
 class IncidentTimelineEntry(BaseModel):
     """インシデントタイムラインエントリ"""
+
     id: UUID
     type: str  # 'status_change', 'assignment', 'work_note', 'attachment'
     title: str
@@ -195,6 +214,7 @@ class IncidentTimelineEntry(BaseModel):
 
 class IncidentTimelineResponse(BaseModel):
     """インシデントタイムラインレスポンス"""
+
     incident_id: UUID
     timeline: List[IncidentTimelineEntry]
     total_count: int
@@ -202,6 +222,7 @@ class IncidentTimelineResponse(BaseModel):
 
 class IncidentFieldUpdate(BaseModel):
     """インシデントフィールド更新スキーマ"""
+
     field_name: str = Field(..., description="更新対象フィールド名")
     field_value: Optional[str] = Field(None, description="新しい値")
     comment: Optional[str] = Field(None, description="更新理由・コメント")
@@ -209,18 +230,27 @@ class IncidentFieldUpdate(BaseModel):
 
 class IncidentBulkUpdate(BaseModel):
     """インシデント一括更新スキーマ"""
-    incident_ids: List[UUID] = Field(..., min_items=1, max_items=100, description="更新対象インシデントID一覧")
+
+    incident_ids: List[UUID] = Field(
+        ..., min_items=1, max_items=100, description="更新対象インシデントID一覧"
+    )
     updates: Dict[str, Any] = Field(..., description="更新内容")
     comment: Optional[str] = Field(None, description="一括更新理由")
 
 
 class CustomFieldUpdate(BaseModel):
     """カスタムフィールド更新スキーマ"""
+
     field_key: str = Field(..., description="カスタムフィールドキー")
     field_value: Optional[str] = Field(None, description="カスタムフィールド値")
-    field_type: str = Field("text", description="フィールドタイプ")  # text, number, date, select, multiselect
-    
-    
+    field_type: str = Field(
+        "text", description="フィールドタイプ"
+    )  # text, number, date, select, multiselect
+
+
 class IncidentCustomFieldsUpdate(BaseModel):
     """インシデントカスタムフィールド更新スキーマ"""
-    custom_fields: List[CustomFieldUpdate] = Field(..., description="カスタムフィールド一覧")
+
+    custom_fields: List[CustomFieldUpdate] = Field(
+        ..., description="カスタムフィールド一覧"
+    )

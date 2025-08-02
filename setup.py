@@ -9,17 +9,18 @@ setup(
     name="itsm-management-system",
     version="1.0.0",
     description="IT Service Management System with comprehensive automation",
-    long_description=open("README.md").read() if open("README.md", "r").readable() else "ITSM Management System",
+    long_description=(
+        open("README.md").read()
+        if open("README.md", "r").readable()
+        else "ITSM Management System"
+    ),
     long_description_content_type="text/markdown",
     author="ITSM Development Team",
     author_email="dev@itsm.local",
     url="https://github.com/Kensan196948G/ITSM-ITManagementSystem",
-    
     packages=find_packages(where="backend", include=["app*"]),
     package_dir={"": "backend"},
-    
     python_requires=">=3.11",
-    
     install_requires=[
         "fastapi>=0.104.0",
         "uvicorn[standard]>=0.24.0",
@@ -38,7 +39,6 @@ setup(
         "pytest-cov>=4.1.0",
         "httpx>=0.25.0",
     ],
-    
     extras_require={
         "dev": [
             "pytest>=7.4.0",
@@ -65,16 +65,14 @@ setup(
             "pytest-xdist>=3.3.0",
             "httpx>=0.25.0",
             "faker>=20.1.0",
-        ]
+        ],
     },
-    
     entry_points={
         "console_scripts": [
             "itsm-server=app.main:app",
             "itsm-cli=app.cli:main",
         ],
     },
-    
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
@@ -88,9 +86,7 @@ setup(
         "Topic :: System :: Systems Administration",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
     ],
-    
     keywords="itsm, it-service-management, fastapi, automation, incident-management",
-    
     include_package_data=True,
     zip_safe=False,
 )

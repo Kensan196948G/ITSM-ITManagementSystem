@@ -18,19 +18,17 @@ from app.services.infinite_auto_repair_system import InfiniteAutoRepairSystem
 
 def setup_logging(log_level: str = "INFO", log_file: str = None):
     """ログ設定"""
-    log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    
+    log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
     handlers = [logging.StreamHandler(sys.stdout)]
-    
+
     if log_file:
         log_path = Path(log_file)
         log_path.parent.mkdir(parents=True, exist_ok=True)
         handlers.append(logging.FileHandler(log_file))
-    
+
     logging.basicConfig(
-        level=getattr(logging, log_level.upper()),
-        format=log_format,
-        handlers=handlers
+        level=getattr(logging, log_level.upper()), format=log_format, handlers=handlers
     )
 
 
@@ -48,53 +46,44 @@ async def main():
     parser.add_argument(
         "--base-url",
         default="http://192.168.3.135:8000",
-        help="Base URL for API monitoring"
+        help="Base URL for API monitoring",
     )
     parser.add_argument(
         "--log-level",
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
         default="INFO",
-        help="Log level"
+        help="Log level",
     )
     parser.add_argument(
-        "--log-file",
-        default="logs/error_monitoring_system.log",
-        help="Log file path"
+        "--log-file", default="logs/error_monitoring_system.log", help="Log file path"
     )
-    parser.add_argument(
-        "--config-file",
-        help="Configuration file path"
-    )
-    parser.add_argument(
-        "--daemon",
-        action="store_true",
-        help="Run as daemon"
-    )
-    
+    parser.add_argument("--config-file", help="Configuration file path")
+    parser.add_argument("--daemon", action="store_true", help="Run as daemon")
+
     args = parser.parse_args()
-    
+
     # ログ設定
     setup_logging(args.log_level, args.log_file)
     logger = logging.getLogger(__name__)
-    
+
     # シグナルハンドラー設定
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
-    
+
     logger.info("Starting ITSM Error Monitoring and Auto-Repair System")
     logger.info(f"Base URL: {args.base_url}")
     logger.info(f"Log Level: {args.log_level}")
-    
+
     try:
         # システム初期化
         system = InfiniteAutoRepairSystem(base_url=args.base_url)
         await system.initialize()
-        
+
         logger.info("System initialized successfully")
-        
+
         # 無限ループ開始
         await system.start_infinite_loop()
-        
+
     except KeyboardInterrupt:
         logger.info("Shutdown requested by user")
     except Exception as e:
@@ -106,7 +95,7 @@ async def main():
             logger.info("System shutdown completed")
         except:
             pass
-    
+
     return 0
 
 

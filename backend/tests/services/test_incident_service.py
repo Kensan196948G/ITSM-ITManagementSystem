@@ -25,7 +25,7 @@ class TestIncidentService:
         """Test creating a new incident"""
         incident_create = IncidentCreate(**incident_data)
         incident = service.create_incident(incident_create)
-        
+
         assert incident.title == incident_data["title"]
         assert incident.description == incident_data["description"]
         assert incident.priority == incident_data["priority"]
@@ -39,7 +39,7 @@ class TestIncidentService:
         # Create incident first
         incident_create = IncidentCreate(**incident_data)
         created_incident = service.create_incident(incident_create)
-        
+
         # Retrieve by ID
         retrieved_incident = service.get_incident(created_incident.id)
         assert retrieved_incident is not None
@@ -58,11 +58,11 @@ class TestIncidentService:
         # Create incident first
         incident_create = IncidentCreate(**incident_data)
         incident = service.create_incident(incident_create)
-        
+
         # Update incident
         update_data = IncidentUpdate(title="Updated Title", status="in_progress")
         updated_incident = service.update_incident(incident.id, update_data)
-        
+
         assert updated_incident.title == "Updated Title"
         assert updated_incident.status == "in_progress"
         assert updated_incident.updated_at is not None
@@ -73,11 +73,11 @@ class TestIncidentService:
         # Create incident first
         incident_create = IncidentCreate(**incident_data)
         incident = service.create_incident(incident_create)
-        
+
         # Delete incident
         result = service.delete_incident(incident.id)
         assert result is True
-        
+
         # Verify deletion
         deleted_incident = service.get_incident(incident.id)
         assert deleted_incident is None
@@ -89,16 +89,18 @@ class TestIncidentService:
         assert isinstance(incidents, list)
 
     @pytest.mark.unit
-    def test_get_incidents_with_filters(self, service: IncidentService, incident_data: dict):
+    def test_get_incidents_with_filters(
+        self, service: IncidentService, incident_data: dict
+    ):
         """Test retrieving incidents with filters"""
         # Create test incidents
         incident_create = IncidentCreate(**incident_data)
         service.create_incident(incident_create)
-        
+
         # Test status filter
         incidents = service.get_incidents(status="open")
         assert all(incident.status == "open" for incident in incidents)
-        
+
         # Test priority filter
         incidents = service.get_incidents(priority="high")
         assert all(incident.priority == "high" for incident in incidents)
@@ -115,31 +117,35 @@ class TestIncidentService:
         # Create test incident
         incident_create = IncidentCreate(**incident_data)
         service.create_incident(incident_create)
-        
+
         # Search by title keyword
         incidents = service.search_incidents("Test")
         assert len(incidents) > 0
         assert any("Test" in incident.title for incident in incidents)
 
     @pytest.mark.unit
-    def test_assign_incident(self, service: IncidentService, incident_data: dict, test_user):
+    def test_assign_incident(
+        self, service: IncidentService, incident_data: dict, test_user
+    ):
         """Test assigning incident to a user"""
         # Create incident
         incident_create = IncidentCreate(**incident_data)
         incident = service.create_incident(incident_create)
-        
+
         # Assign incident
         assigned_incident = service.assign_incident(incident.id, test_user.id)
         assert assigned_incident.assignee_id == test_user.id
 
     @pytest.mark.unit
-    def test_get_incidents_by_assignee(self, service: IncidentService, incident_data: dict, test_user):
+    def test_get_incidents_by_assignee(
+        self, service: IncidentService, incident_data: dict, test_user
+    ):
         """Test retrieving incidents by assignee"""
         # Create and assign incident
         incident_create = IncidentCreate(**incident_data)
         incident = service.create_incident(incident_create)
         service.assign_incident(incident.id, test_user.id)
-        
+
         # Get incidents by assignee
         incidents = service.get_incidents_by_assignee(test_user.id)
         assert len(incidents) > 0
@@ -162,7 +168,7 @@ class TestIncidentService:
         incident_data["priority"] = "low"
         incident_create = IncidentCreate(**incident_data)
         incident = service.create_incident(incident_create)
-        
+
         # Escalate incident
         escalated_incident = service.escalate_incident(incident.id)
         assert escalated_incident.priority in ["medium", "high", "critical"]
@@ -173,7 +179,7 @@ class TestIncidentService:
         # Create incident
         incident_create = IncidentCreate(**incident_data)
         incident = service.create_incident(incident_create)
-        
+
         # Close incident
         closed_incident = service.close_incident(incident.id, "Resolved by user")
         assert closed_incident.status == "closed"
@@ -181,12 +187,14 @@ class TestIncidentService:
         assert closed_incident.closed_at is not None
 
     @pytest.mark.unit
-    @patch('app.services.notification_service.NotificationService')
-    def test_create_incident_sends_notification(self, mock_notification, service: IncidentService, incident_data: dict):
+    @patch("app.services.notification_service.NotificationService")
+    def test_create_incident_sends_notification(
+        self, mock_notification, service: IncidentService, incident_data: dict
+    ):
         """Test that creating incident sends notification"""
         incident_create = IncidentCreate(**incident_data)
         service.create_incident(incident_create)
-        
+
         # Verify notification was sent
         mock_notification.return_value.send_incident_notification.assert_called_once()
 
@@ -198,7 +206,7 @@ class TestIncidentService:
             invalid_data = IncidentCreate(
                 title="",  # Empty title should be invalid
                 description="Test",
-                priority="invalid_priority"
+                priority="invalid_priority",
             )
             service.create_incident(invalid_data)
 
@@ -208,11 +216,11 @@ class TestIncidentService:
         # Create incident
         incident_create = IncidentCreate(**incident_data)
         incident = service.create_incident(incident_create)
-        
+
         # Update incident
         update_data = IncidentUpdate(status="in_progress")
         service.update_incident(incident.id, update_data)
-        
+
         # Check audit trail
         audit_logs = service.get_incident_audit_trail(incident.id)
         assert len(audit_logs) >= 2  # Create and update events

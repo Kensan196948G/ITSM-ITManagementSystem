@@ -13,6 +13,7 @@ from app.models.common import UUID
 
 class ProblemStatus(str, enum.Enum):
     """問題ステータス"""
+
     DRAFT = "draft"
     UNDER_INVESTIGATION = "under_investigation"
     ROOT_CAUSE_ANALYSIS = "root_cause_analysis"
@@ -25,6 +26,7 @@ class ProblemStatus(str, enum.Enum):
 
 class ProblemCategory(str, enum.Enum):
     """問題カテゴリ"""
+
     SOFTWARE = "software"
     HARDWARE = "hardware"
     NETWORK = "network"
@@ -37,15 +39,17 @@ class ProblemCategory(str, enum.Enum):
 
 class BusinessImpact(str, enum.Enum):
     """ビジネス影響度"""
+
     CRITICAL = "critical"  # サービス完全停止
-    HIGH = "high"      # 主要機能停止
-    MEDIUM = "medium"    # 一部機能制限
-    LOW = "low"        # 軽微な影響
-    NONE = "none"      # 影響なし
+    HIGH = "high"  # 主要機能停止
+    MEDIUM = "medium"  # 一部機能制限
+    LOW = "low"  # 軽微な影響
+    NONE = "none"  # 影響なし
 
 
 class RCAPhase(str, enum.Enum):
     """RCAフェーズ"""
+
     NOT_STARTED = "not_started"
     DATA_COLLECTION = "data_collection"
     ANALYSIS = "analysis"
@@ -56,6 +60,7 @@ class RCAPhase(str, enum.Enum):
 
 class Problem(Base):
     """問題モデル"""
+
     __tablename__ = "problems"
 
     id = Column(UUID(), primary_key=True, default=uuid.uuid4)
@@ -65,8 +70,12 @@ class Problem(Base):
     description = Column(Text)
     status = Column(SQLEnum(ProblemStatus), default=ProblemStatus.DRAFT, nullable=False)
     priority = Column(String(20), default="medium", nullable=False)
-    category = Column(SQLEnum(ProblemCategory), default=ProblemCategory.OTHER, nullable=False)
-    business_impact = Column(SQLEnum(BusinessImpact), default=BusinessImpact.LOW, nullable=False)
+    category = Column(
+        SQLEnum(ProblemCategory), default=ProblemCategory.OTHER, nullable=False
+    )
+    business_impact = Column(
+        SQLEnum(BusinessImpact), default=BusinessImpact.LOW, nullable=False
+    )
     impact_analysis = Column(Text)
     root_cause = Column(Text)
     permanent_solution = Column(Text)
@@ -78,16 +87,21 @@ class Problem(Base):
     rca_findings = Column(Text)  # JSON形式のRCA調査結果
     affected_services = Column(Text)  # JSON形式の影響サービス一覧
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
     # リレーション
     assignee = relationship("User", back_populates="problems")
     related_incidents = relationship("ProblemIncident", back_populates="problem")
-    known_errors = relationship("KnownError", back_populates="problem", cascade="all, delete-orphan")
+    known_errors = relationship(
+        "KnownError", back_populates="problem", cascade="all, delete-orphan"
+    )
 
 
 class ProblemIncident(Base):
     """問題とインシデントの関連モデル"""
+
     __tablename__ = "problem_incidents"
 
     id = Column(UUID(), primary_key=True, default=uuid.uuid4)
@@ -102,6 +116,7 @@ class ProblemIncident(Base):
 
 class KnownError(Base):
     """既知のエラーモデル"""
+
     __tablename__ = "known_errors"
 
     id = Column(UUID(), primary_key=True, default=uuid.uuid4)
@@ -111,7 +126,9 @@ class KnownError(Base):
     root_cause = Column(Text)
     workaround = Column(Text)
     solution = Column(Text)
-    category = Column(SQLEnum(ProblemCategory), default=ProblemCategory.OTHER, nullable=False)
+    category = Column(
+        SQLEnum(ProblemCategory), default=ProblemCategory.OTHER, nullable=False
+    )
     tags = Column(Text)  # JSON形式のタグ一覧
     search_keywords = Column(Text)  # 検索用キーワード
     is_published = Column(String(1), default="N")  # Y/N
@@ -120,7 +137,9 @@ class KnownError(Base):
     created_by = Column(UUID(), ForeignKey("users.id"))
     updated_by = Column(UUID(), ForeignKey("users.id"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
     # リレーション
     problem = relationship("Problem", back_populates="known_errors")

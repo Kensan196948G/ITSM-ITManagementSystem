@@ -1,6 +1,7 @@
 """
 pytest configuration and fixtures for ITSM system testing
 """
+
 import json
 import os
 import pytest
@@ -21,7 +22,7 @@ TEST_CONFIG = {
     "timeout": int(os.getenv("ITSM_TIMEOUT", "30")),
 }
 
-fake = Faker('ja_JP')
+fake = Faker("ja_JP")
 
 
 @pytest.fixture(scope="session")
@@ -72,10 +73,19 @@ def sample_incident_data(faker_instance) -> Dict[str, Any]:
     return {
         "title": faker_instance.sentence(nb_words=6),
         "description": faker_instance.text(max_nb_chars=200),
-        "category_id": faker_instance.random_element(elements=["cat_001", "cat_002", "cat_003"]),
-        "priority": faker_instance.random_element(elements=["low", "medium", "high", "critical"]),
-        "impact": faker_instance.random_element(elements=["user", "department", "company"]),
-        "affected_ci_ids": [faker_instance.uuid4() for _ in range(faker_instance.random_int(min=1, max=3))],
+        "category_id": faker_instance.random_element(
+            elements=["cat_001", "cat_002", "cat_003"]
+        ),
+        "priority": faker_instance.random_element(
+            elements=["low", "medium", "high", "critical"]
+        ),
+        "impact": faker_instance.random_element(
+            elements=["user", "department", "company"]
+        ),
+        "affected_ci_ids": [
+            faker_instance.uuid4()
+            for _ in range(faker_instance.random_int(min=1, max=3))
+        ],
     }
 
 
@@ -85,9 +95,13 @@ def sample_problem_data(faker_instance) -> Dict[str, Any]:
     return {
         "title": faker_instance.sentence(nb_words=8),
         "description": faker_instance.text(max_nb_chars=300),
-        "related_incident_ids": [f"INC{faker_instance.random_int(min=100000, max=999999)}" for _ in range(3)],
+        "related_incident_ids": [
+            f"INC{faker_instance.random_int(min=100000, max=999999)}" for _ in range(3)
+        ],
         "impact_analysis": faker_instance.text(max_nb_chars=150),
-        "priority": faker_instance.random_element(elements=["low", "medium", "high", "critical"]),
+        "priority": faker_instance.random_element(
+            elements=["low", "medium", "high", "critical"]
+        ),
     }
 
 
@@ -97,20 +111,24 @@ def sample_change_data(faker_instance) -> Dict[str, Any]:
     start_time = faker_instance.future_datetime(end_date="+30d")
     return {
         "title": faker_instance.sentence(nb_words=6),
-        "type": faker_instance.random_element(elements=["normal", "emergency", "standard"]),
+        "type": faker_instance.random_element(
+            elements=["normal", "emergency", "standard"]
+        ),
         "description": faker_instance.text(max_nb_chars=200),
         "justification": faker_instance.text(max_nb_chars=100),
         "risk_assessment": {
             "level": faker_instance.random_element(elements=["low", "medium", "high"]),
             "impact": faker_instance.text(max_nb_chars=100),
-            "likelihood": faker_instance.random_element(elements=["low", "medium", "high"])
+            "likelihood": faker_instance.random_element(
+                elements=["low", "medium", "high"]
+            ),
         },
         "implementation_plan": faker_instance.text(max_nb_chars=200),
         "rollback_plan": faker_instance.text(max_nb_chars=150),
         "scheduled_start": start_time.isoformat(),
         "scheduled_end": (start_time + timedelta(hours=2)).isoformat(),
         "affected_ci_ids": [faker_instance.uuid4()],
-        "approvers": [faker_instance.uuid4() for _ in range(2)]
+        "approvers": [faker_instance.uuid4() for _ in range(2)],
     }
 
 
@@ -119,15 +137,21 @@ def sample_ci_data(faker_instance) -> Dict[str, Any]:
     """Generate sample CI data for testing"""
     return {
         "name": f"{faker_instance.word()}-{faker_instance.random_element(elements=['server', 'workstation', 'network'])}-{faker_instance.random_int(min=1, max=99):02d}",
-        "type": faker_instance.random_element(elements=["server", "workstation", "network_device", "application"]),
+        "type": faker_instance.random_element(
+            elements=["server", "workstation", "network_device", "application"]
+        ),
         "attributes": {
-            "manufacturer": faker_instance.random_element(elements=["Dell", "HP", "Cisco", "IBM"]),
+            "manufacturer": faker_instance.random_element(
+                elements=["Dell", "HP", "Cisco", "IBM"]
+            ),
             "model": faker_instance.word(),
             "serial_number": faker_instance.bothify(text="???###"),
-            "location": f"DC{faker_instance.random_int(min=1, max=3)}-Rack{faker_instance.random_int(min=1, max=20):02d}-U{faker_instance.random_int(min=1, max=42):02d}"
+            "location": f"DC{faker_instance.random_int(min=1, max=3)}-Rack{faker_instance.random_int(min=1, max=20):02d}-U{faker_instance.random_int(min=1, max=42):02d}",
         },
-        "status": faker_instance.random_element(elements=["active", "inactive", "maintenance"]),
-        "owner_id": faker_instance.uuid4()
+        "status": faker_instance.random_element(
+            elements=["active", "inactive", "maintenance"]
+        ),
+        "owner_id": faker_instance.uuid4(),
     }
 
 
@@ -156,7 +180,7 @@ def test_report_data():
         "start_time": datetime.now(),
         "test_results": [],
         "coverage": {},
-        "performance": {}
+        "performance": {},
     }
 
 
@@ -170,8 +194,8 @@ def pytest_runtest_makereport(item, call):
             "timestamp": datetime.now().isoformat(),
             "markers": [marker.name for marker in item.iter_markers()],
         }
-        
-        if hasattr(item.session, 'test_report_data'):
+
+        if hasattr(item.session, "test_report_data"):
             item.session.test_report_data["test_results"].append(test_result)
 
 
@@ -181,18 +205,20 @@ def pytest_sessionstart(session):
         "start_time": datetime.now(),
         "test_results": [],
         "coverage": {},
-        "performance": {}
+        "performance": {},
     }
 
 
 def pytest_sessionfinish(session, exitstatus):
     """Generate final test report"""
-    if hasattr(session, 'test_report_data'):
+    if hasattr(session, "test_report_data"):
         end_time = datetime.now()
         session.test_report_data["end_time"] = end_time
-        session.test_report_data["duration"] = (end_time - session.test_report_data["start_time"]).total_seconds()
+        session.test_report_data["duration"] = (
+            end_time - session.test_report_data["start_time"]
+        ).total_seconds()
         session.test_report_data["exit_status"] = exitstatus
-        
+
         # Save test results to JSON file
         os.makedirs("tests/reports", exist_ok=True)
         with open("tests/reports/session_report.json", "w") as f:
@@ -211,7 +237,7 @@ def playwright_config():
         "base_url": base_url,
         "timeout": int(os.getenv("PLAYWRIGHT_TIMEOUT", "30000")),
         "viewport": {"width": 1920, "height": 1080},
-        "user_agent": "ITSM-Test-Agent/1.0"
+        "user_agent": "ITSM-Test-Agent/1.0",
     }
 
 
@@ -222,5 +248,5 @@ def benchmark_config():
     return {
         "rounds": int(os.getenv("BENCHMARK_ROUNDS", "5")),
         "warmup_rounds": int(os.getenv("BENCHMARK_WARMUP", "1")),
-        "timeout": int(os.getenv("BENCHMARK_TIMEOUT", "60"))
+        "timeout": int(os.getenv("BENCHMARK_TIMEOUT", "60")),
     }

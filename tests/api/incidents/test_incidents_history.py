@@ -1,6 +1,7 @@
 """
 Incident history and workflow API tests
 """
+
 import pytest
 import requests
 from unittest.mock import patch
@@ -22,71 +23,53 @@ class TestIncidentHistory:
                     "action": "created",
                     "from": None,
                     "to": "new",
-                    "user": {
-                        "id": "user_456",
-                        "name": "山田太郎"
-                    },
+                    "user": {"id": "user_456", "name": "山田太郎"},
                     "timestamp": "2024-01-15T09:30:00+09:00",
                     "details": {
                         "title": "メールサーバーに接続できない",
-                        "priority": "high"
-                    }
+                        "priority": "high",
+                    },
                 },
                 {
                     "id": "hist_002",
                     "action": "status_changed",
                     "from": "new",
                     "to": "assigned",
-                    "user": {
-                        "id": "user_123",
-                        "name": "システム管理者"
-                    },
+                    "user": {"id": "user_123", "name": "システム管理者"},
                     "timestamp": "2024-01-15T09:35:00+09:00",
-                    "details": {
-                        "assignee_id": "user_789",
-                        "assignee_name": "鈴木花子"
-                    }
+                    "details": {"assignee_id": "user_789", "assignee_name": "鈴木花子"},
                 },
                 {
                     "id": "hist_003",
                     "action": "work_note_added",
                     "from": None,
                     "to": None,
-                    "user": {
-                        "id": "user_789",
-                        "name": "鈴木花子"
-                    },
+                    "user": {"id": "user_789", "name": "鈴木花子"},
                     "timestamp": "2024-01-15T10:15:00+09:00",
-                    "details": {
-                        "note": "調査開始。メールサーバーのログを確認中。"
-                    }
-                }
+                    "details": {"note": "調査開始。メールサーバーのログを確認中。"},
+                },
             ],
-            "meta": {
-                "total_count": 3,
-                "current_page": 1,
-                "total_pages": 1
-            }
+            "meta": {"total_count": 3, "current_page": 1, "total_pages": 1},
         }
-        
-        with patch('requests.get') as mock_get:
+
+        with patch("requests.get") as mock_get:
             mock_get.return_value.status_code = 200
             mock_get.return_value.json.return_value = mock_response
-            
+
             response = requests.get(
                 f"{test_config['base_url']}/incidents/{incident_id}/history",
-                headers=api_headers
+                headers=api_headers,
             )
-            
+
             assert response.status_code == 200
             history = response.json()
             assert "data" in history
             assert len(history["data"]) == 3
-            
+
             # Verify chronological order
             timestamps = [item["timestamp"] for item in history["data"]]
             assert timestamps == sorted(timestamps)
-            
+
             # Verify action types
             actions = [item["action"] for item in history["data"]]
             assert "created" in actions
@@ -103,36 +86,29 @@ class TestIncidentHistory:
                     "action": "status_changed",
                     "from": "new",
                     "to": "assigned",
-                    "user": {
-                        "id": "user_123",
-                        "name": "システム管理者"
-                    },
-                    "timestamp": "2024-01-15T09:35:00+09:00"
+                    "user": {"id": "user_123", "name": "システム管理者"},
+                    "timestamp": "2024-01-15T09:35:00+09:00",
                 }
             ],
-            "meta": {
-                "total_count": 1,
-                "current_page": 1,
-                "total_pages": 1
-            }
+            "meta": {"total_count": 1, "current_page": 1, "total_pages": 1},
         }
-        
-        with patch('requests.get') as mock_get:
+
+        with patch("requests.get") as mock_get:
             mock_get.return_value.status_code = 200
             mock_get.return_value.json.return_value = mock_response
-            
+
             params = {
                 "action_types": ["status_changed"],
                 "date_from": "2024-01-15T00:00:00+09:00",
-                "date_to": "2024-01-15T23:59:59+09:00"
+                "date_to": "2024-01-15T23:59:59+09:00",
             }
-            
+
             response = requests.get(
                 f"{test_config['base_url']}/incidents/{incident_id}/history",
                 params=params,
-                headers=api_headers
+                headers=api_headers,
             )
-            
+
             assert response.status_code == 200
             history = response.json()
             assert len(history["data"]) == 1
@@ -144,30 +120,27 @@ class TestIncidentHistory:
         note_data = {
             "content": "ネットワーク設定を確認。問題を特定しました。",
             "is_public": False,
-            "notify_assignee": True
+            "notify_assignee": True,
         }
-        
+
         mock_response = {
             "id": "note_001",
             "content": note_data["content"],
-            "author": {
-                "id": "user_789",
-                "name": "鈴木花子"
-            },
+            "author": {"id": "user_789", "name": "鈴木花子"},
             "is_public": False,
-            "created_at": "2024-01-15T14:30:00+09:00"
+            "created_at": "2024-01-15T14:30:00+09:00",
         }
-        
-        with patch('requests.post') as mock_post:
+
+        with patch("requests.post") as mock_post:
             mock_post.return_value.status_code = 201
             mock_post.return_value.json.return_value = mock_response
-            
+
             response = requests.post(
                 f"{test_config['base_url']}/incidents/{incident_id}/work-notes",
                 json=note_data,
-                headers=api_headers
+                headers=api_headers,
             )
-            
+
             assert response.status_code == 201
             note = response.json()
             assert note["content"] == note_data["content"]
@@ -179,36 +152,33 @@ class TestIncidentHistory:
         incident_id = "INC000123"
         invalid_note_data = {
             "content": "",  # Empty content should fail
-            "is_public": "invalid_boolean"  # Invalid boolean
+            "is_public": "invalid_boolean",  # Invalid boolean
         }
-        
+
         mock_error_response = {
             "error": {
                 "code": "VALIDATION_ERROR",
                 "message": "入力値が不正です",
                 "details": [
-                    {
-                        "field": "content",
-                        "message": "作業ノートの内容は必須です"
-                    },
+                    {"field": "content", "message": "作業ノートの内容は必須です"},
                     {
                         "field": "is_public",
-                        "message": "is_publicはboolean値である必要があります"
-                    }
-                ]
+                        "message": "is_publicはboolean値である必要があります",
+                    },
+                ],
             }
         }
-        
-        with patch('requests.post') as mock_post:
+
+        with patch("requests.post") as mock_post:
             mock_post.return_value.status_code = 422
             mock_post.return_value.json.return_value = mock_error_response
-            
+
             response = requests.post(
                 f"{test_config['base_url']}/incidents/{incident_id}/work-notes",
                 json=invalid_note_data,
-                headers=api_headers
+                headers=api_headers,
             )
-            
+
             assert response.status_code == 422
             error = response.json()["error"]
             assert error["code"] == "VALIDATION_ERROR"
@@ -222,40 +192,30 @@ class TestIncidentHistory:
                 {
                     "id": "note_001",
                     "content": "初回調査開始",
-                    "author": {
-                        "id": "user_789",
-                        "name": "鈴木花子"
-                    },
+                    "author": {"id": "user_789", "name": "鈴木花子"},
                     "is_public": False,
-                    "created_at": "2024-01-15T10:15:00+09:00"
+                    "created_at": "2024-01-15T10:15:00+09:00",
                 },
                 {
                     "id": "note_002",
                     "content": "原因を特定しました",
-                    "author": {
-                        "id": "user_789",
-                        "name": "鈴木花子"
-                    },
+                    "author": {"id": "user_789", "name": "鈴木花子"},
                     "is_public": True,
-                    "created_at": "2024-01-15T14:30:00+09:00"
-                }
+                    "created_at": "2024-01-15T14:30:00+09:00",
+                },
             ],
-            "meta": {
-                "total_count": 2,
-                "current_page": 1,
-                "total_pages": 1
-            }
+            "meta": {"total_count": 2, "current_page": 1, "total_pages": 1},
         }
-        
-        with patch('requests.get') as mock_get:
+
+        with patch("requests.get") as mock_get:
             mock_get.return_value.status_code = 200
             mock_get.return_value.json.return_value = mock_response
-            
+
             response = requests.get(
                 f"{test_config['base_url']}/incidents/{incident_id}/work-notes",
-                headers=api_headers
+                headers=api_headers,
             )
-            
+
             assert response.status_code == 200
             notes = response.json()
             assert len(notes["data"]) == 2
@@ -268,34 +228,30 @@ class TestIncidentHistory:
         assignment_data = {
             "assignee_id": "user_789",
             "assignment_group": "L2_Support",
-            "escalation_reason": "Requires database expertise"
+            "escalation_reason": "Requires database expertise",
         }
-        
+
         mock_response = {
             "id": incident_id,
             "status": "assigned",
-            "assignee": {
-                "id": "user_789",
-                "name": "鈴木花子",
-                "group": "L2_Support"
-            },
+            "assignee": {"id": "user_789", "name": "鈴木花子", "group": "L2_Support"},
             "assigned_at": "2024-01-15T15:00:00+09:00",
             "sla": {
                 "response_due": "2024-01-15T16:00:00+09:00",
-                "resolution_due": "2024-01-16T15:00:00+09:00"
-            }
+                "resolution_due": "2024-01-16T15:00:00+09:00",
+            },
         }
-        
-        with patch('requests.post') as mock_post:
+
+        with patch("requests.post") as mock_post:
             mock_post.return_value.status_code = 200
             mock_post.return_value.json.return_value = mock_response
-            
+
             response = requests.post(
                 f"{test_config['base_url']}/incidents/{incident_id}/assign",
                 json=assignment_data,
-                headers=api_headers
+                headers=api_headers,
             )
-            
+
             assert response.status_code == 200
             result = response.json()
             assert result["status"] == "assigned"
@@ -309,9 +265,9 @@ class TestIncidentHistory:
             "escalation_level": "management",
             "reason": "SLA breach imminent",
             "notify_manager": True,
-            "escalation_note": "高優先度インシデントのSLA違反の可能性"
+            "escalation_note": "高優先度インシデントのSLA違反の可能性",
         }
-        
+
         mock_response = {
             "id": incident_id,
             "escalation_level": "management",
@@ -319,21 +275,21 @@ class TestIncidentHistory:
             "escalated_to": {
                 "id": "user_100",
                 "name": "管理者",
-                "role": "incident_manager"
+                "role": "incident_manager",
             },
-            "notifications_sent": ["email", "sms", "slack"]
+            "notifications_sent": ["email", "sms", "slack"],
         }
-        
-        with patch('requests.post') as mock_post:
+
+        with patch("requests.post") as mock_post:
             mock_post.return_value.status_code = 200
             mock_post.return_value.json.return_value = mock_response
-            
+
             response = requests.post(
                 f"{test_config['base_url']}/incidents/{incident_id}/escalate",
                 json=escalation_data,
-                headers=api_headers
+                headers=api_headers,
             )
-            
+
             assert response.status_code == 200
             result = response.json()
             assert result["escalation_level"] == "management"
@@ -347,38 +303,35 @@ class TestIncidentHistory:
             "resolution_code": "config_change",
             "resolution_notes": "メールサーバーの設定を修正しました。サービスが復旧しています。",
             "verification_required": True,
-            "close_related_incidents": False
+            "close_related_incidents": False,
         }
-        
+
         mock_response = {
             "id": incident_id,
             "status": "resolved",
             "resolution": {
                 "code": "config_change",
                 "notes": resolution_data["resolution_notes"],
-                "resolved_by": {
-                    "id": "user_789",
-                    "name": "鈴木花子"
-                },
-                "resolved_at": "2024-01-15T17:00:00+09:00"
+                "resolved_by": {"id": "user_789", "name": "鈴木花子"},
+                "resolved_at": "2024-01-15T17:00:00+09:00",
             },
             "sla": {
                 "response_met": True,
                 "resolution_met": True,
-                "resolution_time_minutes": 450
-            }
+                "resolution_time_minutes": 450,
+            },
         }
-        
-        with patch('requests.post') as mock_post:
+
+        with patch("requests.post") as mock_post:
             mock_post.return_value.status_code = 200
             mock_post.return_value.json.return_value = mock_response
-            
+
             response = requests.post(
                 f"{test_config['base_url']}/incidents/{incident_id}/resolve",
                 json=resolution_data,
-                headers=api_headers
+                headers=api_headers,
             )
-            
+
             assert response.status_code == 200
             result = response.json()
             assert result["status"] == "resolved"
@@ -393,40 +346,37 @@ class TestIncidentHistory:
             "closure_notes": "ユーザー確認完了。問題は完全に解決されました。",
             "satisfaction_survey": {
                 "rating": 4,
-                "feedback": "迅速な対応ありがとうございました"
-            }
+                "feedback": "迅速な対応ありがとうございました",
+            },
         }
-        
+
         mock_response = {
             "id": incident_id,
             "status": "closed",
             "closure": {
                 "code": "resolved_permanently",
                 "notes": closure_data["closure_notes"],
-                "closed_by": {
-                    "id": "user_456",
-                    "name": "山田太郎"
-                },
-                "closed_at": "2024-01-16T09:00:00+09:00"
+                "closed_by": {"id": "user_456", "name": "山田太郎"},
+                "closed_at": "2024-01-16T09:00:00+09:00",
             },
             "final_sla": {
                 "response_met": True,
                 "resolution_met": True,
                 "total_time_minutes": 1410,
-                "satisfaction_score": 4
-            }
+                "satisfaction_score": 4,
+            },
         }
-        
-        with patch('requests.post') as mock_post:
+
+        with patch("requests.post") as mock_post:
             mock_post.return_value.status_code = 200
             mock_post.return_value.json.return_value = mock_response
-            
+
             response = requests.post(
                 f"{test_config['base_url']}/incidents/{incident_id}/close",
                 json=closure_data,
-                headers=api_headers
+                headers=api_headers,
             )
-            
+
             assert response.status_code == 200
             result = response.json()
             assert result["status"] == "closed"

@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 class ErrorCategory(Enum):
     """エラーカテゴリ"""
+
     SYNTAX_ERROR = "syntax_error"
     RUNTIME_ERROR = "runtime_error"
     LOGIC_ERROR = "logic_error"
@@ -38,6 +39,7 @@ class ErrorCategory(Enum):
 
 class ErrorSeverity(Enum):
     """エラー重要度"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -46,6 +48,7 @@ class ErrorSeverity(Enum):
 
 class RepairConfidence(Enum):
     """修復信頼度"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -55,6 +58,7 @@ class RepairConfidence(Enum):
 @dataclass
 class LogEntry:
     """ログエントリ"""
+
     timestamp: float
     level: str
     message: str
@@ -63,7 +67,7 @@ class LogEntry:
     function_name: Optional[str] = None
     stack_trace: Optional[str] = None
     context: Optional[Dict[str, Any]] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
@@ -71,6 +75,7 @@ class LogEntry:
 @dataclass
 class AnalyzedError:
     """分析されたエラー"""
+
     id: str
     timestamp: float
     category: ErrorCategory
@@ -84,17 +89,18 @@ class AnalyzedError:
     pattern_hash: str
     stack_trace: Optional[str] = None
     context: Optional[Dict[str, Any]] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         result = asdict(self)
-        result['category'] = self.category.value
-        result['severity'] = self.severity.value
+        result["category"] = self.category.value
+        result["severity"] = self.severity.value
         return result
 
 
 @dataclass
 class RepairSuggestion:
     """修復提案"""
+
     error_id: str
     suggestion_id: str
     title: str
@@ -107,19 +113,19 @@ class RepairSuggestion:
     configuration_changes: Optional[Dict[str, Any]] = None
     dependencies: Optional[List[str]] = None
     risks: Optional[List[str]] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         result = asdict(self)
-        result['confidence'] = self.confidence.value
+        result["confidence"] = self.confidence.value
         return result
 
 
 class LogPatternMatcher:
     """ログパターンマッチャー"""
-    
+
     def __init__(self):
         self.error_patterns = self._load_error_patterns()
-    
+
     def _load_error_patterns(self) -> List[Dict[str, Any]]:
         """エラーパターンを読み込み"""
         return [
@@ -130,7 +136,7 @@ class LogPatternMatcher:
                 "category": ErrorCategory.RUNTIME_ERROR,
                 "severity": ErrorSeverity.MEDIUM,
                 "component_pattern": r"File \"([^\"]+)\"",
-                "variables": ["object_type", "attribute_name"]
+                "variables": ["object_type", "attribute_name"],
             },
             {
                 "name": "ImportError",
@@ -138,7 +144,7 @@ class LogPatternMatcher:
                 "category": ErrorCategory.DEPENDENCY_ERROR,
                 "severity": ErrorSeverity.HIGH,
                 "component_pattern": r"File \"([^\"]+)\"",
-                "variables": ["module_name"]
+                "variables": ["module_name"],
             },
             {
                 "name": "KeyError",
@@ -146,7 +152,7 @@ class LogPatternMatcher:
                 "category": ErrorCategory.LOGIC_ERROR,
                 "severity": ErrorSeverity.MEDIUM,
                 "component_pattern": r"File \"([^\"]+)\"",
-                "variables": ["key_name"]
+                "variables": ["key_name"],
             },
             {
                 "name": "FileNotFoundError",
@@ -154,9 +160,8 @@ class LogPatternMatcher:
                 "category": ErrorCategory.CONFIGURATION_ERROR,
                 "severity": ErrorSeverity.HIGH,
                 "component_pattern": r"File \"([^\"]+)\"",
-                "variables": ["file_path"]
+                "variables": ["file_path"],
             },
-            
             # Database エラー
             {
                 "name": "DatabaseConnectionError",
@@ -164,7 +169,7 @@ class LogPatternMatcher:
                 "category": ErrorCategory.DATABASE_ERROR,
                 "severity": ErrorSeverity.CRITICAL,
                 "component_pattern": r"",
-                "variables": []
+                "variables": [],
             },
             {
                 "name": "SQLSyntaxError",
@@ -172,9 +177,8 @@ class LogPatternMatcher:
                 "category": ErrorCategory.SYNTAX_ERROR,
                 "severity": ErrorSeverity.HIGH,
                 "component_pattern": r"",
-                "variables": []
+                "variables": [],
             },
-            
             # Network エラー
             {
                 "name": "ConnectionTimeout",
@@ -182,7 +186,7 @@ class LogPatternMatcher:
                 "category": ErrorCategory.NETWORK_ERROR,
                 "severity": ErrorSeverity.MEDIUM,
                 "component_pattern": r"",
-                "variables": []
+                "variables": [],
             },
             {
                 "name": "ConnectionRefused",
@@ -190,9 +194,8 @@ class LogPatternMatcher:
                 "category": ErrorCategory.NETWORK_ERROR,
                 "severity": ErrorSeverity.HIGH,
                 "component_pattern": r"",
-                "variables": []
+                "variables": [],
             },
-            
             # Authentication/Authorization エラー
             {
                 "name": "AuthenticationFailure",
@@ -200,7 +203,7 @@ class LogPatternMatcher:
                 "category": ErrorCategory.AUTHENTICATION_ERROR,
                 "severity": ErrorSeverity.HIGH,
                 "component_pattern": r"",
-                "variables": []
+                "variables": [],
             },
             {
                 "name": "PermissionDenied",
@@ -208,9 +211,8 @@ class LogPatternMatcher:
                 "category": ErrorCategory.AUTHORIZATION_ERROR,
                 "severity": ErrorSeverity.MEDIUM,
                 "component_pattern": r"",
-                "variables": []
+                "variables": [],
             },
-            
             # Performance エラー
             {
                 "name": "MemoryError",
@@ -218,7 +220,7 @@ class LogPatternMatcher:
                 "category": ErrorCategory.PERFORMANCE_ERROR,
                 "severity": ErrorSeverity.CRITICAL,
                 "component_pattern": r"",
-                "variables": []
+                "variables": [],
             },
             {
                 "name": "CPUTimeout",
@@ -226,28 +228,30 @@ class LogPatternMatcher:
                 "category": ErrorCategory.PERFORMANCE_ERROR,
                 "severity": ErrorSeverity.HIGH,
                 "component_pattern": r"",
-                "variables": []
-            }
+                "variables": [],
+            },
         ]
-    
+
     def analyze_log_entry(self, log_entry: LogEntry) -> Optional[AnalyzedError]:
         """ログエントリを分析"""
         message = log_entry.message.lower()
-        
+
         for pattern_info in self.error_patterns:
             match = re.search(pattern_info["pattern"], message, re.IGNORECASE)
             if match:
                 # コンポーネント特定
                 component = "unknown"
                 if pattern_info["component_pattern"] and log_entry.stack_trace:
-                    comp_match = re.search(pattern_info["component_pattern"], log_entry.stack_trace)
+                    comp_match = re.search(
+                        pattern_info["component_pattern"], log_entry.stack_trace
+                    )
                     if comp_match:
                         component = Path(comp_match.group(1)).name
-                
+
                 # パターンハッシュ生成
                 normalized_message = self._normalize_message(log_entry.message)
                 pattern_hash = hashlib.md5(normalized_message.encode()).hexdigest()
-                
+
                 return AnalyzedError(
                     id=f"error_{int(log_entry.timestamp)}_{pattern_hash[:8]}",
                     timestamp=log_entry.timestamp,
@@ -261,9 +265,9 @@ class LogPatternMatcher:
                     last_occurrence=log_entry.timestamp,
                     pattern_hash=pattern_hash,
                     stack_trace=log_entry.stack_trace,
-                    context=log_entry.context
+                    context=log_entry.context,
                 )
-        
+
         # パターンにマッチしない場合は未知のエラー
         return AnalyzedError(
             id=f"error_{int(log_entry.timestamp)}_unknown",
@@ -278,25 +282,29 @@ class LogPatternMatcher:
             last_occurrence=log_entry.timestamp,
             pattern_hash=hashlib.md5(log_entry.message.encode()).hexdigest(),
             stack_trace=log_entry.stack_trace,
-            context=log_entry.context
+            context=log_entry.context,
         )
-    
+
     def _normalize_message(self, message: str) -> str:
         """メッセージを正規化"""
         # 数値、ファイルパス、IDなどの変数部分を置換
-        normalized = re.sub(r'\b\d+\b', '{NUMBER}', message)
-        normalized = re.sub(r'/[^\s]+', '{PATH}', normalized)
-        normalized = re.sub(r'[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}', '{UUID}', normalized)
-        normalized = re.sub(r'\b[A-Fa-f0-9]{32}\b', '{HASH}', normalized)
+        normalized = re.sub(r"\b\d+\b", "{NUMBER}", message)
+        normalized = re.sub(r"/[^\s]+", "{PATH}", normalized)
+        normalized = re.sub(
+            r"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}",
+            "{UUID}",
+            normalized,
+        )
+        normalized = re.sub(r"\b[A-Fa-f0-9]{32}\b", "{HASH}", normalized)
         return normalized.lower().strip()
 
 
 class RepairSuggestionEngine:
     """修復提案エンジン"""
-    
+
     def __init__(self):
         self.repair_templates = self._load_repair_templates()
-    
+
     def _load_repair_templates(self) -> Dict[ErrorCategory, List[Dict[str, Any]]]:
         """修復テンプレートを読み込み"""
         return {
@@ -311,9 +319,9 @@ class RepairSuggestionEngine:
                         "Identify the missing package from the error message",
                         "Install using pip: pip install {package_name}",
                         "Update requirements.txt if needed",
-                        "Restart the application"
+                        "Restart the application",
                     ],
-                    "risks": ["Package version conflicts"]
+                    "risks": ["Package version conflicts"],
                 },
                 {
                     "title": "Add package to requirements",
@@ -324,11 +332,10 @@ class RepairSuggestionEngine:
                     "steps": [
                         "Add package to requirements.txt",
                         "Run pip install -r requirements.txt",
-                        "Commit changes to version control"
-                    ]
-                }
+                        "Commit changes to version control",
+                    ],
+                },
             ],
-            
             ErrorCategory.CONFIGURATION_ERROR: [
                 {
                     "title": "Create missing configuration file",
@@ -340,12 +347,11 @@ class RepairSuggestionEngine:
                         "Create the missing file or directory",
                         "Add appropriate default configuration",
                         "Set correct file permissions",
-                        "Update documentation"
+                        "Update documentation",
                     ],
-                    "risks": ["Incorrect default values", "Permission issues"]
+                    "risks": ["Incorrect default values", "Permission issues"],
                 }
             ],
-            
             ErrorCategory.DATABASE_ERROR: [
                 {
                     "title": "Database connection repair",
@@ -357,12 +363,11 @@ class RepairSuggestionEngine:
                         "Check database service status",
                         "Verify connection parameters",
                         "Test database connectivity",
-                        "Update connection pool settings if needed"
+                        "Update connection pool settings if needed",
                     ],
-                    "risks": ["Service disruption", "Data loss"]
+                    "risks": ["Service disruption", "Data loss"],
                 }
             ],
-            
             ErrorCategory.RUNTIME_ERROR: [
                 {
                     "title": "Null/attribute check",
@@ -374,17 +379,16 @@ class RepairSuggestionEngine:
                         "Identify the line causing the error",
                         "Add null/none checks before attribute access",
                         "Add proper error handling",
-                        "Add logging for debugging"
+                        "Add logging for debugging",
                     ],
                     "code_changes": [
                         {
                             "type": "add_check",
-                            "template": "if obj is not None and hasattr(obj, 'attribute'):"
+                            "template": "if obj is not None and hasattr(obj, 'attribute'):",
                         }
-                    ]
+                    ],
                 }
             ],
-            
             ErrorCategory.NETWORK_ERROR: [
                 {
                     "title": "Add retry mechanism",
@@ -396,17 +400,16 @@ class RepairSuggestionEngine:
                         "Implement exponential backoff retry",
                         "Add timeout configuration",
                         "Add proper error handling",
-                        "Add monitoring and logging"
+                        "Add monitoring and logging",
                     ],
                     "code_changes": [
                         {
                             "type": "retry_decorator",
-                            "template": "@retry(max_attempts=3, backoff_factor=2)"
+                            "template": "@retry(max_attempts=3, backoff_factor=2)",
                         }
-                    ]
+                    ],
                 }
             ],
-            
             ErrorCategory.PERFORMANCE_ERROR: [
                 {
                     "title": "Memory optimization",
@@ -418,18 +421,18 @@ class RepairSuggestionEngine:
                         "Profile memory usage",
                         "Identify memory leaks",
                         "Optimize data structures",
-                        "Add memory monitoring"
+                        "Add memory monitoring",
                     ],
-                    "risks": ["Performance degradation", "Feature changes"]
+                    "risks": ["Performance degradation", "Feature changes"],
                 }
-            ]
+            ],
         }
-    
+
     def generate_suggestions(self, error: AnalyzedError) -> List[RepairSuggestion]:
         """修復提案を生成"""
         suggestions = []
         templates = self.repair_templates.get(error.category, [])
-        
+
         for i, template in enumerate(templates):
             suggestion = RepairSuggestion(
                 error_id=error.id,
@@ -443,77 +446,84 @@ class RepairSuggestionEngine:
                 code_changes=template.get("code_changes"),
                 configuration_changes=template.get("configuration_changes"),
                 dependencies=template.get("dependencies"),
-                risks=template.get("risks")
+                risks=template.get("risks"),
             )
             suggestions.append(suggestion)
-        
+
         # エラー固有の提案を追加
         custom_suggestions = self._generate_custom_suggestions(error)
         suggestions.extend(custom_suggestions)
-        
+
         # 優先度でソート
         suggestions.sort(key=lambda x: x.priority)
-        
+
         return suggestions
-    
-    def _generate_custom_suggestions(self, error: AnalyzedError) -> List[RepairSuggestion]:
+
+    def _generate_custom_suggestions(
+        self, error: AnalyzedError
+    ) -> List[RepairSuggestion]:
         """エラー固有の修復提案を生成"""
         suggestions = []
-        
+
         # 頻度が高いエラーの場合
         if error.frequency > 10:
-            suggestions.append(RepairSuggestion(
-                error_id=error.id,
-                suggestion_id=f"{error.id}_high_frequency",
-                title="High frequency error - priority fix needed",
-                description=f"This error has occurred {error.frequency} times. Immediate attention required.",
-                confidence=RepairConfidence.HIGH,
-                estimated_effort="High (immediate fix required)",
-                priority=0,  # 最高優先度
-                steps=[
-                    "Investigate root cause immediately",
-                    "Implement temporary workaround if possible",
-                    "Plan permanent fix",
-                    "Add monitoring to prevent recurrence"
-                ],
-                risks=["Service degradation", "User impact"]
-            ))
-        
+            suggestions.append(
+                RepairSuggestion(
+                    error_id=error.id,
+                    suggestion_id=f"{error.id}_high_frequency",
+                    title="High frequency error - priority fix needed",
+                    description=f"This error has occurred {error.frequency} times. Immediate attention required.",
+                    confidence=RepairConfidence.HIGH,
+                    estimated_effort="High (immediate fix required)",
+                    priority=0,  # 最高優先度
+                    steps=[
+                        "Investigate root cause immediately",
+                        "Implement temporary workaround if possible",
+                        "Plan permanent fix",
+                        "Add monitoring to prevent recurrence",
+                    ],
+                    risks=["Service degradation", "User impact"],
+                )
+            )
+
         # スタックトレースがある場合
         if error.stack_trace:
-            suggestions.append(RepairSuggestion(
-                error_id=error.id,
-                suggestion_id=f"{error.id}_stack_trace_analysis",
-                title="Stack trace analysis",
-                description="Detailed analysis of the stack trace to identify the exact cause",
-                confidence=RepairConfidence.MEDIUM,
-                estimated_effort="Medium (analysis required)",
-                priority=3,
-                steps=[
-                    "Analyze the full stack trace",
-                    "Identify the exact line causing the error",
-                    "Review code changes in the affected area",
-                    "Add additional logging if needed"
-                ]
-            ))
-        
+            suggestions.append(
+                RepairSuggestion(
+                    error_id=error.id,
+                    suggestion_id=f"{error.id}_stack_trace_analysis",
+                    title="Stack trace analysis",
+                    description="Detailed analysis of the stack trace to identify the exact cause",
+                    confidence=RepairConfidence.MEDIUM,
+                    estimated_effort="Medium (analysis required)",
+                    priority=3,
+                    steps=[
+                        "Analyze the full stack trace",
+                        "Identify the exact line causing the error",
+                        "Review code changes in the affected area",
+                        "Add additional logging if needed",
+                    ],
+                )
+            )
+
         return suggestions
 
 
 class LogAnalysisDatabase:
     """ログ分析データベース"""
-    
+
     def __init__(self, db_path: str = "log_analysis.db"):
         self.db_path = db_path
         self.init_database()
-    
+
     def init_database(self):
         """データベース初期化"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            
+
             # 分析エラーテーブル
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS analyzed_errors (
                     id TEXT PRIMARY KEY,
                     timestamp REAL,
@@ -529,10 +539,12 @@ class LogAnalysisDatabase:
                     stack_trace TEXT,
                     context TEXT
                 )
-            """)
-            
+            """
+            )
+
             # 修復提案テーブル
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS repair_suggestions (
                     suggestion_id TEXT PRIMARY KEY,
                     error_id TEXT,
@@ -550,10 +562,12 @@ class LogAnalysisDatabase:
                     applied_timestamp REAL,
                     FOREIGN KEY (error_id) REFERENCES analyzed_errors (id)
                 )
-            """)
-            
+            """
+            )
+
             # ログエントリテーブル
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS log_entries (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     timestamp REAL,
@@ -565,129 +579,186 @@ class LogAnalysisDatabase:
                     stack_trace TEXT,
                     context TEXT
                 )
-            """)
-            
+            """
+            )
+
             # インデックス作成
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_errors_category ON analyzed_errors (category)")
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_errors_severity ON analyzed_errors (severity)")
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_errors_timestamp ON analyzed_errors (timestamp)")
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_suggestions_error_id ON repair_suggestions (error_id)")
-            
+            cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_errors_category ON analyzed_errors (category)"
+            )
+            cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_errors_severity ON analyzed_errors (severity)"
+            )
+            cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_errors_timestamp ON analyzed_errors (timestamp)"
+            )
+            cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_suggestions_error_id ON repair_suggestions (error_id)"
+            )
+
             conn.commit()
-    
+
     def save_log_entry(self, log_entry: LogEntry) -> int:
         """ログエントリを保存"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO log_entries 
                 (timestamp, level, message, source_file, line_number, 
                  function_name, stack_trace, context)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                log_entry.timestamp, log_entry.level, log_entry.message,
-                log_entry.source_file, log_entry.line_number,
-                log_entry.function_name, log_entry.stack_trace,
-                json.dumps(log_entry.context) if log_entry.context else None
-            ))
+            """,
+                (
+                    log_entry.timestamp,
+                    log_entry.level,
+                    log_entry.message,
+                    log_entry.source_file,
+                    log_entry.line_number,
+                    log_entry.function_name,
+                    log_entry.stack_trace,
+                    json.dumps(log_entry.context) if log_entry.context else None,
+                ),
+            )
             return cursor.lastrowid
-    
+
     def save_analyzed_error(self, error: AnalyzedError):
         """分析エラーを保存または更新"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            
+
             # 既存エラーをチェック
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT frequency, first_occurrence FROM analyzed_errors 
                 WHERE pattern_hash = ?
-            """, (error.pattern_hash,))
-            
+            """,
+                (error.pattern_hash,),
+            )
+
             existing = cursor.fetchone()
-            
+
             if existing:
                 # 既存エラーを更新
-                cursor.execute("""
+                cursor.execute(
+                    """
                     UPDATE analyzed_errors SET
                         frequency = ?,
                         last_occurrence = ?,
                         severity = ?
                     WHERE pattern_hash = ?
-                """, (
-                    existing[0] + 1,
-                    error.timestamp,
-                    error.severity.value,
-                    error.pattern_hash
-                ))
+                """,
+                    (
+                        existing[0] + 1,
+                        error.timestamp,
+                        error.severity.value,
+                        error.pattern_hash,
+                    ),
+                )
             else:
                 # 新規エラーを挿入
-                cursor.execute("""
+                cursor.execute(
+                    """
                     INSERT INTO analyzed_errors 
                     (id, timestamp, category, severity, original_message, 
                      normalized_message, affected_component, frequency, 
                      first_occurrence, last_occurrence, pattern_hash, 
                      stack_trace, context)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    error.id, error.timestamp, error.category.value,
-                    error.severity.value, error.original_message,
-                    error.normalized_message, error.affected_component,
-                    error.frequency, error.first_occurrence,
-                    error.last_occurrence, error.pattern_hash,
-                    error.stack_trace, json.dumps(error.context) if error.context else None
-                ))
-    
+                """,
+                    (
+                        error.id,
+                        error.timestamp,
+                        error.category.value,
+                        error.severity.value,
+                        error.original_message,
+                        error.normalized_message,
+                        error.affected_component,
+                        error.frequency,
+                        error.first_occurrence,
+                        error.last_occurrence,
+                        error.pattern_hash,
+                        error.stack_trace,
+                        json.dumps(error.context) if error.context else None,
+                    ),
+                )
+
     def save_repair_suggestion(self, suggestion: RepairSuggestion):
         """修復提案を保存"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT OR REPLACE INTO repair_suggestions 
                 (suggestion_id, error_id, title, description, confidence,
                  estimated_effort, priority, steps, code_changes,
                  configuration_changes, dependencies, risks)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                suggestion.suggestion_id, suggestion.error_id, suggestion.title,
-                suggestion.description, suggestion.confidence.value,
-                suggestion.estimated_effort, suggestion.priority,
-                json.dumps(suggestion.steps),
-                json.dumps(suggestion.code_changes) if suggestion.code_changes else None,
-                json.dumps(suggestion.configuration_changes) if suggestion.configuration_changes else None,
-                json.dumps(suggestion.dependencies) if suggestion.dependencies else None,
-                json.dumps(suggestion.risks) if suggestion.risks else None
-            ))
-    
+            """,
+                (
+                    suggestion.suggestion_id,
+                    suggestion.error_id,
+                    suggestion.title,
+                    suggestion.description,
+                    suggestion.confidence.value,
+                    suggestion.estimated_effort,
+                    suggestion.priority,
+                    json.dumps(suggestion.steps),
+                    (
+                        json.dumps(suggestion.code_changes)
+                        if suggestion.code_changes
+                        else None
+                    ),
+                    (
+                        json.dumps(suggestion.configuration_changes)
+                        if suggestion.configuration_changes
+                        else None
+                    ),
+                    (
+                        json.dumps(suggestion.dependencies)
+                        if suggestion.dependencies
+                        else None
+                    ),
+                    json.dumps(suggestion.risks) if suggestion.risks else None,
+                ),
+            )
+
     def get_top_errors(self, limit: int = 10) -> List[Dict[str, Any]]:
         """頻度の高いエラーを取得"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT * FROM analyzed_errors 
                 ORDER BY frequency DESC, severity DESC
                 LIMIT ?
-            """, (limit,))
-            
+            """,
+                (limit,),
+            )
+
             columns = [desc[0] for desc in cursor.description]
             return [dict(zip(columns, row)) for row in cursor.fetchall()]
-    
+
     def get_suggestions_for_error(self, error_id: str) -> List[Dict[str, Any]]:
         """エラーの修復提案を取得"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT * FROM repair_suggestions 
                 WHERE error_id = ?
                 ORDER BY priority
-            """, (error_id,))
-            
+            """,
+                (error_id,),
+            )
+
             columns = [desc[0] for desc in cursor.description]
             return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 
 class LogAnalysisEngine:
     """ログ分析エンジン"""
-    
+
     def __init__(self):
         self.database = LogAnalysisDatabase()
         self.pattern_matcher = LogPatternMatcher()
@@ -697,9 +768,9 @@ class LogAnalysisEngine:
             Path("backend/logs/itsm_error.log"),
             Path("backend/logs/auto_repair.log"),
             Path("logs/itsm.log"),
-            Path("logs/itsm_error.log")
+            Path("logs/itsm_error.log"),
         ]
-    
+
     async def analyze_log_files(self) -> Dict[str, Any]:
         """ログファイルを分析"""
         analysis_results = {
@@ -707,9 +778,9 @@ class LogAnalysisEngine:
             "files_analyzed": 0,
             "entries_processed": 0,
             "errors_found": 0,
-            "suggestions_generated": 0
+            "suggestions_generated": 0,
         }
-        
+
         for log_file in self.log_files:
             if log_file.exists():
                 try:
@@ -717,20 +788,22 @@ class LogAnalysisEngine:
                     analysis_results["files_analyzed"] += 1
                     analysis_results["entries_processed"] += result["entries_processed"]
                     analysis_results["errors_found"] += result["errors_found"]
-                    analysis_results["suggestions_generated"] += result["suggestions_generated"]
+                    analysis_results["suggestions_generated"] += result[
+                        "suggestions_generated"
+                    ]
                 except Exception as e:
                     logger.error(f"Error analyzing {log_file}: {e}")
-        
+
         return analysis_results
-    
+
     async def _analyze_single_file(self, log_file: Path) -> Dict[str, Any]:
         """単一ログファイルを分析"""
         entries_processed = 0
         errors_found = 0
         suggestions_generated = 0
-        
+
         try:
-            async with aiofiles.open(log_file, 'r') as f:
+            async with aiofiles.open(log_file, "r") as f:
                 async for line in f:
                     try:
                         log_entry = self._parse_log_line(line.strip())
@@ -738,175 +811,197 @@ class LogAnalysisEngine:
                             # ログエントリを保存
                             self.database.save_log_entry(log_entry)
                             entries_processed += 1
-                            
+
                             # エラーレベルの場合は分析
-                            if log_entry.level.upper() in ['ERROR', 'CRITICAL', 'EXCEPTION']:
-                                analyzed_error = self.pattern_matcher.analyze_log_entry(log_entry)
+                            if log_entry.level.upper() in [
+                                "ERROR",
+                                "CRITICAL",
+                                "EXCEPTION",
+                            ]:
+                                analyzed_error = self.pattern_matcher.analyze_log_entry(
+                                    log_entry
+                                )
                                 if analyzed_error:
                                     # 分析エラーを保存
                                     self.database.save_analyzed_error(analyzed_error)
                                     errors_found += 1
-                                    
+
                                     # 修復提案を生成
-                                    suggestions = self.suggestion_engine.generate_suggestions(analyzed_error)
+                                    suggestions = (
+                                        self.suggestion_engine.generate_suggestions(
+                                            analyzed_error
+                                        )
+                                    )
                                     for suggestion in suggestions:
                                         self.database.save_repair_suggestion(suggestion)
                                         suggestions_generated += 1
-                    
+
                     except Exception as e:
                         logger.error(f"Error processing log line: {e}")
-                        
+
         except Exception as e:
             logger.error(f"Error reading log file {log_file}: {e}")
-        
+
         return {
             "entries_processed": entries_processed,
             "errors_found": errors_found,
-            "suggestions_generated": suggestions_generated
+            "suggestions_generated": suggestions_generated,
         }
-    
+
     def _parse_log_line(self, line: str) -> Optional[LogEntry]:
         """ログ行を解析"""
         if not line.strip():
             return None
-        
+
         # 基本的なログフォーマットを想定
         # 2024-01-01 12:00:00,123 - ERROR - message
-        timestamp_pattern = r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}[,\.]\d{3})'
-        level_pattern = r'(DEBUG|INFO|WARNING|ERROR|CRITICAL|EXCEPTION)'
-        
+        timestamp_pattern = r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}[,\.]\d{3})"
+        level_pattern = r"(DEBUG|INFO|WARNING|ERROR|CRITICAL|EXCEPTION)"
+
         # タイムスタンプとレベルを抽出
-        match = re.search(f'{timestamp_pattern}.*?{level_pattern}.*?-\s*(.*)', line)
+        match = re.search(f"{timestamp_pattern}.*?{level_pattern}.*?-\s*(.*)", line)
         if match:
             timestamp_str = match.group(1)
             level = match.group(2)
             message = match.group(3)
-            
+
             # タイムスタンプをfloatに変換
             try:
-                dt = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S,%f')
+                dt = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S,%f")
                 timestamp = dt.timestamp()
             except ValueError:
                 try:
-                    dt = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S.%f')
+                    dt = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S.%f")
                     timestamp = dt.timestamp()
                 except ValueError:
                     timestamp = time.time()
-            
+
             # スタックトレースを検出
             stack_trace = None
-            if 'traceback' in message.lower() or 'file "' in message.lower():
+            if "traceback" in message.lower() or 'file "' in message.lower():
                 stack_trace = message
-            
+
             return LogEntry(
                 timestamp=timestamp,
                 level=level,
                 message=message,
-                stack_trace=stack_trace
+                stack_trace=stack_trace,
             )
-        
+
         return None
-    
+
     async def generate_analysis_report(self) -> Dict[str, Any]:
         """分析レポートを生成"""
         top_errors = self.database.get_top_errors(20)
-        
+
         # カテゴリ別統計
         category_stats = Counter()
         severity_stats = Counter()
         component_stats = Counter()
-        
+
         for error in top_errors:
-            category_stats[error['category']] += error['frequency']
-            severity_stats[error['severity']] += error['frequency']
-            component_stats[error['affected_component']] += error['frequency']
-        
+            category_stats[error["category"]] += error["frequency"]
+            severity_stats[error["severity"]] += error["frequency"]
+            component_stats[error["affected_component"]] += error["frequency"]
+
         # 修復提案統計
         total_suggestions = 0
         high_confidence_suggestions = 0
-        
+
         for error in top_errors:
-            suggestions = self.database.get_suggestions_for_error(error['id'])
+            suggestions = self.database.get_suggestions_for_error(error["id"])
             total_suggestions += len(suggestions)
-            high_confidence_suggestions += len([s for s in suggestions if s['confidence'] in ['high', 'very_high']])
-        
+            high_confidence_suggestions += len(
+                [s for s in suggestions if s["confidence"] in ["high", "very_high"]]
+            )
+
         report = {
             "timestamp": time.time(),
             "summary": {
                 "total_unique_errors": len(top_errors),
-                "total_error_occurrences": sum(e['frequency'] for e in top_errors),
+                "total_error_occurrences": sum(e["frequency"] for e in top_errors),
                 "total_suggestions": total_suggestions,
-                "high_confidence_suggestions": high_confidence_suggestions
+                "high_confidence_suggestions": high_confidence_suggestions,
             },
             "top_errors": top_errors[:10],
             "statistics": {
                 "by_category": dict(category_stats.most_common()),
                 "by_severity": dict(severity_stats.most_common()),
-                "by_component": dict(component_stats.most_common(10))
+                "by_component": dict(component_stats.most_common(10)),
             },
-            "recommendations": await self._generate_recommendations(top_errors)
+            "recommendations": await self._generate_recommendations(top_errors),
         }
-        
+
         return report
-    
-    async def _generate_recommendations(self, top_errors: List[Dict[str, Any]]) -> List[str]:
+
+    async def _generate_recommendations(
+        self, top_errors: List[Dict[str, Any]]
+    ) -> List[str]:
         """全体的な推奨事項を生成"""
         recommendations = []
-        
+
         # 重要度の高いエラーをチェック
-        critical_errors = [e for e in top_errors if e['severity'] == 'critical']
+        critical_errors = [e for e in top_errors if e["severity"] == "critical"]
         if critical_errors:
-            recommendations.append(f"Address {len(critical_errors)} critical errors immediately")
-        
+            recommendations.append(
+                f"Address {len(critical_errors)} critical errors immediately"
+            )
+
         # 頻度の高いエラーをチェック
-        frequent_errors = [e for e in top_errors if e['frequency'] > 50]
+        frequent_errors = [e for e in top_errors if e["frequency"] > 50]
         if frequent_errors:
-            recommendations.append(f"Focus on {len(frequent_errors)} high-frequency errors")
-        
+            recommendations.append(
+                f"Focus on {len(frequent_errors)} high-frequency errors"
+            )
+
         # カテゴリ別の推奨事項
-        category_counts = Counter(e['category'] for e in top_errors)
+        category_counts = Counter(e["category"] for e in top_errors)
         most_common_category = category_counts.most_common(1)
         if most_common_category:
-            recommendations.append(f"Most errors are {most_common_category[0][0]} - consider systematic review")
-        
+            recommendations.append(
+                f"Most errors are {most_common_category[0][0]} - consider systematic review"
+            )
+
         # コンポーネント別の推奨事項
-        component_counts = Counter(e['affected_component'] for e in top_errors)
+        component_counts = Counter(e["affected_component"] for e in top_errors)
         most_problematic_component = component_counts.most_common(1)
-        if most_problematic_component and most_problematic_component[0][0] != 'unknown':
-            recommendations.append(f"Component '{most_problematic_component[0][0]}' needs attention")
-        
+        if most_problematic_component and most_problematic_component[0][0] != "unknown":
+            recommendations.append(
+                f"Component '{most_problematic_component[0][0]}' needs attention"
+            )
+
         return recommendations
-    
+
     async def start_continuous_analysis(self, interval: int = 300):
         """継続的なログ分析を開始"""
         logger.info("Starting continuous log analysis")
-        
+
         while True:
             try:
                 # ログファイルを分析
                 analysis_results = await self.analyze_log_files()
                 logger.info(f"Analyzed logs: {analysis_results}")
-                
+
                 # レポート生成
                 if analysis_results["errors_found"] > 0:
                     report = await self.generate_analysis_report()
                     await self._save_report(report)
-                
+
                 await asyncio.sleep(interval)
-                
+
             except Exception as e:
                 logger.error(f"Error in continuous analysis: {e}")
                 await asyncio.sleep(60)
-    
+
     async def _save_report(self, report: Dict[str, Any]):
         """レポートをファイルに保存"""
         report_dir = Path("log_analysis_reports")
         report_dir.mkdir(exist_ok=True)
-        
+
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         report_file = report_dir / f"analysis_report_{timestamp}.json"
-        
-        async with aiofiles.open(report_file, 'w') as f:
+
+        async with aiofiles.open(report_file, "w") as f:
             await f.write(json.dumps(report, indent=2, default=str))
 
 
@@ -914,19 +1009,19 @@ class LogAnalysisEngine:
 async def main():
     """メイン実行関数"""
     engine = LogAnalysisEngine()
-    
+
     try:
         # 一度分析を実行
         analysis_results = await engine.analyze_log_files()
         logger.info(f"Analysis completed: {analysis_results}")
-        
+
         # レポート生成
         report = await engine.generate_analysis_report()
         await engine._save_report(report)
-        
+
         # 継続的な分析を開始
         await engine.start_continuous_analysis()
-        
+
     except KeyboardInterrupt:
         logger.info("Log analysis stopped by user")
 

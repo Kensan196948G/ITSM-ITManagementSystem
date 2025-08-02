@@ -15,7 +15,7 @@ class TestAuthAPI:
         """Test successful login"""
         login_data = {
             "username": test_user_data["email"],
-            "password": test_user_data["password"]
+            "password": test_user_data["password"],
         }
         response = client.post("/api/v1/auth/login", json=login_data)
         assert response.status_code == 200
@@ -30,7 +30,7 @@ class TestAuthAPI:
         """Test login with invalid credentials"""
         login_data = {
             "username": "nonexistent@example.com",
-            "password": "wrongpassword"
+            "password": "wrongpassword",
         }
         response = client.post("/api/v1/auth/login", json=login_data)
         assert response.status_code == 401
@@ -52,7 +52,7 @@ class TestAuthAPI:
             "email": "newuser@example.com",
             "username": "newuser",
             "full_name": "New User",
-            "password": "newpassword123"
+            "password": "newpassword123",
         }
         response = client.post("/api/v1/auth/register", json=register_data)
         assert response.status_code == 201
@@ -79,7 +79,7 @@ class TestAuthAPI:
             "email": "invalid-email",
             "username": "testuser",
             "full_name": "Test User",
-            "password": "password123"
+            "password": "password123",
         }
         response = client.post("/api/v1/auth/register", json=register_data)
         assert response.status_code == 422
@@ -130,19 +130,21 @@ class TestAuthAPI:
         client.headers.update(auth_headers)
         password_data = {
             "current_password": "testpassword123",
-            "new_password": "newtestpassword123"
+            "new_password": "newtestpassword123",
         }
         response = client.put("/api/v1/auth/change-password", json=password_data)
         assert response.status_code == 200
 
     @pytest.mark.api
     @pytest.mark.auth
-    def test_change_password_invalid_current(self, client: TestClient, auth_headers: dict):
+    def test_change_password_invalid_current(
+        self, client: TestClient, auth_headers: dict
+    ):
         """Test password change with invalid current password"""
         client.headers.update(auth_headers)
         password_data = {
             "current_password": "wrongpassword",
-            "new_password": "newtestpassword123"
+            "new_password": "newtestpassword123",
         }
         response = client.put("/api/v1/auth/change-password", json=password_data)
         assert response.status_code == 400
@@ -160,10 +162,7 @@ class TestAuthAPI:
     def test_reset_password(self, client: TestClient):
         """Test password reset with token"""
         # This would typically require a valid reset token
-        reset_data = {
-            "token": "sample_reset_token",
-            "new_password": "resetpassword123"
-        }
+        reset_data = {"token": "sample_reset_token", "new_password": "resetpassword123"}
         response = client.post("/api/v1/auth/reset-password", json=reset_data)
         # Expect 400 for invalid token in test environment
         assert response.status_code in [200, 400]
@@ -183,7 +182,9 @@ class TestAuthAPI:
     @pytest.mark.auth
     def test_verify_invalid_token(self, client: TestClient):
         """Test verification of invalid token"""
-        response = client.post("/api/v1/auth/verify-token", json={"token": "invalid_token"})
+        response = client.post(
+            "/api/v1/auth/verify-token", json={"token": "invalid_token"}
+        )
         assert response.status_code == 200
         data = response.json()
         assert data["valid"] is False
