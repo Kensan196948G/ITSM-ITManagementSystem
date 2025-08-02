@@ -191,8 +191,8 @@ class MasterInfiniteLoopController:
                 api_url = f"{self.config['api_url']}/error-monitor/integrated-monitoring/start"
                 params = {
                     "monitoring_interval": 5,
-                    "auto_repair": True,
-                    "enhanced_mode": True
+                    "auto_repair": "true",
+                    "enhanced_mode": "true"
                 }
                 
                 async with session.post(api_url, params=params) as response:

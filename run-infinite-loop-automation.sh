@@ -57,10 +57,29 @@ EOF
 check_python_env() {
     log_info "Python環境を確認しています..."
     
-    if ! command -v python3 &> /dev/null; then
-        log_error "Python3が見つかりません"
-        exit 1
+    # 仮想環境パス
+    local venv_path="${BASE_DIR}/venv_automation"
+    
+    # 仮想環境作成
+    if [ ! -d "$venv_path" ]; then
+        log_info "仮想環境を作成しています..."
+        python3 -m venv "$venv_path" || {
+            log_error "仮想環境の作成に失敗しました"
+            exit 1
+        }
+        
+        # 仮想環境でパッケージインストール
+        log_info "必要なパッケージをインストールしています..."
+        source "$venv_path/bin/activate"
+        pip install aiohttp psutil || {
+            log_error "パッケージのインストールに失敗しました"
+            exit 1
+        }
+        deactivate
     fi
+    
+    # 仮想環境確認
+    source "$venv_path/bin/activate"
     
     # 必要なパッケージ確認
     local required_packages=(
@@ -69,9 +88,9 @@ check_python_env() {
     )
     
     for package in "${required_packages[@]}"; do
-        if ! python3 -c "import $package" &> /dev/null; then
+        if ! python -c "import $package" &> /dev/null; then
             log_warn "パッケージ '$package' が見つかりません。インストールしています..."
-            pip3 install "$package" || {
+            pip install "$package" || {
                 log_error "パッケージ '$package' のインストールに失敗しました"
                 exit 1
             }
@@ -146,9 +165,13 @@ start_monitoring() {
         return 1
     fi
     
+    # 仮想環境アクティベート
+    local venv_path="${BASE_DIR}/venv_automation"
+    source "$venv_path/bin/activate"
+    
     # バックグラウンドで実行
     cd "$BASE_DIR"
-    nohup python3 master-infinite-loop-automation.py > "$LOG_FILE" 2>&1 &
+    nohup python master-infinite-loop-automation.py > "$LOG_FILE" 2>&1 &
     local pid=$!
     echo "$pid" > "$PID_FILE"
     
@@ -258,8 +281,11 @@ show_status() {
     # 詳細状態取得
     if check_process; then
         log_info "詳細状態を取得しています..."
+        local venv_path="${BASE_DIR}/venv_automation"
         cd "$BASE_DIR"
-        python3 master-infinite-loop-automation.py status 2>/dev/null | head -20
+        source "$venv_path/bin/activate"
+        python master-infinite-loop-automation.py status 2>/dev/null | head -20
+        deactivate
     fi
 }
 
@@ -267,8 +293,11 @@ show_status() {
 generate_report() {
     log_info "包括的レポートを生成しています..."
     
+    local venv_path="${BASE_DIR}/venv_automation"
     cd "$BASE_DIR"
-    python3 master-infinite-loop-automation.py report
+    source "$venv_path/bin/activate"
+    python master-infinite-loop-automation.py report
+    deactivate
     
     log_info "レポート生成が完了しました"
 }
