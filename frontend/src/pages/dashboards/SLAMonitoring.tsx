@@ -502,268 +502,520 @@ const SLAMonitoring: React.FC = React.memo(() => {
       </Grid>
 
       {/* チャートセクション */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 優先度別SLA遵守率 - 修正版 */}
-        <ChartCard title="優先度別SLA遵守率" subtitle="各優先度レベルでの達成状況">
-          <div className="space-y-4">
-            {priorityData.map((item, index) => {
-              const colors = ['bg-red-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500']
-              const colorClass = colors[index % colors.length]
-              const complianceRate = parseFloat(item.complianceRate)
-              
-              return (
-                <div key={index} className="bg-white border rounded-lg p-4 shadow-sm">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-4 h-4 ${colorClass} rounded`}></div>
-                      <h4 className="font-semibold text-lg text-gray-800">{item.priority}</h4>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-gray-800">{item.complianceRate}%</div>
-                      <div className="text-sm text-gray-600">遵守率</div>
-                    </div>
-                  </div>
-                  
-                  {/* プログレスバー */}
-                  <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
-                    <div 
-                      className={`h-3 rounded-full ${colorClass} transition-all duration-1000 ease-out relative`}
-                      style={{ width: `${complianceRate}%` }}
-                    >
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-white text-xs font-bold">
-                          {complianceRate > 25 && `${item.complianceRate}%`}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* 詳細統計 */}
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div className="text-center">
-                      <div className="font-bold text-gray-800">{item.total}</div>
-                      <div className="text-gray-600">総チケット</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="font-bold text-green-600">{item.onTime}</div>
-                      <div className="text-gray-600">期限内完了</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="font-bold text-red-600">{item.violated}</div>
-                      <div className="text-gray-600">SLA違反</div>
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </ChartCard>
-
-        {/* カテゴリ別SLA分析 - 修正版 */}
-        <ChartCard title="📊 カテゴリ別SLA分析" subtitle="サービスカテゴリごとの遵守状況">
-          <div className="space-y-4">
-            {data.categoryAnalysis.map((category, index) => {
-              const getStatusColor = (rate: number) => {
-                if (rate >= 95) return { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-800', bar: 'bg-green-500' }
-                if (rate >= 90) return { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-800', bar: 'bg-yellow-500' }
-                return { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-800', bar: 'bg-red-500' }
-              }
-              
-              const colors = getStatusColor(category.complianceRate)
-              
-              return (
-                <div key={index} className={`p-6 rounded-xl border-2 ${colors.border} ${colors.bg} shadow-sm hover:shadow-md transition-all duration-300`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 rounded-full ${colors.bar} flex items-center justify-center`}>
-                        <span className="text-white font-bold text-sm">{category.category[0]}</span>
-                      </div>
-                      <div>
-                        <h4 className={`font-bold text-lg ${colors.text}`}>{category.category}</h4>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <span className="text-lg">{getTrendIcon(category.trend)}</span>
-                          <span className="text-sm text-gray-600">トレンド</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className={`text-4xl font-black ${colors.text}`}>                     
-                        {category.complianceRate}%
-                      </div>
-                      <div className="text-sm text-gray-600">SLA遵守率</div>
-                    </div>
-                  </div>
-                  
-                  {/* プログレスバー - テキスト表示改善 */}
-                  <div className="w-full bg-gray-200 rounded-full h-6 mb-4 relative">
-                    <div 
-                      className={`h-6 rounded-full ${colors.bar} transition-all duration-1000 ease-out flex items-center justify-center relative overflow-hidden`}
-                      style={{ width: `${category.complianceRate}%` }}
-                    >
-                      {/* 白いテキスト - コントラスト確保 */}
-                      {category.complianceRate > 30 && (
-                        <span className="text-white font-bold text-sm drop-shadow-lg">
-                          {category.complianceRate}% 遵守
-                        </span>
-                      )}
-                    </div>
-                    {/* プログレスバーの外側にもラベル表示 */}
-                    {category.complianceRate <= 30 && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className={`font-bold text-sm ${colors.text}`}>
-                          {category.complianceRate}% 遵守
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* 詳細統計グリッド */}
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center p-4 bg-white rounded-lg border border-gray-200">
-                      <div className="text-2xl font-bold text-blue-600">{category.avgResponseTime}h</div>
-                      <div className="text-sm text-gray-600 font-medium">平均応答時間</div>
-                    </div>
-                    <div className="text-center p-4 bg-white rounded-lg border border-gray-200">
-                      <div className="text-2xl font-bold text-red-600">{category.violationCount}</div>
-                      <div className="text-sm text-gray-600 font-medium">違反件数</div>
-                    </div>
-                    <div className="text-center p-4 bg-white rounded-lg border border-gray-200">
-                      <div className={`text-2xl font-bold ${
-                        category.trend === 'up' ? 'text-green-600' : 
-                        category.trend === 'down' ? 'text-red-600' : 'text-gray-600'
-                      }`}>
-                        {category.trend === 'up' ? '↗ 改善' : category.trend === 'down' ? '↘ 悪化' : '→ 安定'}
-                      </div>
-                      <div className="text-sm text-gray-600 font-medium">トレンド</div>
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </ChartCard>
-
-        {/* SLA危険チケット一覧 - カード形式 */}
-        <ChartCard title="🚨 SLA危険チケット" subtitle="期限が迫っているチケット（カード形式）" className="lg:col-span-2">
-          <div className="space-y-4 max-h-96 overflow-y-auto">
-            {data.riskTickets.map((ticket) => {
-              const timeRemaining = getTimeRemaining(ticket.slaDeadline!)
-              const urgencyGradient = timeRemaining.urgent ? gradients.critical : gradients.warning;
-              
-              return (
-                <div 
-                  key={ticket.id} 
-                  className={`relative p-6 rounded-xl shadow-lg transition-all duration-300 hover:shadow-2xl border-l-4 ${
-                    timeRemaining.urgent ? 'animate-pulse' : ''
-                  }`}
-                  style={{
-                    background: `linear-gradient(135deg, ${
-                      timeRemaining.urgent ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)'
-                    } 0%, rgba(255, 255, 255, 0.05) 100%)`,
-                    borderLeftColor: timeRemaining.urgent ? '#EF4444' : '#F59E0B'
-                  }}
-                >
-                  {/* 危険度インジケーター */}
-                  {timeRemaining.urgent && (
-                    <div className="absolute top-2 right-2 w-4 h-4 bg-red-500 rounded-full animate-ping"></div>
-                  )}
-                  
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <span className="text-lg font-bold text-gray-800">{ticket.id}</span>
-                        <span className={`inline-flex px-3 py-1 text-xs font-bold rounded-full text-white shadow-lg`} 
-                              style={{ 
-                                backgroundColor: PRIORITY_COLORS[ticket.priority as keyof typeof PRIORITY_COLORS],
-                                textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
-                              }}>
-                          {getPriorityLabel(ticket.priority)}
-                        </span>
-                      </div>
-                      
-                      <h4 className="text-lg font-semibold text-gray-900 mb-2">{ticket.title}</h4>
-                      
-                      <div className="flex items-center space-x-4 text-sm text-gray-600">
-                        <div className="flex items-center space-x-1">
-                          <span>👤</span>
-                          <span>{ticket.assignee}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <span>📁</span>
-                          <span>{ticket.category}</span>
-                        </div>
-                      </div>
-                    </div>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {/* 優先度別SLA遵守率 */}
+        <Grid item xs={12} lg={6}>
+          <RichChartCard 
+            title="優先度別SLA遵守率" 
+            subtitle="各優先度レベルでの達成状況"
+            icon={<AssessmentIcon />}
+            actions={
+              <IconButton size="small">
+                <RefreshIcon />
+              </IconButton>
+            }
+          >
+            <Stack spacing={3}>
+              {priorityData.map((item, index) => {
+                const priorityColors = ['#EF4444', '#F59E0B', '#3B82F6', '#10B981']
+                const color = priorityColors[index % priorityColors.length]
+                const complianceRate = parseFloat(item.complianceRate)
+                
+                return (
+                  <Paper key={index} sx={{ 
+                    p: 3, 
+                    background: `linear-gradient(135deg, ${color}10 0%, rgba(255,255,255,0.8) 100%)`,
+                    border: `1px solid ${color}30`,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: `0 4px 12px ${color}25`
+                    }
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Avatar sx={{ bgcolor: color, width: 32, height: 32 }}>
+                          <SpeedIcon sx={{ fontSize: 18 }} />
+                        </Avatar>
+                        <Typography variant="h6" sx={{ fontWeight: 700, color }}>
+                          {item.priority}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ textAlign: 'right' }}>
+                        <Typography variant="h4" sx={{ fontWeight: 800, color }}>
+                          {item.complianceRate}%
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          遵守率
+                        </Typography>
+                      </Box>
+                    </Box>
                     
-                    <div className="text-right">
-                      <div className={`text-3xl font-black mb-2 ${timeRemaining.color}`}>
-                        ⏰
-                      </div>
-                      <div className={`text-xl font-bold ${timeRemaining.color}`}>
-                        {timeRemaining.text}
-                      </div>
-                      <div className="text-sm text-gray-600">残り時間</div>
-                    </div>
-                  </div>
-                  
-                  {/* プログレスバー（残り時間の視覚化） */}
-                  <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
-                    <div 
-                      className="h-3 rounded-full transition-all duration-1000 ease-out"
-                      style={{
-                        width: timeRemaining.urgent ? '90%' : '60%',
-                        background: urgencyGradient
-                      }}
+                    <LinearProgress 
+                      variant="determinate" 
+                      value={complianceRate} 
+                      sx={{ 
+                        height: 12, 
+                        borderRadius: 6, 
+                        mb: 2,
+                        bgcolor: 'grey.200',
+                        '& .MuiLinearProgress-bar': {
+                          bgcolor: color,
+                          borderRadius: 6
+                        }
+                      }} 
                     />
-                  </div>
+                    
+                    <Grid container spacing={2}>
+                      <Grid item xs={4}>
+                        <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'background.paper', borderRadius: 1 }}>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                            {item.total}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            総チケット
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={4}>
+                        <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'background.paper', borderRadius: 1 }}>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: 'success.main' }}>
+                            {item.onTime}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            期限内完了
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={4}>
+                        <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'background.paper', borderRadius: 1 }}>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: 'error.main' }}>
+                            {item.violated}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            SLA違反
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  </Paper>
+                )
+              })}
+            </Stack>
+          </RichChartCard>
+        </Grid>
+
+        {/* カテゴリ別SLA分析 */}
+        <Grid item xs={12} lg={6}>
+          <RichChartCard 
+            title="カテゴリ別SLA分析" 
+            subtitle="サービスカテゴリごとの遵守状況"
+            icon={<AnalyticsIcon />}
+            actions={
+              <Stack direction="row" spacing={1}>
+                <IconButton size="small">
+                  <FilterIcon />
+                </IconButton>
+                <IconButton size="small">
+                  <DownloadIcon />
+                </IconButton>
+              </Stack>
+            }
+          >
+            <Stack spacing={3}>
+              {data.categoryAnalysis.map((category, index) => {
+                const getStatusColor = (rate: number) => {
+                  if (rate >= 95) return { primary: '#10B981', secondary: '#059669', bg: '#F0FDF4' }
+                  if (rate >= 90) return { primary: '#F59E0B', secondary: '#D97706', bg: '#FFFBEB' }
+                  return { primary: '#EF4444', secondary: '#DC2626', bg: '#FEF2F2' }
+                }
+                
+                const colors = getStatusColor(category.complianceRate)
+                const categoryIcons = {
+                  Infrastructure: <BuildIcon />,
+                  Network: <NetworkIcon />,
+                  Application: <AppsIcon />,
+                  Hardware: <HardwareIcon />,
+                  Security: <SecurityIcon />
+                }
+                
+                return (
+                  <Paper key={index} sx={{ 
+                    p: 3, 
+                    background: `linear-gradient(135deg, ${colors.bg} 0%, rgba(255,255,255,0.9) 100%)`,
+                    border: `2px solid ${colors.primary}30`,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-3px)',
+                      boxShadow: `0 8px 20px ${colors.primary}25`,
+                      border: `2px solid ${colors.primary}50`
+                    }
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Avatar sx={{ 
+                          bgcolor: colors.primary, 
+                          width: 48, 
+                          height: 48,
+                          boxShadow: `0 4px 12px ${colors.primary}40`
+                        }}>
+                          {categoryIcons[category.category as keyof typeof categoryIcons] || <ComputerIcon />}
+                        </Avatar>
+                        <Box>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: colors.primary }}>
+                            {category.category}
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {getTrendIcon(category.trend)}
+                            <Typography variant="caption" color="text.secondary">
+                              トレンド
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                      <Box sx={{ textAlign: 'right' }}>
+                        <Typography variant="h3" sx={{ 
+                          fontWeight: 900, 
+                          color: colors.primary,
+                          textShadow: `0 2px 4px ${colors.primary}20`
+                        }}>
+                          {category.complianceRate}%
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          SLA遵守率
+                        </Typography>
+                      </Box>
+                    </Box>
+                    
+                    <LinearProgress 
+                      variant="determinate" 
+                      value={category.complianceRate} 
+                      sx={{ 
+                        height: 16, 
+                        borderRadius: 8, 
+                        mb: 3,
+                        bgcolor: 'grey.200',
+                        '& .MuiLinearProgress-bar': {
+                          background: `linear-gradient(90deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+                          borderRadius: 8
+                        }
+                      }} 
+                    />
+                    
+                    <Grid container spacing={2}>
+                      <Grid item xs={4}>
+                        <Box sx={{ 
+                          textAlign: 'center', 
+                          p: 2, 
+                          bgcolor: 'background.paper', 
+                          borderRadius: 2,
+                          border: '1px solid',
+                          borderColor: 'grey.200'
+                        }}>
+                          <Typography variant="h5" sx={{ fontWeight: 700, color: 'info.main' }}>
+                            {category.avgResponseTime}h
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            平均応答時間
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={4}>
+                        <Box sx={{ 
+                          textAlign: 'center', 
+                          p: 2, 
+                          bgcolor: 'background.paper', 
+                          borderRadius: 2,
+                          border: '1px solid',
+                          borderColor: 'grey.200'
+                        }}>
+                          <Typography variant="h5" sx={{ fontWeight: 700, color: 'error.main' }}>
+                            {category.violationCount}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            違反件数
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={4}>
+                        <Box sx={{ 
+                          textAlign: 'center', 
+                          p: 2, 
+                          bgcolor: 'background.paper', 
+                          borderRadius: 2,
+                          border: '1px solid',
+                          borderColor: 'grey.200'
+                        }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 0.5 }}>
+                            {getTrendIcon(category.trend)}
+                            <Typography variant="h6" sx={{ 
+                              fontWeight: 700, 
+                              ml: 1,
+                              color: category.trend === 'up' ? 'success.main' : 
+                                     category.trend === 'down' ? 'error.main' : 'text.secondary'
+                            }}>
+                              {category.trend === 'up' ? '改善' : category.trend === 'down' ? '悪化' : '安定'}
+                            </Typography>
+                          </Box>
+                          <Typography variant="caption" color="text.secondary">
+                            トレンド
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  </Paper>
+                )
+              })}
+            </Stack>
+          </RichChartCard>
+        </Grid>
+
+        {/* SLA危険チケット一覧 */}
+        <Grid item xs={12}>
+          <RichChartCard 
+            title="SLA危険チケット" 
+            subtitle="期限が迫っているチケット - 緊急対応が必要"
+            icon={<ErrorIcon />}
+            actions={
+              <Stack direction="row" spacing={1}>
+                <Button size="small" startIcon={<NotificationsIcon />} variant="outlined">
+                  アラート設定
+                </Button>
+                <IconButton size="small">
+                  <RefreshIcon />
+                </IconButton>
+              </Stack>
+            }
+          >
+            <Box sx={{ maxHeight: 600, overflow: 'auto', pr: 1 }}>
+              <Stack spacing={3}>
+                {data.riskTickets.map((ticket) => {
+                  const timeRemaining = getTimeRemaining(ticket.slaDeadline!)
+                  const isUrgent = timeRemaining.urgent
+                  const urgentColor = isUrgent ? '#EF4444' : '#F59E0B'
                   
-                  {/* アクションボタン */}
-                  <div className="flex items-center justify-end space-x-3">
-                    <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 shadow-md">
-                      📝 詳細
-                    </button>
-                    {timeRemaining.urgent && (
-                      <button className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 shadow-md animate-bounce">
-                        ⬆️ エスカレート
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </ChartCard>
+                  return (
+                    <Paper 
+                      key={ticket.id}
+                      sx={{
+                        p: 3,
+                        position: 'relative',
+                        background: `linear-gradient(135deg, ${urgentColor}10 0%, rgba(255,255,255,0.9) 100%)`,
+                        border: `2px solid ${urgentColor}30`,
+                        borderLeft: `6px solid ${urgentColor}`,
+                        transition: 'all 0.3s ease',
+                        animation: isUrgent ? 'pulse 2s infinite' : 'none',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: `0 8px 25px ${urgentColor}25`
+                        }
+                      }}
+                    >
+                      {isUrgent && (
+                        <Box sx={{ 
+                          position: 'absolute', 
+                          top: 8, 
+                          right: 8, 
+                          width: 12, 
+                          height: 12, 
+                          bgcolor: 'error.main', 
+                          borderRadius: '50%',
+                          animation: 'ping 1s infinite'
+                        }} />
+                      )}
+                      
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid item xs={12} md={8}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                            <Avatar sx={{ bgcolor: urgentColor, width: 40, height: 40 }}>
+                              <AssignmentIcon />
+                            </Avatar>
+                            <Box>
+                              <Typography variant="h6" sx={{ fontWeight: 700, color: urgentColor }}>
+                                {ticket.id}
+                              </Typography>
+                              <Chip
+                                label={getPriorityLabel(ticket.priority)}
+                                size="small"
+                                sx={{
+                                  bgcolor: PRIORITY_COLORS[ticket.priority as keyof typeof PRIORITY_COLORS],
+                                  color: 'white',
+                                  fontWeight: 600
+                                }}
+                              />
+                            </Box>
+                          </Box>
+                          
+                          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                            {ticket.title}
+                          </Typography>
+                          
+                          <Stack direction="row" spacing={3}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <GroupIcon color="action" sx={{ fontSize: 18 }} />
+                              <Typography variant="body2" color="text.secondary">
+                                {ticket.assignee}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <AssignmentIcon color="action" sx={{ fontSize: 18 }} />
+                              <Typography variant="body2" color="text.secondary">
+                                {ticket.category}
+                              </Typography>
+                            </Box>
+                          </Stack>
+                        </Grid>
+                        
+                        <Grid item xs={12} md={4}>
+                          <Box sx={{ textAlign: 'center' }}>
+                            <Avatar sx={{ 
+                              bgcolor: urgentColor, 
+                              width: 64, 
+                              height: 64, 
+                              mx: 'auto', 
+                              mb: 1 
+                            }}>
+                              <ScheduleIcon sx={{ fontSize: 32 }} />
+                            </Avatar>
+                            <Typography variant="h5" sx={{ 
+                              fontWeight: 800, 
+                              color: urgentColor,
+                              mb: 0.5
+                            }}>
+                              {timeRemaining.text}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              残り時間
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      </Grid>
+                      
+                      <LinearProgress 
+                        variant="determinate" 
+                        value={isUrgent ? 85 : 60} 
+                        sx={{ 
+                          height: 8, 
+                          borderRadius: 4, 
+                          my: 2,
+                          bgcolor: 'grey.200',
+                          '& .MuiLinearProgress-bar': {
+                            bgcolor: urgentColor,
+                            borderRadius: 4
+                          }
+                        }} 
+                      />
+                      
+                      <Stack direction="row" spacing={2} justifyContent="flex-end">
+                        <Button 
+                          size="small" 
+                          variant="outlined" 
+                          startIcon={<AssignmentIcon />}
+                        >
+                          詳細
+                        </Button>
+                        {isUrgent && (
+                          <Button 
+                            size="small" 
+                            variant="contained" 
+                            color="error"
+                            startIcon={<TrendingUpIcon />}
+                            sx={{ animation: 'bounce 1s infinite' }}
+                          >
+                            エスカレート
+                          </Button>
+                        )}
+                      </Stack>
+                    </Paper>
+                  )
+                })}
+              </Stack>
+            </Box>
+          </RichChartCard>
+        </Grid>
 
         {/* エスカレーション履歴 */}
-        <ChartCard title="エスカレーション履歴" subtitle="最近のエスカレーション状況">
-          <div className="space-y-4">
-            {data.escalationHistory.slice(0, 5).map((escalation, index) => (
-              <div key={index} className="border-l-4 border-blue-400 pl-4 py-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {escalation.ticketId}: {escalation.from} → {escalation.to}
-                    </p>
-                    <p className="text-xs text-gray-600 mt-1">{escalation.reason}</p>
-                  </div>
-                  <div className="text-right">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      escalation.status === 'completed' ? 'bg-green-100 text-green-800' :
-                      escalation.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {escalation.status === 'completed' ? '完了' : 
-                       escalation.status === 'pending' ? '保留中' : 'キャンセル'}
-                    </span>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {new Date(escalation.timestamp).toLocaleString('ja-JP')}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </ChartCard>
+        <Grid item xs={12} md={6}>
+          <RichChartCard 
+            title="エスカレーション履歴" 
+            subtitle="最近のエスカレーション状況"
+            icon={<TrendingUpIcon />}
+            actions={
+              <IconButton size="small">
+                <TimelineIcon />
+              </IconButton>
+            }
+          >
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>チケットID</TableCell>
+                    <TableCell>エスカレーション</TableCell>
+                    <TableCell>理由</TableCell>
+                    <TableCell align="center">ステータス</TableCell>
+                    <TableCell align="center">日時</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {data.escalationHistory.slice(0, 5).map((escalation, index) => (
+                    <TableRow 
+                      key={index}
+                      sx={{ 
+                        '&:hover': { bgcolor: 'action.hover' },
+                        borderLeft: '3px solid',
+                        borderLeftColor: 'primary.main'
+                      }}
+                    >
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                          {escalation.ticketId}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <TrendingUpIcon color="action" sx={{ fontSize: 16 }} />
+                          <Typography variant="body2">
+                            {escalation.from} → {escalation.to}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" color="text.secondary">
+                          {escalation.reason}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Chip
+                          label={
+                            escalation.status === 'completed' ? '完了' :
+                            escalation.status === 'pending' ? '保留中' : 'キャンセル'
+                          }
+                          size="small"
+                          color={
+                            escalation.status === 'completed' ? 'success' :
+                            escalation.status === 'pending' ? 'warning' : 'default'
+                          }
+                          variant="outlined"
+                        />
+                      </TableCell>
+                      <TableCell align="center">
+                        <Typography variant="caption" color="text.secondary">
+                          {new Date(escalation.timestamp).toLocaleString('ja-JP', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </RichChartCard>
+        </Grid>
 
         {/* SLA遵守率 - 円形プログレス */}
         <ChartCard title="⭐ 全体SLA遵守状況" subtitle="グラデーション付き円形プログレス">
