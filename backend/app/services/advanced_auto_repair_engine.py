@@ -145,16 +145,16 @@ class AdvancedAutoRepairEngine:
             },
             # 依存関係エラーパターン
             "dependency_patterns": {
-                r"pip.*ERROR.*No matching distribution found for (\w+)": self._fix_package_not_found,
-                r"version conflict.*(\w+)==([\d\.]+).*(\w+)==([\d\.]+)": self._fix_version_conflict,
-                r"ImportError.*DLL load failed.*(\w+)": self._fix_dll_error,
+                r"pip.*ERROR.*No matching distribution found for (\w+)": self._fix_module_not_found,
+                # r"version conflict.*(\w+)==([\d\.]+).*(\w+)==([\d\.]+)": self._fix_version_conflict,
+                # r"ImportError.*DLL load failed.*(\w+)": self._fix_dll_error,
             },
             # FastAPIエラーパターン
             "fastapi_patterns": {
-                r"FastAPI.*HTTP.*(\d{3}).*(.+)": self._fix_fastapi_http_error,
-                r"Pydantic.*ValidationError.*(\w+)": self._fix_pydantic_validation_error,
-                r"Uvicorn.*failed to start": self._fix_uvicorn_start_error,
-                r"Router.*already exists.*(\w+)": self._fix_router_conflict,
+                # r"FastAPI.*HTTP.*(\d{3}).*(.+)": self._fix_fastapi_http_error,
+                # r"Pydantic.*ValidationError.*(\w+)": self._fix_pydantic_validation_error,
+                # r"Uvicorn.*failed to start": self._fix_uvicorn_start_error,
+                # r"Router.*already exists.*(\w+)": self._fix_router_conflict,
             },
         }
 

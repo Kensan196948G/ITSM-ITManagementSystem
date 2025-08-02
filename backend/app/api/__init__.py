@@ -12,7 +12,7 @@ from .v1 import (
     users_router,
     attachments_router,
 )  # , custom_fields_router
-from .v1.error_monitor import router as error_monitor_router
+# from .v1.error_monitor import router as error_monitor_router
 from .v1.repair_monitor import router as repair_monitor_router
 from .v1.cicd_automation import router as cicd_router
 from .v1.error_monitoring import router as error_monitoring_router
@@ -34,9 +34,9 @@ api_router.include_router(changes_router, prefix="/changes", tags=["changes"])
 api_router.include_router(
     attachments_router, prefix="/attachments", tags=["attachments"]
 )
-api_router.include_router(
-    error_monitor_router, prefix="/monitoring", tags=["monitoring"]
-)
+# api_router.include_router(
+#     error_monitor_router, prefix="/monitoring", tags=["monitoring"]
+# )
 api_router.include_router(
     repair_monitor_router, prefix="/api/v1", tags=["repair-monitor"]
 )
