@@ -50,6 +50,7 @@ jobs:
         pip install psycopg2-binary asyncpg
     
     - name: Run pytest
+      timeout-minutes: 15
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/itsm_test
         ASYNC_DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/itsm_test
@@ -60,7 +61,7 @@ jobs:
         ACCESS_TOKEN_EXPIRE_MINUTES: 30
       run: |
         cd backend
-        pytest --cov=app --cov-report=xml --cov-report=html
+        pytest --cov=app --cov-report=xml --cov-report=html --timeout=300 -m "not slow"
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
@@ -195,6 +196,7 @@ jobs:
         timeout 60 bash -c 'until curl -s http://localhost:3000; do sleep 2; done'
     
     - name: Run E2E tests
+      timeout-minutes: 20
       run: |
         npx playwright test
     

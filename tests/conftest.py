@@ -40,6 +40,7 @@ def faker_instance():
 def test_config():
     """Basic test configuration"""
     return {
+        "base_url": "http://127.0.0.1:8000",
         "api_base_url": "http://127.0.0.1:8000",
         "auth_url": "http://127.0.0.1:8000/api/v1/auth",
         "timeout": 30,
