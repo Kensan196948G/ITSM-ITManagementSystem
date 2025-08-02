@@ -1099,110 +1099,285 @@ const RealTimeMonitoring: React.FC = React.memo(() => {
           </RichChartCard>
         </Grid>
 
-          {/* システムイベント */}
-          <ChartCard title="システムイベント" subtitle="最新のシステムイベント">
-            <div className="space-y-3 max-h-64 overflow-y-auto">
-              {data.liveFeed.systemEvents.map((event) => (
-                <div key={event.id} className="border-l-4 border-blue-400 pl-3 py-2">
-                  <div className="flex items-start space-x-2">
-                    <span className="text-lg">{getEventIcon(event.type)}</span>
-                    <div className="flex-1">
-                      <p className="text-sm">{event.message}</p>
-                      <div className="flex justify-between mt-1 text-xs text-gray-600">
-                        <span className={`font-medium ${
-                          event.severity === 'critical' ? 'text-red-600' :
-                          event.severity === 'high' ? 'text-orange-600' :
-                          event.severity === 'medium' ? 'text-yellow-600' :
-                          'text-green-600'
-                        }`}>
-                          {event.severity === 'critical' ? '重大' :
-                           event.severity === 'high' ? '高' :
-                           event.severity === 'medium' ? '中' : '低'}
-                        </span>
-                        <span>{new Date(event.timestamp).toLocaleString('ja-JP')}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ChartCard>
+        {/* システムイベント */}
+        <Grid item xs={12} lg={6}>
+          <RichChartCard 
+            title="システムイベント" 
+            subtitle="最新のシステムイベント"
+            icon={<SystemIcon />}
+            isLive={true}
+            actions={
+              <IconButton size="small">
+                <ActivityIcon />
+              </IconButton>
+            }
+          >
+            <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+              <Stack spacing={2}>
+                {data.liveFeed.systemEvents.map((event) => {
+                  const getEventIconComponent = (type: string) => {
+                    switch (type) {
+                      case 'system': return <SystemIcon />
+                      case 'security': return <LockIcon />
+                      case 'maintenance': return <BuildIcon />
+                      case 'error': return <ErrorIcon />
+                      default: return <DescriptionIcon />
+                    }
+                  }
+                  
+                  const getSeverityInfo = (severity: string) => {
+                    switch (severity) {
+                      case 'critical': return { color: '#EF4444', bg: '#FEF2F2', label: '重大' }
+                      case 'high': return { color: '#F59E0B', bg: '#FFFBEB', label: '高' }
+                      case 'medium': return { color: '#F59E0B', bg: '#FFFBEB', label: '中' }
+                      default: return { color: '#10B981', bg: '#F0FDF4', label: '低' }
+                    }
+                  }
+                  
+                  const severityInfo = getSeverityInfo(event.severity)
+                  
+                  return (
+                    <Paper key={event.id} sx={{
+                      p: 2,
+                      borderLeft: `4px solid ${severityInfo.color}`,
+                      background: `linear-gradient(135deg, ${severityInfo.bg} 0%, rgba(255,255,255,0.9) 100%)`,
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateX(4px)',
+                        boxShadow: `0 4px 12px ${severityInfo.color}25`
+                      }
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'start', gap: 2 }}>
+                        <Avatar sx={{ bgcolor: severityInfo.color, width: 32, height: 32 }}>
+                          {getEventIconComponent(event.type)}
+                        </Avatar>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                            {event.message}
+                          </Typography>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Chip
+                              label={severityInfo.label}
+                              size="small"
+                              sx={{
+                                bgcolor: severityInfo.color,
+                                color: 'white',
+                                fontWeight: 600,
+                                fontSize: '11px'
+                              }}
+                            />
+                            <Typography variant="caption" color="text.secondary">
+                              {new Date(event.timestamp).toLocaleString('ja-JP', {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                    </Paper>
+                  )
+                })}
+              </Stack>
+            </Box>
+          </RichChartCard>
+        </Grid>
 
-          {/* ユーザーアクティビティ */}
-          <ChartCard title="ユーザーアクティビティ" subtitle="最新のユーザー操作">
-            <div className="space-y-3 max-h-64 overflow-y-auto">
-              {data.liveFeed.userActivity.map((activity) => (
-                <div key={activity.id} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded transition-colors duration-200">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-medium text-blue-600">
-                        {activity.user.split(' ')[0][0]}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">{activity.user}</p>
-                      <p className="text-xs text-gray-600">{activity.action}: {activity.target}</p>
-                    </div>
-                  </div>
-                  <span className="text-xs text-gray-500">
-                    {new Date(activity.timestamp).toLocaleTimeString('ja-JP')}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </ChartCard>
-        </div>
+        {/* ユーザーアクティビティ */}
+        <Grid item xs={12} lg={6}>
+          <RichChartCard 
+            title="ユーザーアクティビティ" 
+            subtitle="最新のユーザー操作"
+            icon={<PersonIcon />}
+            isLive={true}
+            actions={
+              <IconButton size="small">
+                <ActivityIcon />
+              </IconButton>
+            }
+          >
+            <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+              <Stack spacing={2}>
+                {data.liveFeed.userActivity.map((activity) => (
+                  <Paper key={activity.id} sx={{
+                    p: 2,
+                    background: 'linear-gradient(135deg, #F8FAFC 0%, rgba(255,255,255,0.9) 100%)',
+                    border: '1px solid #E2E8F0',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-1px)',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      bgcolor: '#F1F5F9'
+                    }
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Avatar sx={{ 
+                          bgcolor: 'primary.main', 
+                          width: 36, 
+                          height: 36,
+                          fontSize: '14px',
+                          fontWeight: 700
+                        }}>
+                          {activity.user.split(' ')[0][0]}
+                        </Avatar>
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            {activity.user}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {activity.action}: {activity.target}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                        {new Date(activity.timestamp).toLocaleTimeString('ja-JP', {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </Typography>
+                    </Box>
+                  </Paper>
+                ))}
+              </Stack>
+            </Box>
+          </RichChartCard>
+        </Grid>
+      </Grid>
 
-        {/* ネットワーク・データベース状態 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ChartCard title="ネットワーク状態" subtitle="ネットワーク接続とパフォーマンス">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="font-medium">全体状態</span>
+      {/* ネットワーク・データベース状態 */}
+      <Grid container spacing={3}>
+        <Grid item xs={12} lg={6}>
+          <RichChartCard 
+            title="ネットワーク状態" 
+            subtitle="ネットワーク接続とパフォーマンス"
+            icon={<NetworkIcon />}
+            isLive={true}
+            actions={
+              <IconButton size="small">
+                <MonitorIcon />
+              </IconButton>
+            }
+          >
+            <Stack spacing={3}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  全体状態
+                </Typography>
                 <StatusIndicator status={data.systemStatus.network.status} />
-              </div>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="bg-gray-50 p-3 rounded">
-                  <div className="text-gray-600">レイテンシ</div>
-                  <div className="text-lg font-semibold">{data.systemStatus.network.latency}ms</div>
-                </div>
-                <div className="bg-gray-50 p-3 rounded">
-                  <div className="text-gray-600">パケットロス</div>
-                  <div className="text-lg font-semibold">{data.systemStatus.network.packetLoss}%</div>
-                </div>
-              </div>
-              <div className="bg-gray-50 p-3 rounded">
-                <div className="text-gray-600">帯域幅使用量</div>
-                <div className="text-lg font-semibold">{data.systemStatus.network.bandwidth} Mbps</div>
-              </div>
-            </div>
-          </ChartCard>
+              </Box>
+              
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#F8FAFC' }}>
+                    <Avatar sx={{ bgcolor: 'info.main', width: 32, height: 32, mx: 'auto', mb: 1 }}>
+                      <NetworkIcon sx={{ fontSize: 18 }} />
+                    </Avatar>
+                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'info.main' }}>
+                      {data.systemStatus.network.latency}ms
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      レイテンシ
+                    </Typography>
+                  </Paper>
+                </Grid>
+                <Grid item xs={6}>
+                  <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#F8FAFC' }}>
+                    <Avatar sx={{ bgcolor: 'warning.main', width: 32, height: 32, mx: 'auto', mb: 1 }}>
+                      <ErrorIcon sx={{ fontSize: 18 }} />
+                    </Avatar>
+                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'warning.main' }}>
+                      {data.systemStatus.network.packetLoss}%
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      パケットロス
+                    </Typography>
+                  </Paper>
+                </Grid>
+              </Grid>
+              
+              <Paper sx={{ p: 3, textAlign: 'center', bgcolor: '#F0FDF4' }}>
+                <Avatar sx={{ bgcolor: 'success.main', width: 40, height: 40, mx: 'auto', mb: 1 }}>
+                  <SpeedIcon sx={{ fontSize: 20 }} />
+                </Avatar>
+                <Typography variant="h4" sx={{ fontWeight: 800, color: 'success.main' }}>
+                  {data.systemStatus.network.bandwidth} Mbps
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  帯域幅使用量
+                </Typography>
+              </Paper>
+            </Stack>
+          </RichChartCard>
+        </Grid>
 
-          <ChartCard title="データベース状態" subtitle="データベース接続とパフォーマンス">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="font-medium">接続状態</span>
+        <Grid item xs={12} lg={6}>
+          <RichChartCard 
+            title="データベース状態" 
+            subtitle="データベース接続とパフォーマンス"
+            icon={<StorageIcon />}
+            isLive={true}
+            actions={
+              <IconButton size="small">
+                <AnalyticsIcon />
+              </IconButton>
+            }
+          >
+            <Stack spacing={3}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  接続状態
+                </Typography>
                 <StatusIndicator status={data.systemStatus.database.status} />
-              </div>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="bg-gray-50 p-3 rounded">
-                  <div className="text-gray-600">アクティブ接続</div>
-                  <div className="text-lg font-semibold">{data.systemStatus.database.connections}</div>
-                </div>
-                <div className="bg-gray-50 p-3 rounded">
-                  <div className="text-gray-600">クエリ時間</div>
-                  <div className="text-lg font-semibold">{data.systemStatus.database.queryTime}ms</div>
-                </div>
-              </div>
-              <div className="bg-gray-50 p-3 rounded">
-                <div className="text-gray-600">データベースサイズ</div>
-                <div className="text-lg font-semibold">{data.systemStatus.database.size}</div>
-              </div>
-            </div>
-          </ChartCard>
-        </div>
-      </div>
-    </div>
+              </Box>
+              
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#F8FAFC' }}>
+                    <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32, mx: 'auto', mb: 1 }}>
+                      <GroupIcon sx={{ fontSize: 18 }} />
+                    </Avatar>
+                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                      {data.systemStatus.database.connections}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      アクティブ接続
+                    </Typography>
+                  </Paper>
+                </Grid>
+                <Grid item xs={6}>
+                  <Paper sx={{ p: 2, textAlign: 'center', bgcolor: '#F8FAFC' }}>
+                    <Avatar sx={{ bgcolor: 'secondary.main', width: 32, height: 32, mx: 'auto', mb: 1 }}>
+                      <ScheduleIcon sx={{ fontSize: 18 }} />
+                    </Avatar>
+                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'secondary.main' }}>
+                      {data.systemStatus.database.queryTime}ms
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      クエリ時間
+                    </Typography>
+                  </Paper>
+                </Grid>
+              </Grid>
+              
+              <Paper sx={{ p: 3, textAlign: 'center', bgcolor: '#EFF6FF' }}>
+                <Avatar sx={{ bgcolor: 'info.main', width: 40, height: 40, mx: 'auto', mb: 1 }}>
+                  <StorageIcon sx={{ fontSize: 20 }} />
+                </Avatar>
+                <Typography variant="h4" sx={{ fontWeight: 800, color: 'info.main' }}>
+                  {data.systemStatus.database.size}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  データベースサイズ
+                </Typography>
+              </Paper>
+            </Stack>
+          </RichChartCard>
+        </Grid>
+      </Grid>
+    </Box>
   )
 })
 

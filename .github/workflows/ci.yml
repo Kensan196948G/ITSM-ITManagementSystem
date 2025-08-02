@@ -38,7 +38,6 @@ jobs:
       - name: Install Dependencies
         run: |
           cd frontend && npm ci || npm install
-          cd ../itsm-backend && npm ci || npm install
       - name: Log Build Output
         run: echo "::notice ::Build process completed"
 
@@ -55,7 +54,8 @@ jobs:
           node-version: '18'
       - name: Run Tests
         run: |
-          cd frontend && npm test || echo "⚠️ Test Failed" >> $GITHUB_STEP_SUMMARY
+          cd frontend && npm ci || npm install
+          npm test || echo "⚠️ Test Failed" >> $GITHUB_STEP_SUMMARY
 
   notify:
     if: ${{ failure() }}
@@ -63,6 +63,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Notify CIManager
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "🚨 CI/CDジョブで失敗が発生しました。" > ci-failure.txt
-          gh issue create --title "CI Failure - $(date)" --body "$(cat ci-failure.txt)" || true
+          echo "ワークフロー実行: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> ci-failure.txt
+          gh issue create --title "CI Failure - $(date)" --body "$(cat ci-failure.txt)" || echo "Failed to create issue"

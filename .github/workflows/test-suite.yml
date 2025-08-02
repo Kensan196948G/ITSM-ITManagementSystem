@@ -141,6 +141,9 @@ jobs:
     - name: Run unit tests
       run: |
         mkdir -p tests/reports
+        cd backend
+        python init_sqlite_db.py
+        cd ..
         pytest backend/tests/unit/ -v --tb=short \
           --html=tests/reports/unit-report.html \
           --json-report --json-report-file=tests/reports/unit-report.json \
