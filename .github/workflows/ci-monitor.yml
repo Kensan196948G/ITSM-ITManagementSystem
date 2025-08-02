@@ -2,8 +2,8 @@ name: ITSM CI/CD Monitor - Auto-Repair Detection
 
 on:
   schedule:
-    # GitHub Actions minimum is 1 minute, but we implement rapid-fire monitoring within the job
-    - cron: '* * * * *'  # Every minute
+    # GitHub Actions minimum is 5 minutes for public repos
+    - cron: '*/5 * * * *'  # Every 5 minutes
   workflow_dispatch:
   repository_dispatch:
     types: [ci-failure-detected, manual-monitor-trigger]
@@ -116,8 +116,8 @@ jobs:
             fi
           }
           
-          # Main monitoring loop - 6 cycles of 5 seconds each for 30 seconds total
-          for i in $(seq 1 6); do
+          # Main monitoring loop - 3 cycles of 10 seconds each for 30 seconds total
+          for i in $(seq 1 3); do
             echo "--- Monitor Check #$i at $(date) ---"
             
             if check_ci_status; then
@@ -149,9 +149,9 @@ jobs:
             fi
             
             # Wait for next check (except on last iteration)
-            if [ "$i" -lt 6 ]; then
-              echo "Waiting ${MONITOR_INTERVAL} seconds for next check..."
-              sleep $MONITOR_INTERVAL
+            if [ "$i" -lt 3 ]; then
+              echo "Waiting 10 seconds for next check..."
+              sleep 10
             fi
           done
 

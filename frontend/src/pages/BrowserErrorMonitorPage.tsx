@@ -372,13 +372,48 @@ const BrowserErrorMonitorPage: React.FC = () => {
       </Dialog>
 
       {/* フッター情報 */}
-      <Paper sx={{ p: 2, mt: 4, backgroundColor: 'grey.50' }}>
-        <Typography variant="body2" color="textSecondary" align="center">
-          MCP Playwright WebUI ブラウザエラー検知・修復システム v1.0.0
-          <br />
-          対象URL: http://192.168.3.135:3000 | バックエンドAPI: http://192.168.3.135:8000
-          <br />
-          React/Material-UI ベース | WAI-ARIA準拠 | レスポンシブデザイン対応
+      <Paper 
+        component="footer"
+        sx={{ 
+          p: { xs: 2, sm: 3 }, 
+          mt: 4, 
+          backgroundColor: 'grey.50',
+          borderTop: 1,
+          borderColor: 'divider'
+        }}
+        elevation={0}
+        role="contentinfo"
+      >
+        <Typography 
+          variant="body2" 
+          color="textSecondary" 
+          align="center"
+          component="div"
+        >
+          <Box sx={{ mb: 1 }}>
+            <strong>MCP Playwright WebUI ブラウザエラー検知・修復システム v1.0.0</strong>
+          </Box>
+          
+          <Box sx={{ mb: 1, display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 1 }}>
+            <span aria-label="監視対象URL">対象URL: http://192.168.3.135:3000</span>
+            <span aria-hidden="true">|</span>
+            <span aria-label="バックエンドAPI URL">バックエンドAPI: http://192.168.3.135:8000</span>
+          </Box>
+          
+          <Box sx={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 1 }}>
+            <span>React/Material-UI ベース</span>
+            <span aria-hidden="true">|</span>
+            <span aria-label="アクセシビリティ対応">WAI-ARIA準拠</span>
+            <span aria-hidden="true">|</span>
+            <span aria-label="デザイン対応">レスポンシブデザイン対応</span>
+          </Box>
+          
+          <Box sx={{ mt: 2, fontSize: '0.75rem' }}>
+            <Typography variant="caption" component="div">
+              無限ループエラー検知・修復システムにより、ブラウザエラーを自動で検知・修復し、
+              エラーが完全になくなるまで継続的に監視・修復を実行します。
+            </Typography>
+          </Box>
         </Typography>
       </Paper>
     </Container>
