@@ -1,46 +1,189 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts'
+import {
+  Box, Grid, Typography, Card, CardContent, Avatar, IconButton, Divider, Chip,
+  LinearProgress, useTheme, Tabs, Tab, Button, useMediaQuery, Stack, Alert as MuiAlert,
+  Skeleton, Badge, Tooltip as MuiTooltip, FormControl, InputLabel, Select, MenuItem,
+  Fab, alpha, CircularProgress as MuiCircularProgress, Paper, TableContainer, 
+  Table, TableHead, TableRow, TableCell, TableBody, Switch, FormControlLabel
+} from '@mui/material'
+import {
+  Computer as ComputerIcon, Storage as StorageIcon, Memory as MemoryIcon, Speed as SpeedIcon,
+  NetworkCheck as NetworkIcon, Security as SecurityIcon, Cloud as CloudIcon, 
+  MonitorHeart as MonitorIcon, Dashboard as DashboardIcon, Analytics as AnalyticsIcon,
+  Warning as WarningIcon, Error as ErrorIcon, CheckCircle as CheckCircleIcon,
+  Notifications as NotificationsIcon, Group as GroupIcon, Assignment as AssignmentIcon,
+  Refresh as RefreshIcon, Settings as SettingsIcon, PlayArrow as PlayIcon,
+  Pause as PauseIcon, Timeline as TimelineIcon, TrendingUp as TrendingUpIcon,
+  Build as BuildIcon, Hardware as HardwareIcon, Apps as AppsIcon,
+  Person as PersonIcon, Schedule as ScheduleIcon, SystemUpdate as SystemIcon,
+  Lock as LockIcon, Description as DescriptionIcon, Activity as ActivityIcon
+} from '@mui/icons-material'
 import { RealTimeData, ServerStatus, ServiceStatus, Alert, Ticket, StatusChange, SystemEvent, UserActivity } from '../../types/dashboard'
-import MetricCard from '../../components/dashboard/MetricCard'
-import ChartCard from '../../components/dashboard/ChartCard'
 import StatusIndicator from '../../components/dashboard/StatusIndicator'
+import { gradients, animations, chartColors } from '../../theme/theme'
 
-// 安定したメトリクスカードコンポーネント
-interface StableMetricCardProps {
+// Enhanced metric card component with Material-UI
+interface IconRichMetricCardProps {
   title: string
-  value: number
-  unit: string
+  value: number | string
+  unit?: string
   status: 'good' | 'warning' | 'critical'
-  icon: string
+  icon: React.ReactElement
+  subtitle?: string
+  isLive?: boolean
 }
 
-const StableMetricCard: React.FC<StableMetricCardProps> = React.memo(({ title, value, unit, status, icon }) => {
-  const getStatusColor = useCallback((status: string) => {
-    switch (status) {
-      case 'critical':
-        return 'bg-red-500 text-white'
-      case 'warning':
-        return 'bg-yellow-500 text-white'
-      default:
-        return 'bg-green-500 text-white'
-    }
-  }, [])
-
+const IconRichMetricCard: React.FC<IconRichMetricCardProps> = React.memo(({ 
+  title, value, unit, status, icon, subtitle, isLive = false 
+}) => {
+  const statusColors = {
+    good: { primary: '#10B981', secondary: '#059669', bg: '#F0FDF4' },
+    warning: { primary: '#F59E0B', secondary: '#D97706', bg: '#FFFBEB' },
+    critical: { primary: '#EF4444', secondary: '#DC2626', bg: '#FEF2F2' }
+  }
+  
+  const colors = statusColors[status]
+  
   return (
-    <div className={`p-6 rounded-xl shadow-lg ${getStatusColor(status)} transition-colors duration-300`}>
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold">{title}</h3>
-        <span className="text-3xl opacity-80">{icon}</span>
-      </div>
-      <div className="text-4xl font-black mb-2">
-        {value}<span className="text-xl font-medium ml-2">{unit}</span>
-      </div>
-      <div className="text-sm opacity-90">
-        {status === 'good' ? '正常' : status === 'warning' ? '注意' : '異常'}
-      </div>
-    </div>
+    <Card sx={{ 
+      height: '100%',
+      background: `linear-gradient(135deg, ${colors.bg} 0%, rgba(255,255,255,0.9) 100%)`,
+      border: `2px solid ${colors.primary}30`,
+      transition: 'all 0.3s ease',
+      position: 'relative',
+      overflow: 'visible',
+      '&:hover': {
+        transform: 'translateY(-4px)',
+        boxShadow: `0 12px 30px ${colors.primary}25`,
+        border: `2px solid ${colors.primary}60`
+      }
+    }}>
+      {isLive && (
+        <Box sx={{
+          position: 'absolute',
+          top: -6,
+          right: -6,
+          width: 12,
+          height: 12,
+          bgcolor: 'success.main',
+          borderRadius: '50%',
+          animation: 'ping 2s infinite',
+          zIndex: 1
+        }} />
+      )}
+      
+      <CardContent sx={{ p: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+          <Avatar sx={{ 
+            bgcolor: colors.primary, 
+            width: 56, 
+            height: 56,
+            boxShadow: `0 6px 15px ${colors.primary}40`
+          }}>
+            {icon}
+          </Avatar>
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: colors.primary, mb: 0.5 }}>
+              {title}
+            </Typography>
+            {subtitle && (
+              <Typography variant="caption" color="text.secondary">
+                {subtitle}
+              </Typography>
+            )}
+          </Box>
+        </Box>
+        
+        <Typography variant="h3" sx={{ 
+          fontWeight: 900, 
+          color: colors.primary,
+          mb: 1,
+          textShadow: `0 2px 4px ${colors.primary}20`
+        }}>
+          {value}{unit && <span style={{ fontSize: '0.6em', marginLeft: '4px' }}>{unit}</span>}
+        </Typography>
+        
+        <Typography variant="body2" sx={{ 
+          fontWeight: 600,
+          color: colors.primary,
+          opacity: 0.8
+        }}>
+          {status === 'good' ? '正常稼働中' : status === 'warning' ? '要注意' : '緊急対応要'}
+        </Typography>
+      </CardContent>
+    </Card>
   )
 })
+
+// Rich chart card component
+const RichChartCard: React.FC<{
+  title: string
+  subtitle?: string
+  icon?: React.ReactElement
+  children: React.ReactNode
+  className?: string
+  actions?: React.ReactNode
+  isLive?: boolean
+}> = ({ title, subtitle, icon, children, className, actions, isLive = false }) => (
+  <Card sx={{ 
+    height: '100%',
+    background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.9) 100%)',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(255,255,255,0.2)',
+    transition: 'all 0.3s ease',
+    position: 'relative',
+    '&:hover': {
+      transform: 'translateY(-2px)',
+      boxShadow: 8
+    }
+  }}>
+    {isLive && (
+      <Box sx={{
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 0.5,
+        px: 1,
+        py: 0.5,
+        bgcolor: 'success.main',
+        borderRadius: 2,
+        color: 'white'
+      }}>
+        <Box sx={{ width: 6, height: 6, bgcolor: 'white', borderRadius: '50%', animation: 'pulse 2s infinite' }} />
+        <Typography variant="caption" sx={{ fontSize: '10px', fontWeight: 600 }}>
+          LIVE
+        </Typography>
+      </Box>
+    )}
+    
+    <CardContent sx={{ p: 3 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {icon && (
+            <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>
+              {icon}
+            </Avatar>
+          )}
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              {title}
+            </Typography>
+            {subtitle && (
+              <Typography variant="body2" color="text.secondary">
+                {subtitle}
+              </Typography>
+            )}
+          </Box>
+        </Box>
+        {actions}
+      </Box>
+      {children}
+    </CardContent>
+  </Card>
+)
 
 const RealTimeMonitoring: React.FC = React.memo(() => {
   const [data, setData] = useState<RealTimeData | null>(null)
@@ -334,176 +477,391 @@ const RealTimeMonitoring: React.FC = React.memo(() => {
 
   if (loading || !data) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-        <div className="container mx-auto px-4 py-6 max-w-7xl">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-300 rounded w-1/3 mb-6"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-32 bg-gray-200 rounded"></div>
-              ))}
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-64 bg-gray-200 rounded"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      <Box sx={{ p: 3 }}>
+        <Grid container spacing={3}>
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Grid item xs={12} sm={6} md={3} key={i}>
+              <Card>
+                <CardContent>
+                  <Skeleton variant="circular" width={56} height={56} sx={{ mb: 2 }} />
+                  <Skeleton variant="text" height={24} sx={{ mb: 1 }} />
+                  <Skeleton variant="text" height={40} sx={{ mb: 1 }} />
+                  <Skeleton variant="text" width="60%" />
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      <div className="container mx-auto px-4 py-6 max-w-7xl space-y-6">
-        {/* ヘッダー */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">リアルタイム監視ダッシュボード</h1>
-              <p className="text-gray-600 mt-2">システム状態とライブメトリクスの監視</p>
-            </div>
-            <div className="flex items-center space-x-4 mt-4 sm:mt-0">
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="autoRefresh"
-                  checked={autoRefresh}
-                  onChange={(e) => setAutoRefresh(e.target.checked)}
-                  className="rounded"
-                />
-                <label htmlFor="autoRefresh" className="text-sm text-gray-700">自動更新</label>
-              </div>
-              <select
-                value={refreshInterval}
-                onChange={(e) => setRefreshInterval(parseInt(e.target.value))}
-                disabled={!autoRefresh}
-                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-              >
-                <option value="30000">30秒</option>
-                <option value="60000">1分</option>
-                <option value="300000">5分</option>
-                <option value="600000">10分</option>
-              </select>
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span>ライブ</span>
-              </div>
-            </div>
-          </div>
-        </div>
+    <Box sx={{ p: 3 }}>
+      {/* Header with gradient background */}
+      <Box sx={{ 
+        mb: 4, 
+        p: 3, 
+        borderRadius: 2,
+        background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%)',
+        color: 'white',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        {/* Animated background elements */}
+        <Box sx={{
+          position: 'absolute',
+          top: -20,
+          right: -20,
+          width: 100,
+          height: 100,
+          borderRadius: '50%',
+          background: 'rgba(255,255,255,0.1)',
+          animation: 'pulse 3s infinite'
+        }} />
+        
+        <Grid container spacing={2} alignItems="center" justifyContent="space-between">
+          <Grid item xs={12} md={6}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+              <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
+                <MonitorIcon sx={{ fontSize: 32 }} />
+              </Avatar>
+              <Box>
+                <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.5 }}>
+                  リアルタイム監視ダッシュボード
+                </Typography>
+                <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                  システム状態とライブメトリクスの監視
+                </Typography>
+              </Box>
+            </Box>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Stack direction="row" spacing={2} justifyContent="flex-end" flexWrap="wrap">
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={autoRefresh}
+                    onChange={(e) => setAutoRefresh(e.target.checked)}
+                    sx={{ 
+                      '& .MuiSwitch-track': { bgcolor: 'rgba(255,255,255,0.3)' },
+                      '& .MuiSwitch-thumb': { bgcolor: 'white' }
+                    }}
+                  />
+                }
+                label="自動更新"
+                sx={{ color: 'white', '& .MuiFormControlLabel-label': { fontWeight: 600 } }}
+              />
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <Select
+                  value={refreshInterval}
+                  onChange={(e) => setRefreshInterval(parseInt(e.target.value as string))}
+                  disabled={!autoRefresh}
+                  sx={{ 
+                    color: 'white',
+                    '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' },
+                    '& .MuiSvgIcon-root': { color: 'white' }
+                  }}
+                >
+                  <MenuItem value={30000}>30秒</MenuItem>
+                  <MenuItem value={60000}>1分</MenuItem>
+                  <MenuItem value={300000}>5分</MenuItem>
+                  <MenuItem value={600000}>10分</MenuItem>
+                </Select>
+              </FormControl>
+              <Chip
+                icon={<Box sx={{ width: 8, height: 8, bgcolor: 'success.main', borderRadius: '50%', animation: 'pulse 2s infinite' }} />}
+                label="LIVE"
+                variant="outlined"
+                sx={{ 
+                  color: 'white', 
+                  borderColor: 'rgba(255,255,255,0.3)',
+                  fontWeight: 600
+                }}
+              />
+            </Stack>
+          </Grid>
+        </Grid>
+      </Box>
 
-        {/* ライブメトリクス - 安定化 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StableMetricCard
+      {/* ライブメトリクス */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <IconRichMetricCard
             title="アクティブユーザー"
             value={data.liveMetrics.activeUsers}
             unit="人"
             status="good"
-            icon="👥"
+            icon={<GroupIcon />}
+            subtitle="現在オンライン"
+            isLive={true}
           />
-          <StableMetricCard
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <IconRichMetricCard
             title="アクティブチケット"
             value={data.liveMetrics.activeTickets}
             unit="件"
             status="good"
-            icon="🎟️"
+            icon={<AssignmentIcon />}
+            subtitle="対応中のチケット"
+            isLive={true}
           />
-          <StableMetricCard
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <IconRichMetricCard
             title="システム負荷"
             value={data.liveMetrics.systemLoad}
             unit="%"
             status={data.liveMetrics.systemLoad > 80 ? 'critical' : data.liveMetrics.systemLoad > 60 ? 'warning' : 'good'}
-            icon="📊"
+            icon={<SpeedIcon />}
+            subtitle="CPU・メモリ総合"
+            isLive={true}
           />
-          <StableMetricCard
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <IconRichMetricCard
             title="アクティブアラート"
             value={data.liveMetrics.alerts.filter(a => a.type === 'critical' || a.type === 'warning').length}
             unit="件"
             status={data.liveMetrics.alerts.filter(a => a.type === 'critical').length > 0 ? 'critical' : 
                    data.liveMetrics.alerts.filter(a => a.type === 'warning').length > 0 ? 'warning' : 'good'}
-            icon="🚨"
+            icon={<NotificationsIcon />}
+            subtitle="要対応アラート"
+            isLive={true}
           />
-        </div>
+        </Grid>
+      </Grid>
 
-        {/* システム状態監視 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* サーバー状態 */}
-          <ChartCard title="サーバー状態" subtitle="各サーバーのリアルタイム監視">
-            <div className="space-y-4">
-              {data.systemStatus.servers.map((server) => (
-                <div key={server.id} className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-3">
-                      <StatusIndicator status={server.status} showLabel={false} />
-                      <span className="font-medium">{server.name}</span>
-                    </div>
-                    <span className="text-sm text-gray-600">稼働時間: {server.uptime}</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <span>CPU</span>
-                        <span>{server.cpu}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className={`h-2 rounded-full transition-all duration-300 ${server.cpu > 80 ? 'bg-red-500' : server.cpu > 60 ? 'bg-yellow-500' : 'bg-green-500'}`}
-                          style={{ width: `${server.cpu}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <span>メモリ</span>
-                        <span>{server.memory}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className={`h-2 rounded-full transition-all duration-300 ${server.memory > 80 ? 'bg-red-500' : server.memory > 60 ? 'bg-yellow-500' : 'bg-green-500'}`}
-                          style={{ width: `${server.memory}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <span>ディスク</span>
-                        <span>{server.disk}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className={`h-2 rounded-full transition-all duration-300 ${server.disk > 80 ? 'bg-red-500' : server.disk > 60 ? 'bg-yellow-500' : 'bg-green-500'}`}
-                          style={{ width: `${server.disk}%` }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ChartCard>
+      {/* システム状態監視 */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {/* サーバー状態 */}
+        <Grid item xs={12} lg={6}>
+          <RichChartCard 
+            title="サーバー状態" 
+            subtitle="各サーバーのリアルタイム監視"
+            icon={<ComputerIcon />}
+            isLive={true}
+            actions={
+              <Stack direction="row" spacing={1}>
+                <IconButton size="small">
+                  <RefreshIcon />
+                </IconButton>
+                <IconButton size="small">
+                  <SettingsIcon />
+                </IconButton>
+              </Stack>
+            }
+          >
+            <Stack spacing={3}>
+              {data.systemStatus.servers.map((server) => {
+                const getServerIcon = (name: string) => {
+                  if (name.includes('Web')) return <NetworkIcon />
+                  if (name.includes('データベース')) return <StorageIcon />
+                  if (name.includes('アプリケーション')) return <AppsIcon />
+                  return <ComputerIcon />
+                }
+                
+                const getStatusColor = (status: string) => {
+                  if (status === 'online') return { color: '#10B981', bg: '#F0FDF4' }
+                  if (status === 'warning') return { color: '#F59E0B', bg: '#FFFBEB' }
+                  return { color: '#EF4444', bg: '#FEF2F2' }
+                }
+                
+                const statusColor = getStatusColor(server.status)
+                
+                return (
+                  <Paper key={server.id} sx={{ 
+                    p: 3, 
+                    background: `linear-gradient(135deg, ${statusColor.bg} 0%, rgba(255,255,255,0.9) 100%)`,
+                    border: `1px solid ${statusColor.color}30`,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: `0 8px 20px ${statusColor.color}25`
+                    }
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Avatar sx={{ bgcolor: statusColor.color, width: 40, height: 40 }}>
+                          {getServerIcon(server.name)}
+                        </Avatar>
+                        <Box>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: statusColor.color }}>
+                            {server.name}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {server.status === 'online' ? 'オンライン' : server.status === 'warning' ? '警告' : 'オフライン'}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      <Chip 
+                        label={`稼働時間: ${server.uptime}`}
+                        size="small"
+                        variant="outlined"
+                        sx={{ 
+                          borderColor: statusColor.color,
+                          color: statusColor.color,
+                          fontWeight: 600
+                        }}
+                      />
+                    </Box>
+                    
+                    <Grid container spacing={2}>
+                      {[
+                        { label: 'CPU', value: server.cpu, icon: <SpeedIcon /> },
+                        { label: 'メモリ', value: server.memory, icon: <MemoryIcon /> },
+                        { label: 'ディスク', value: server.disk, icon: <StorageIcon /> }
+                      ].map((metric, index) => {
+                        const getMetricColor = (value: number) => {
+                          if (value > 80) return '#EF4444'
+                          if (value > 60) return '#F59E0B'
+                          return '#10B981'
+                        }
+                        
+                        const metricColor = getMetricColor(metric.value)
+                        
+                        return (
+                          <Grid item xs={4} key={index}>
+                            <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 1 }}>
+                                <Avatar sx={{ bgcolor: metricColor, width: 24, height: 24 }}>
+                                  {React.cloneElement(metric.icon, { sx: { fontSize: 14 } })}
+                                </Avatar>
+                                <Typography variant="caption" color="text.secondary">
+                                  {metric.label}
+                                </Typography>
+                              </Box>
+                              <Typography variant="h6" sx={{ fontWeight: 700, color: metricColor, mb: 1 }}>
+                                {metric.value}%
+                              </Typography>
+                              <LinearProgress 
+                                variant="determinate" 
+                                value={metric.value} 
+                                sx={{ 
+                                  height: 6, 
+                                  borderRadius: 3,
+                                  bgcolor: 'grey.200',
+                                  '& .MuiLinearProgress-bar': {
+                                    bgcolor: metricColor,
+                                    borderRadius: 3
+                                  }
+                                }} 
+                              />
+                            </Box>
+                          </Grid>
+                        )
+                      })}
+                    </Grid>
+                  </Paper>
+                )
+              })}
+            </Stack>
+          </RichChartCard>
+        </Grid>
 
-          {/* サービス状態 */}
-          <ChartCard title="サービス状態" subtitle="各サービスの稼働状況">
-            <div className="space-y-4">
-              {data.systemStatus.services.map((service) => (
-                <div key={service.id} className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center space-x-3">
-                      <StatusIndicator status={service.status} showLabel={false} />
-                      <span className="font-medium">{service.name}</span>
-                    </div>
-                    <span className="text-sm text-gray-600">稼働率: {service.uptime}%</span>
-                  </div>
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>応答時間: {service.responseTime}ms</span>
-                    <span>最終確認: {new Date(service.lastCheck).toLocaleTimeString('ja-JP')}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ChartCard>
+        {/* サービス状態 */}
+        <Grid item xs={12} lg={6}>
+          <RichChartCard 
+            title="サービス状態" 
+            subtitle="各サービスの稼働状況"
+            icon={<AppsIcon />}
+            isLive={true}
+            actions={
+              <Stack direction="row" spacing={1}>
+                <IconButton size="small">
+                  <AnalyticsIcon />
+                </IconButton>
+                <IconButton size="small">
+                  <RefreshIcon />
+                </IconButton>
+              </Stack>
+            }
+          >
+            <Stack spacing={3}>
+              {data.systemStatus.services.map((service) => {
+                const getServiceIcon = (name: string) => {
+                  if (name.includes('Web')) return <NetworkIcon />
+                  if (name.includes('API')) return <AppsIcon />
+                  if (name.includes('認証')) return <SecurityIcon />
+                  if (name.includes('メール')) return <DescriptionIcon />
+                  return <CloudIcon />
+                }
+                
+                const getServiceStatusColor = (status: string) => {
+                  if (status === 'operational') return { color: '#10B981', bg: '#F0FDF4', label: '正常稼働' }
+                  if (status === 'degraded') return { color: '#F59E0B', bg: '#FFFBEB', label: '性能低下' }
+                  return { color: '#EF4444', bg: '#FEF2F2', label: 'サービス停止' }
+                }
+                
+                const statusInfo = getServiceStatusColor(service.status)
+                
+                return (
+                  <Paper key={service.id} sx={{ 
+                    p: 3, 
+                    background: `linear-gradient(135deg, ${statusInfo.bg} 0%, rgba(255,255,255,0.9) 100%)`,
+                    border: `1px solid ${statusInfo.color}30`,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: `0 6px 15px ${statusInfo.color}25`
+                    }
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Avatar sx={{ bgcolor: statusInfo.color, width: 36, height: 36 }}>
+                          {getServiceIcon(service.name)}
+                        </Avatar>
+                        <Box>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: statusInfo.color }}>
+                            {service.name}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: statusInfo.color, fontWeight: 600 }}>
+                            {statusInfo.label}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      <Box sx={{ textAlign: 'right' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 700, color: statusInfo.color }}>
+                          {service.uptime}%
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          稼働率
+                        </Typography>
+                      </Box>
+                    </Box>
+                    
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <Box sx={{ textAlign: 'center', p: 1.5, bgcolor: 'background.paper', borderRadius: 1 }}>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                            {service.responseTime}ms
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            応答時間
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Box sx={{ textAlign: 'center', p: 1.5, bgcolor: 'background.paper', borderRadius: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            {new Date(service.lastCheck).toLocaleTimeString('ja-JP', {
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            最終確認
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  </Paper>
+                )
+              })}
+            </Stack>
+          </RichChartCard>
+        </Grid>
 
           {/* システム負荷履歴 */}
           <ChartCard title="システム負荷履歴" subtitle="過去20回の負荷推移" className="lg:col-span-2">
