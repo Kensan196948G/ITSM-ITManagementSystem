@@ -47,7 +47,7 @@ jobs:
         cd backend
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install psycopg2-binary asyncpg
+        pip install psycopg2-binary asyncpg aiosqlite
     
     - name: Run pytest
       timeout-minutes: 15
@@ -147,7 +147,7 @@ jobs:
         cd backend
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install psycopg2-binary asyncpg
+        pip install psycopg2-binary asyncpg aiosqlite
     
     - name: Install Node.js dependencies
       run: |
