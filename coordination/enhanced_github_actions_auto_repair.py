@@ -35,10 +35,30 @@ class RepairStatus(Enum):
 
 class SecurityLevel(Enum):
     """セキュリティレベル"""
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    CRITICAL = "critical"
+    LOW = 1
+    MEDIUM = 2
+    HIGH = 3
+    CRITICAL = 4
+    
+    def __ge__(self, other):
+        if isinstance(other, SecurityLevel):
+            return self.value >= other.value
+        return NotImplemented
+    
+    def __gt__(self, other):
+        if isinstance(other, SecurityLevel):
+            return self.value > other.value
+        return NotImplemented
+    
+    def __le__(self, other):
+        if isinstance(other, SecurityLevel):
+            return self.value <= other.value
+        return NotImplemented
+    
+    def __lt__(self, other):
+        if isinstance(other, SecurityLevel):
+            return self.value < other.value
+        return NotImplemented
 
 @dataclass
 class RepairContext:
