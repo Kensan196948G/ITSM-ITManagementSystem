@@ -67,3 +67,4 @@ coverage/
 htmlcov/test_env/
 *.pyc
 __pycache__/
+test_env/
