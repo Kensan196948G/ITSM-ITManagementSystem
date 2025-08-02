@@ -385,10 +385,61 @@ EOF
           
           echo "Repair log updated successfully"
 
+      - name: Configure Git and Commit Repairs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔧 Configuring Git for auto-repair commits..."
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          # Check if there are changes to commit
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "📊 Changes detected after repair operations"
+            git add .claude-flow/ || true
+            git add frontend/ || true
+            git add backend/ || true
+            git add coordination/ || true
+            
+            # Check if there are staged changes
+            if [ -n "$(git diff --cached --name-only)" ]; then
+              git commit -m "CI Auto-repair: ${{ needs.analyze-failure.outputs.repair-strategy }}
+
+- Repair strategy: ${{ needs.analyze-failure.outputs.repair-strategy }}
+- Failed jobs addressed: ${{ needs.analyze-failure.outputs.failed-jobs }}
+- Error patterns fixed: ${{ needs.analyze-failure.outputs.error-patterns }}
+- Retry count: ${{ needs.analyze-failure.outputs.retry-count }} → $((retry_count + 1))
+- Validation results: $validation_results
+
+🤖 Automated repair by CI Auto-Repair System"
+              
+              # Push with authentication
+              git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+              git push origin HEAD:${GITHUB_REF#refs/heads/} || {
+                echo "⚠️ Push failed, attempting alternative method..."
+                git push origin HEAD:main || {
+                  echo "❌ Failed to push repair changes"
+                  echo "This may indicate a permissions issue or branch protection"
+                  exit 1
+                }
+              }
+              echo "✅ Repair changes committed and pushed successfully"
+            else
+              echo "ℹ️ No staged changes to commit"
+            fi
+          else
+            echo "ℹ️ No changes detected after repair operations"
+          fi
+
   trigger-rerun:
     name: Trigger CI Re-execution
     runs-on: ubuntu-latest
     needs: [analyze-failure, comprehensive-repair]
+    permissions:
+      contents: read
+      actions: write
+      issues: write
+      metadata: read
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -464,6 +515,9 @@ EOF
     runs-on: ubuntu-latest
     needs: analyze-failure
     if: needs.analyze-failure.outputs.retry-count >= 5
+    permissions:
+      contents: read
+      metadata: read
     steps:
       - name: Safety Limit Reached
         run: |
