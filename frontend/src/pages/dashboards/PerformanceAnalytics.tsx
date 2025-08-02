@@ -1,9 +1,32 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
-import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
+import { 
+  LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, 
+  Tooltip, ResponsiveContainer, PieChart, Pie, Cell, RadialBarChart, RadialBar,
+  ComposedChart, Scatter, ScatterChart, Treemap, FunnelChart, Funnel, LabelList 
+} from 'recharts'
+import {
+  Box, Grid, Typography, Card, CardContent, Avatar, IconButton, Divider, Chip,
+  LinearProgress, useTheme, Tabs, Tab, Button, useMediaQuery, Stack, Alert,
+  Skeleton, Badge, Tooltip as MuiTooltip, FormControl, InputLabel, Select, MenuItem,
+  Fab, alpha, CircularProgress, Paper, TableContainer, Table, TableHead, TableRow,
+  TableCell, TableBody, TablePagination
+} from '@mui/material'
+import {
+  TrendingUp as TrendingUpIcon, Refresh as RefreshIcon, Analytics as AnalyticsIcon,
+  Dashboard as DashboardIcon, Speed as SpeedIcon, Memory as MemoryIcon,
+  Storage as StorageIcon, NetworkCheck as NetworkIcon, Security as SecurityIcon,
+  BugReport as BugIcon, Build as BuildIcon, AutoFixHigh as AutoFixIcon,
+  CheckCircle as CheckCircleIcon, Warning as WarningIcon, Error as ErrorIcon,
+  Schedule as ScheduleIcon, Assignment as AssignmentIcon, Group as GroupIcon,
+  ShowChart as ChartIcon, Timeline as TimelineIcon, TableChart as TableIcon,
+  BarChart as BarChartIcon, DonutLarge as DonutIcon, PieChart as PieChartIcon,
+  Assessment as ReportIcon, MonitorHeart as MonitorIcon, CloudQueue as CloudIcon,
+  DataUsage as DataIcon, GraphicEq as GraphIcon, Hub as HubIcon
+} from '@mui/icons-material'
 import { PerformanceData, TimeSeriesData, AgentStats, BottleneckAnalysis } from '../../types/dashboard'
 import MetricCard from '../../components/dashboard/MetricCard'
 import ChartCard from '../../components/dashboard/ChartCard'
-// import { GradientAreaChart, AnimatedGaugeChart, HeatmapChart, TreemapChart } from '../../components/charts'
+import DataTable, { TableColumn } from '../../components/common/DataTable'
 import { gradients, animations, chartColors } from '../../theme/theme'
 
 // 新しいコンポーネントのインターフェース定義

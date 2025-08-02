@@ -609,6 +609,67 @@ const Dashboard: React.FC = () => {
             </Grid>
           </Grid>
 
+          {/* CI/CD自動修復システム統計 */}
+          <Grid container spacing={3} sx={{ mb: 3 }}>
+            <Grid item xs={12}>
+              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <AutoFixIcon color="primary" />
+                CI/CD自動修復システム
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <EnhancedMetricCard
+                title="修復ループ回数"
+                value={cicdMetrics.totalLoops}
+                icon={<AutoFixIcon />}
+                color={theme.palette.info.main}
+                subtitle="継続実行中"
+                trend={{ value: 2.1, label: "今日", direction: "up" }}
+                loading={refreshing}
+                action={
+                  <Tooltip title="詳細監視">
+                    <IconButton size="small" color="primary">
+                      <MonitorIcon />
+                    </IconButton>
+                  </Tooltip>
+                }
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <EnhancedMetricCard
+                title="検出エラー数"
+                value={cicdMetrics.totalErrors}
+                icon={<BugIcon />}
+                color={theme.palette.warning.main}
+                subtitle="総累積数"
+                trend={{ value: 0.8, label: "1時間", direction: "up" }}
+                loading={refreshing}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <EnhancedMetricCard
+                title="修復成功率"
+                value={`${cicdMetrics.fixSuccessRate}%`}
+                icon={<CheckCircleIcon />}
+                color={theme.palette.success.main}
+                subtitle="自動修復精度"
+                trend={{ value: 0, label: "安定", direction: "neutral" }}
+                loading={refreshing}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <EnhancedMetricCard
+                title="システム稼働率"
+                value={cicdMetrics.uptime}
+                icon={<SpeedIcon />}
+                color={theme.palette.primary.main}
+                subtitle="24時間稼働"
+                trend={{ value: 0.1, label: "昨日比", direction: "up" }}
+                loading={refreshing}
+              />
+            </Grid>
+          </Grid>
+
           {/* システムヘルス・パフォーマンス指標 */}
           <Grid container spacing={3} sx={{ mb: 3 }}>
             <Grid item xs={12} md={3}>
