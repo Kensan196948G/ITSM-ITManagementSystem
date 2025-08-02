@@ -1125,3 +1125,244 @@ async def get_problem_kpis(
             status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="KPIメトリクスの取得中にエラーが発生しました"
         )
+
+
+# 一括操作API
+@router.put(
+    "/bulk-update",
+    response_model=BulkOperationResult,
+    summary="問題一括更新",
+    description="複数の問題を一括で更新します",
+)
+async def bulk_update_problems(
+    bulk_request: BulkUpdateRequest,
+    db: Session = Depends(get_db),
+    current_user_id: UUID = Depends(get_current_user_id)
+) -> BulkOperationResult:
+    """問題を一括更新する"""
+    try:
+        tenant_id = get_user_tenant_id(current_user_id)
+        success_count = 0
+        failed_count = 0
+        failed_items = []
+        
+        for problem_id in bulk_request.problem_ids:
+            try:
+                problem = db.query(Problem).filter(
+                    and_(
+                        Problem.id == problem_id,
+                        Problem.tenant_id == tenant_id
+                    )
+                ).first()
+                
+                if not problem:
+                    failed_count += 1
+                    failed_items.append({
+                        "id": str(problem_id),
+                        "error": "問題が見つかりません"
+                    })
+                    continue
+                
+                # フィールドを更新
+                update_data = bulk_request.updates.model_dump(exclude_unset=True)
+                for field, value in update_data.items():
+                    if field == "affected_services" and value is not None:
+                        problem.affected_services = json.dumps(value)
+                    elif hasattr(problem, field):
+                        setattr(problem, field, value)
+                
+                success_count += 1
+                
+            except Exception as e:
+                failed_count += 1
+                failed_items.append({
+                    "id": str(problem_id),
+                    "error": str(e)
+                })
+        
+        db.commit()
+        
+        return BulkOperationResult(
+            success_count=success_count,
+            failed_count=failed_count,
+            failed_items=failed_items,
+            message=f"{success_count}件の問題が正常に更新されました。{failed_count}件の更新に失敗しました。"
+        )
+        
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="一括更新中にエラーが発生しました"
+        )
+
+
+@router.delete(
+    "/bulk-delete",
+    response_model=BulkOperationResult,
+    summary="問題一括削除",
+    description="複数の問題を一括で削除します",
+)
+async def bulk_delete_problems(
+    bulk_request: BulkDeleteRequest,
+    db: Session = Depends(get_db),
+    current_user_id: UUID = Depends(get_current_user_id)
+) -> BulkOperationResult:
+    """問題を一括削除する"""
+    try:
+        tenant_id = get_user_tenant_id(current_user_id)
+        success_count = 0
+        failed_count = 0
+        failed_items = []
+        
+        for problem_id in bulk_request.problem_ids:
+            try:
+                problem = db.query(Problem).filter(
+                    and_(
+                        Problem.id == problem_id,
+                        Problem.tenant_id == tenant_id
+                    )
+                ).first()
+                
+                if not problem:
+                    failed_count += 1
+                    failed_items.append({
+                        "id": str(problem_id),
+                        "error": "問題が見つかりません"
+                    })
+                    continue
+                
+                # 関連データの整合性チェック
+                if problem.status in [ProblemStatus.UNDER_INVESTIGATION, ProblemStatus.ROOT_CAUSE_ANALYSIS]:
+                    failed_count += 1
+                    failed_items.append({
+                        "id": str(problem_id),
+                        "error": "調査中または分析中の問題は削除できません"
+                    })
+                    continue
+                
+                db.delete(problem)
+                success_count += 1
+                
+            except Exception as e:
+                failed_count += 1
+                failed_items.append({
+                    "id": str(problem_id),
+                    "error": str(e)
+                })
+        
+        db.commit()
+        
+        return BulkOperationResult(
+            success_count=success_count,
+            failed_count=failed_count,
+            failed_items=failed_items,
+            message=f"{success_count}件の問題が正常に削除されました。{failed_count}件の削除に失敗しました。理由: {bulk_request.reason}"
+        )
+        
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="一括削除中にエラーが発生しました"
+        )
+
+
+@router.get(
+    "/export",
+    summary="問題データエクスポート",
+    description="問題データをCSV形式でエクスポートします",
+)
+async def export_problems(
+    format: str = Query("csv", description="エクスポート形式"),
+    status_filter: Optional[List[str]] = Query(None, description="ステータスフィルター"),
+    category: Optional[List[str]] = Query(None, description="カテゴリフィルター"),
+    date_from: Optional[str] = Query(None, description="開始日（YYYY-MM-DD）"),
+    date_to: Optional[str] = Query(None, description="終了日（YYYY-MM-DD）"),
+    db: Session = Depends(get_db),
+    current_user_id: UUID = Depends(get_current_user_id)
+):
+    """問題データをエクスポートする"""
+    try:
+        from fastapi.responses import StreamingResponse
+        import io
+        import csv
+        
+        tenant_id = get_user_tenant_id(current_user_id)
+        
+        # クエリ構築
+        query = db.query(Problem).filter(Problem.tenant_id == tenant_id)
+        
+        # フィルター適用
+        if status_filter:
+            query = query.filter(Problem.status.in_(status_filter))
+        
+        if category:
+            category_enums = [ProblemCategory(cat) for cat in category if cat in [e.value for e in ProblemCategory]]
+            if category_enums:
+                query = query.filter(Problem.category.in_(category_enums))
+        
+        if date_from:
+            try:
+                from_date = datetime.strptime(date_from, "%Y-%m-%d")
+                query = query.filter(Problem.created_at >= from_date)
+            except ValueError:
+                pass
+        
+        if date_to:
+            try:
+                to_date = datetime.strptime(date_to, "%Y-%m-%d")
+                query = query.filter(Problem.created_at <= to_date)
+            except ValueError:
+                pass
+        
+        problems = query.order_by(Problem.created_at).all()
+        
+        # CSV生成
+        if format.lower() == "csv":
+            output = io.StringIO()
+            writer = csv.writer(output)
+            
+            # ヘッダー
+            writer.writerow([
+                "問題番号", "タイトル", "ステータス", "優先度", "カテゴリ",
+                "ビジネス影響", "担当者ID", "RCAフェーズ", "作成日", "更新日"
+            ])
+            
+            # データ行
+            for problem in problems:
+                writer.writerow([
+                    problem.problem_number,
+                    problem.title,
+                    problem.status.value,
+                    problem.priority,
+                    problem.category.value,
+                    problem.business_impact.value,
+                    str(problem.assignee_id) if problem.assignee_id else "",
+                    problem.rca_phase.value,
+                    problem.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                    problem.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+                ])
+            
+            output.seek(0)
+            
+            response = StreamingResponse(
+                io.BytesIO(output.getvalue().encode('utf-8-sig')),
+                media_type="text/csv",
+                headers={"Content-Disposition": f"attachment; filename=problems_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"}
+            )
+            
+            return response
+        else:
+            raise HTTPException(
+                status_code=http_status.HTTP_400_BAD_REQUEST,
+                detail="サポートされていないエクスポート形式です"
+            )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="エクスポート中にエラーが発生しました"
+        )
