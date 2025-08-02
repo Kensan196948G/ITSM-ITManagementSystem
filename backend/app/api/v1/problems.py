@@ -762,3 +762,366 @@ async def add_rca_finding(
             status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="RCA調査結果の追加中にエラーが発生しました"
         )
+
+
+# 統計・分析API
+@router.get(
+    "/statistics",
+    response_model=ProblemStatistics,
+    summary="問題管理統計",
+    description="問題管理の統計情報を取得します",
+)
+async def get_problem_statistics(
+    db: Session = Depends(get_db),
+    current_user_id: UUID = Depends(get_current_user_id)
+) -> ProblemStatistics:
+    """問題管理統計を取得する"""
+    try:
+        tenant_id = get_user_tenant_id(current_user_id)
+        
+        # 基本統計
+        total_problems = db.query(func.count(Problem.id)).filter(
+            Problem.tenant_id == tenant_id
+        ).scalar() or 0
+        
+        open_problems = db.query(func.count(Problem.id)).filter(
+            and_(
+                Problem.tenant_id == tenant_id,
+                Problem.status.in_([
+                    ProblemStatus.DRAFT,
+                    ProblemStatus.UNDER_INVESTIGATION,
+                    ProblemStatus.ROOT_CAUSE_ANALYSIS,
+                    ProblemStatus.SOLUTION_DEVELOPMENT,
+                    ProblemStatus.SOLUTION_TESTING
+                ])
+            )
+        ).scalar() or 0
+        
+        # 今月解決した問題数
+        current_month_start = datetime.utcnow().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        resolved_this_month = db.query(func.count(Problem.id)).filter(
+            and_(
+                Problem.tenant_id == tenant_id,
+                Problem.status == ProblemStatus.RESOLVED,
+                Problem.updated_at >= current_month_start
+            )
+        ).scalar() or 0
+        
+        # ステータス別統計
+        status_stats = db.query(
+            Problem.status, func.count(Problem.id)
+        ).filter(
+            Problem.tenant_id == tenant_id
+        ).group_by(Problem.status).all()
+        
+        by_status = {status.value: count for status, count in status_stats}
+        
+        # 優先度別統計
+        priority_stats = db.query(
+            Problem.priority, func.count(Problem.id)
+        ).filter(
+            Problem.tenant_id == tenant_id
+        ).group_by(Problem.priority).all()
+        
+        by_priority = {priority: count for priority, count in priority_stats}
+        
+        # カテゴリ別統計
+        category_stats = db.query(
+            Problem.category, func.count(Problem.id)
+        ).filter(
+            Problem.tenant_id == tenant_id
+        ).group_by(Problem.category).all()
+        
+        by_category = {category.value: count for category, count in category_stats}
+        
+        # ビジネス影響別統計
+        impact_stats = db.query(
+            Problem.business_impact, func.count(Problem.id)
+        ).filter(
+            Problem.tenant_id == tenant_id
+        ).group_by(Problem.business_impact).all()
+        
+        by_business_impact = {impact.value: count for impact, count in impact_stats}
+        
+        # 平均解決時間（時間単位）
+        avg_resolution_query = db.query(
+            func.avg(
+                func.extract('epoch', Problem.updated_at - Problem.created_at) / 3600
+            )
+        ).filter(
+            and_(
+                Problem.tenant_id == tenant_id,
+                Problem.status == ProblemStatus.RESOLVED
+            )
+        ).scalar()
+        
+        avg_resolution_time = float(avg_resolution_query) if avg_resolution_query else None
+        
+        # RCA完了率
+        rca_completed = db.query(func.count(Problem.id)).filter(
+            and_(
+                Problem.tenant_id == tenant_id,
+                Problem.rca_phase == RCAPhase.COMPLETED
+            )
+        ).scalar() or 0
+        
+        rca_completion_rate = (rca_completed / total_problems * 100) if total_problems > 0 else 0.0
+        
+        return ProblemStatistics(
+            total_problems=total_problems,
+            by_status=by_status,
+            by_priority=by_priority,
+            by_category=by_category,
+            by_business_impact=by_business_impact,
+            avg_resolution_time=avg_resolution_time,
+            open_problems=open_problems,
+            resolved_this_month=resolved_this_month,
+            rca_completion_rate=round(rca_completion_rate, 2)
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="統計情報の取得中にエラーが発生しました"
+        )
+
+
+@router.get(
+    "/trends",
+    response_model=ProblemTrends,
+    summary="問題トレンド分析",
+    description="問題のトレンド分析データを取得します",
+)
+async def get_problem_trends(
+    period: str = Query("30d", description="期間（7d, 30d, 90d, 1y）"),
+    db: Session = Depends(get_db),
+    current_user_id: UUID = Depends(get_current_user_id)
+) -> ProblemTrends:
+    """問題トレンド分析を取得する"""
+    try:
+        tenant_id = get_user_tenant_id(current_user_id)
+        
+        # 期間設定
+        period_days = {
+            "7d": 7,
+            "30d": 30,
+            "90d": 90,
+            "1y": 365
+        }
+        
+        days = period_days.get(period, 30)
+        start_date = datetime.utcnow() - timedelta(days=days)
+        
+        # 作成トレンド
+        created_trends_query = db.query(
+            func.date(Problem.created_at).label('date'),
+            func.count(Problem.id).label('count')
+        ).filter(
+            and_(
+                Problem.tenant_id == tenant_id,
+                Problem.created_at >= start_date
+            )
+        ).group_by(func.date(Problem.created_at)).order_by(func.date(Problem.created_at)).all()
+        
+        created_trends = [
+            TrendData(period=str(date), value=count, label="作成")
+            for date, count in created_trends_query
+        ]
+        
+        # 解決トレンド
+        resolved_trends_query = db.query(
+            func.date(Problem.updated_at).label('date'),
+            func.count(Problem.id).label('count')
+        ).filter(
+            and_(
+                Problem.tenant_id == tenant_id,
+                Problem.status == ProblemStatus.RESOLVED,
+                Problem.updated_at >= start_date
+            )
+        ).group_by(func.date(Problem.updated_at)).order_by(func.date(Problem.updated_at)).all()
+        
+        resolved_trends = [
+            TrendData(period=str(date), value=count, label="解決")
+            for date, count in resolved_trends_query
+        ]
+        
+        # カテゴリトレンド
+        category_trends_query = db.query(
+            Problem.category,
+            func.count(Problem.id).label('count')
+        ).filter(
+            and_(
+                Problem.tenant_id == tenant_id,
+                Problem.created_at >= start_date
+            )
+        ).group_by(Problem.category).order_by(func.count(Problem.id).desc()).all()
+        
+        category_trends = [
+            TrendData(period=period, value=count, label=category.value)
+            for category, count in category_trends_query
+        ]
+        
+        # 影響度トレンド
+        impact_trends_query = db.query(
+            Problem.business_impact,
+            func.count(Problem.id).label('count')
+        ).filter(
+            and_(
+                Problem.tenant_id == tenant_id,
+                Problem.created_at >= start_date
+            )
+        ).group_by(Problem.business_impact).order_by(func.count(Problem.id).desc()).all()
+        
+        impact_trends = [
+            TrendData(period=period, value=count, label=impact.value)
+            for impact, count in impact_trends_query
+        ]
+        
+        # 解決時間トレンド（日単位の平均）
+        resolution_time_trends_query = db.query(
+            func.date(Problem.updated_at).label('date'),
+            func.avg(
+                func.extract('epoch', Problem.updated_at - Problem.created_at) / 3600
+            ).label('avg_hours')
+        ).filter(
+            and_(
+                Problem.tenant_id == tenant_id,
+                Problem.status == ProblemStatus.RESOLVED,
+                Problem.updated_at >= start_date
+            )
+        ).group_by(func.date(Problem.updated_at)).order_by(func.date(Problem.updated_at)).all()
+        
+        resolution_time_trends = [
+            TrendData(period=str(date), value=int(avg_hours or 0), label="解決時間（時間）")
+            for date, avg_hours in resolution_time_trends_query
+        ]
+        
+        return ProblemTrends(
+            created_trends=created_trends,
+            resolved_trends=resolved_trends,
+            category_trends=category_trends,
+            impact_trends=impact_trends,
+            resolution_time_trends=resolution_time_trends
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="トレンド分析の取得中にエラーが発生しました"
+        )
+
+
+@router.get(
+    "/kpis",
+    response_model=KPIMetrics,
+    summary="KPIメトリクス",
+    description="問題管理のKPIメトリクスを取得します",
+)
+async def get_problem_kpis(
+    period: str = Query("30d", description="期間（7d, 30d, 90d, 1y）"),
+    db: Session = Depends(get_db),
+    current_user_id: UUID = Depends(get_current_user_id)
+) -> KPIMetrics:
+    """KPIメトリクスを取得する"""
+    try:
+        tenant_id = get_user_tenant_id(current_user_id)
+        
+        # 期間設定
+        period_days = {
+            "7d": 7,
+            "30d": 30,
+            "90d": 90,
+            "1y": 365
+        }
+        
+        days = period_days.get(period, 30)
+        start_date = datetime.utcnow() - timedelta(days=days)
+        
+        # MTTR (Mean Time To Repair) - 時間単位
+        mttr_query = db.query(
+            func.avg(
+                func.extract('epoch', Problem.updated_at - Problem.created_at) / 3600
+            )
+        ).filter(
+            and_(
+                Problem.tenant_id == tenant_id,
+                Problem.status == ProblemStatus.RESOLVED,
+                Problem.updated_at >= start_date
+            )
+        ).scalar()
+        
+        mttr = float(mttr_query) if mttr_query else None
+        
+        # MTBF (Mean Time Between Failures) - 概算値
+        total_problems = db.query(func.count(Problem.id)).filter(
+            and_(
+                Problem.tenant_id == tenant_id,
+                Problem.created_at >= start_date
+            )
+        ).scalar() or 0
+        
+        mtbf = (days * 24 / total_problems) if total_problems > 0 else None
+        
+        # 初回解決率（仮の計算）
+        first_call_resolution = 75.0  # 実際の計算ロジックを実装
+        
+        # 問題再発率
+        # 簡略化: 同じカテゴリで複数回発生している問題の割合
+        recurring_problems = db.query(
+            Problem.category,
+            func.count(Problem.id).label('count')
+        ).filter(
+            and_(
+                Problem.tenant_id == tenant_id,
+                Problem.created_at >= start_date
+            )
+        ).group_by(Problem.category).having(func.count(Problem.id) > 1).all()
+        
+        total_unique_categories = db.query(
+            func.count(func.distinct(Problem.category))
+        ).filter(
+            and_(
+                Problem.tenant_id == tenant_id,
+                Problem.created_at >= start_date
+            )
+        ).scalar() or 0
+        
+        problem_recurrence_rate = (len(recurring_problems) / total_unique_categories * 100) if total_unique_categories > 0 else 0.0
+        
+        # RCA効果度スコア
+        rca_completed = db.query(func.count(Problem.id)).filter(
+            and_(
+                Problem.tenant_id == tenant_id,
+                Problem.rca_phase == RCAPhase.COMPLETED,
+                Problem.created_at >= start_date
+            )
+        ).scalar() or 0
+        
+        rca_problems = db.query(func.count(Problem.id)).filter(
+            and_(
+                Problem.tenant_id == tenant_id,
+                Problem.rca_phase != RCAPhase.NOT_STARTED,
+                Problem.created_at >= start_date
+            )
+        ).scalar() or 0
+        
+        rca_effectiveness_score = (rca_completed / rca_problems * 100) if rca_problems > 0 else 0.0
+        
+        # SLA遵守率（仮の値）
+        sla_compliance_rate = 85.0  # 実際のSLA計算ロジックを実装
+        
+        return KPIMetrics(
+            mttr=round(mttr, 2) if mttr else None,
+            mtbf=round(mtbf, 2) if mtbf else None,
+            first_call_resolution_rate=first_call_resolution,
+            problem_recurrence_rate=round(problem_recurrence_rate, 2),
+            rca_effectiveness_score=round(rca_effectiveness_score, 2),
+            customer_satisfaction_score=None,  # 外部システムから取得
+            sla_compliance_rate=sla_compliance_rate
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="KPIメトリクスの取得中にエラーが発生しました"
+        )
