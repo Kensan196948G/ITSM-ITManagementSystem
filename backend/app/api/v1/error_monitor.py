@@ -12,6 +12,7 @@ from app.services.continuous_monitor import ContinuousBackendMonitor
 from app.services.enhanced_infinite_loop_monitor import enhanced_monitor
 from app.services.advanced_auto_repair_engine import advanced_repair_engine
 from app.services.comprehensive_report_generator import report_generator, ReportConfig, ReportType, ReportFormat
+from app.services.security_compliance_monitor import security_compliance_monitor, SecurityLevel, ThreatType, ComplianceFramework
 
 router = APIRouter(prefix="/error-monitor", tags=["error-monitor"])
 
