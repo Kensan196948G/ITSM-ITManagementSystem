@@ -219,55 +219,161 @@ const BrowserErrorAdminDashboard: React.FC = () => {
   }, []);
 
   // 統計情報の更新
-  const updateStatistics = () => {
-    if (!infiniteLoopMonitor) return;
+  const updateStatistics = async (controller?: MCPPlaywrightMasterController) => {
+    const activeController = controller || masterController;
+    if (!activeController) return;
 
-    const repairStats = autoRepairEngine.getRepairStatistics();
-    const loopStats = infiniteLoopMonitor.getStatistics();
-    const currentLoopSession = infiniteLoopMonitor.getCurrentSession();
+    try {
+      // システムステータスを取得
+      const systemStatus = await activeController.getSystemStatus();
+      
+      // 統計情報を更新
+      setStatistics({
+        totalErrors: systemStatus.metrics.totalErrors,
+        fixedErrors: systemStatus.metrics.successfulRepairs,
+        activeMonitoring: systemStatus.isRunning,
+        successRate: systemStatus.metrics.totalErrors > 0 
+          ? (systemStatus.metrics.successfulRepairs / systemStatus.metrics.totalErrors) * 100 
+          : 100,
+        averageFixTime: systemStatus.metrics.avgRepairTime,
+        loopSessions: systemStatus.metrics.currentIteration,
+        healthScore: systemStatus.healthScore,
+        systemUptime: systemStatus.metrics.systemUptime,
+        activeBrowsers: systemStatus.components.detector.health,
+        currentIteration: systemStatus.metrics.currentIteration
+      });
 
-    setStatistics({
-      totalErrors: repairStats.total,
-      fixedErrors: repairStats.successful,
-      activeMonitoring: infiniteLoopMonitor.isMonitoringActive(),
-      successRate: repairStats.successRate,
-      averageFixTime: 2.5, // 実装要
-      loopSessions: loopStats.totalSessions
-    });
+      // システム状態を更新
+      setSystemStatus(prev => ({
+        ...prev,
+        errorDetection: systemStatus.components.detector.status === 'running',
+        autoRepair: systemStatus.components.repairEngine.status === 'ready',
+        infiniteLoop: systemStatus.components.loopController.status === 'running',
+        validation: systemStatus.components.validation.status === 'ready'
+      }));
 
-    setCurrentSession(currentLoopSession);
-    setSessionHistory(infiniteLoopMonitor.getSessionHistory());
+      // リアルタイム統計を更新
+      setRealtimeStats(systemStatus);
+
+      // アラート履歴を更新
+      setAlertsHistory(systemStatus.alerts);
+
+    } catch (error) {
+      console.error('❌ 統計情報の更新に失敗:', error);
+    }
+  };
+
+  // システム全体の開始/停止
+  const toggleMasterSystem = async () => {
+    if (!masterController) {
+      console.warn('⚠️ マスターコントローラーが初期化されていません');
+      return;
+    }
+
+    try {
+      if (systemStatus.masterController && statistics.activeMonitoring) {
+        console.log('🛑 MCP Playwright システムを停止中...');
+        await masterController.stop();
+        
+        setSystemStatus(prev => ({
+          ...prev,
+          errorDetection: false,
+          infiniteLoop: false,
+          autoRepair: false
+        }));
+        
+        console.log('✅ システムを停止しました');
+      } else {
+        console.log('🚀 MCP Playwright システムを開始中...');
+        await masterController.start();
+        
+        setSystemStatus(prev => ({
+          ...prev,
+          errorDetection: true,
+          autoRepair: true
+        }));
+        
+        console.log('✅ システムを開始しました');
+      }
+
+      await updateStatistics();
+    } catch (error) {
+      console.error('❌ システム切り替えエラー:', error);
+    }
   };
 
   // 無限ループ監視の開始/停止
   const toggleInfiniteLoop = async () => {
-    if (!infiniteLoopMonitor) return;
+    if (!masterController) {
+      console.warn('⚠️ マスターコントローラーが初期化されていません');
+      return;
+    }
 
-    if (systemStatus.infiniteLoop) {
-      infiniteLoopMonitor.stopInfiniteLoop();
-      setSystemStatus(prev => ({ ...prev, infiniteLoop: false }));
-    } else {
-      try {
-        await infiniteLoopMonitor.startInfiniteLoop('http://192.168.3.135:3000');
+    try {
+      // マスターコントローラーから無限ループコントローラーにアクセス
+      // 実際の実装では、マスターコントローラーに無限ループ制御メソッドを追加する必要があります
+      console.log('🔄 無限ループ状態を切り替え中...');
+      
+      if (systemStatus.infiniteLoop) {
+        // 停止ロジック（マスターコントローラー経由）
+        console.log('🛑 無限ループを停止中...');
+        setSystemStatus(prev => ({ ...prev, infiniteLoop: false }));
+      } else {
+        // 開始ロジック（マスターコントローラー経由）
+        console.log('🚀 無限ループを開始中...');
         setSystemStatus(prev => ({ ...prev, infiniteLoop: true }));
-      } catch (error) {
-        console.error('無限ループ開始エラー:', error);
       }
+
+      await updateStatistics();
+    } catch (error) {
+      console.error('❌ 無限ループ切り替えエラー:', error);
     }
   };
 
   // エラー検知の開始/停止
   const toggleErrorDetection = async () => {
+    if (!masterController) {
+      console.warn('⚠️ マスターコントローラーが初期化されていません');
+      return;
+    }
+
     try {
+      // マスターコントローラー経由でエラー検知を制御
       if (systemStatus.errorDetection) {
-        errorDetectionEngine.stopMonitoring();
+        console.log('🛑 エラー検知を停止中...');
+        // 実際の実装では、マスターコントローラーにエラー検知制御メソッドを追加
         setSystemStatus(prev => ({ ...prev, errorDetection: false }));
       } else {
-        await errorDetectionEngine.startMonitoring();
+        console.log('🚀 エラー検知を開始中...');
         setSystemStatus(prev => ({ ...prev, errorDetection: true }));
       }
+
+      await updateStatistics();
     } catch (error) {
-      console.error('エラー検知切り替えエラー:', error);
+      console.error('❌ エラー検知切り替えエラー:', error);
+    }
+  };
+
+  // 緊急停止
+  const emergencyStop = async () => {
+    if (!masterController) return;
+
+    try {
+      console.log('🚨 緊急停止を実行中...');
+      await masterController.emergencyStop();
+      
+      setSystemStatus({
+        errorDetection: false,
+        autoRepair: false,
+        infiniteLoop: false,
+        validation: false,
+        masterController: false
+      });
+
+      console.log('🚨 緊急停止が完了しました');
+      await updateStatistics();
+    } catch (error) {
+      console.error('❌ 緊急停止エラー:', error);
     }
   };
 

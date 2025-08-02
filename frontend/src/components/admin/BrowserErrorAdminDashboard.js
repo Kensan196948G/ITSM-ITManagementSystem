@@ -2,23 +2,27 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState, useEffect } from 'react';
 import { Box, Grid, Card, CardContent, Typography, Button, Switch, FormControlLabel, Tabs, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, LinearProgress, Alert, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, CircularProgress, List, ListItem, ListItemText, ListItemIcon, Divider } from '@mui/material';
 import { Dashboard as DashboardIcon, Error as ErrorIcon, Build as BuildIcon, CheckCircle as CheckCircleIcon, Warning as WarningIcon, PlayArrow as PlayIcon, Stop as StopIcon, Refresh as RefreshIcon, Settings as SettingsIcon, Assessment as AssessmentIcon, Security as SecurityIcon, Visibility as VisibilityIcon, Download as DownloadIcon, TrendingUp as TrendingUpIcon, AutoMode as AutoModeIcon } from '@mui/icons-material';
-// Services
-import { errorDetectionEngine } from '../../services/errorDetectionEngine';
-import { autoRepairEngine } from '../../services/autoRepairEngine';
-import { validationSystem } from '../../services/validationSystem';
-import { InfiniteLoopMonitor, defaultInfiniteLoopConfig } from '../../services/infiniteLoopMonitor';
+// MCP Playwright Services
+import { defaultConfig as detectorConfig } from '../../services/mcpPlaywrightErrorDetector';
+import { defaultInfiniteLoopConfig } from '../../services/infiniteLoopController';
+import { MCPPlaywrightMasterController, defaultMasterControllerConfig } from '../../services/mcpPlaywrightMasterController';
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
     return (_jsx("div", { role: "tabpanel", hidden: value !== index, id: `admin-tabpanel-${index}`, "aria-labelledby": `admin-tab-${index}`, ...other, children: value === index && _jsx(Box, { sx: { p: 3 }, children: children }) }));
 }
 const BrowserErrorAdminDashboard = () => {
     const [tabValue, setTabValue] = useState(0);
-    const [infiniteLoopMonitor, setInfiniteLoopMonitor] = useState(null);
+    // MCP Playwright Services
+    const [masterController, setMasterController] = useState(null);
+    const [isInitialized, setIsInitialized] = useState(false);
+    const [isInitializing, setIsInitializing] = useState(false);
+    const [initializationError, setInitializationError] = useState(null);
     const [systemStatus, setSystemStatus] = useState({
         errorDetection: false,
         autoRepair: false,
         infiniteLoop: false,
-        validation: false
+        validation: false,
+        masterController: false
     });
     const [statistics, setStatistics] = useState({
         totalErrors: 0,
@@ -26,40 +30,98 @@ const BrowserErrorAdminDashboard = () => {
         activeMonitoring: false,
         successRate: 0,
         averageFixTime: 0,
-        loopSessions: 0
+        loopSessions: 0,
+        healthScore: 100,
+        systemUptime: 0,
+        activeBrowsers: 0,
+        currentIteration: 0
     });
+    const [realtimeStats, setRealtimeStats] = useState(null);
     const [currentSession, setCurrentSession] = useState(null);
     const [sessionHistory, setSessionHistory] = useState([]);
     const [configDialogOpen, setConfigDialogOpen] = useState(false);
     const [reportDialogOpen, setReportDialogOpen] = useState(false);
     const [selectedReport, setSelectedReport] = useState(null);
+    const [alertsHistory, setAlertsHistory] = useState([]);
+    const [performanceMetrics, setPerformanceMetrics] = useState(null);
+    // システム初期化
+    const initializeMasterController = async () => {
+        if (isInitializing)
+            return;
+        setIsInitializing(true);
+        setInitializationError(null);
+        try {
+            console.log('🚀 MCP Playwright マスターコントローラーを初期化中...');
+            // マスターコントローラー設定
+            const masterConfig = {
+                ...defaultMasterControllerConfig,
+                detectorConfig: {
+                    ...detectorConfig,
+                    targetUrls: [
+                        'http://192.168.3.135:3000',
+                        'http://192.168.3.135:3000/admin'
+                    ],
+                    browsers: ['chromium', 'firefox'],
+                    monitoringInterval: 5000,
+                    enableScreenshots: true,
+                    enableTrace: true,
+                    reportingEnabled: true,
+                },
+                loopConfig: {
+                    ...defaultInfiniteLoopConfig,
+                    maxIterations: 500,
+                    iterationDelay: 15000,
+                    errorThreshold: 3,
+                    successThreshold: 3,
+                    timeoutMinutes: 180,
+                },
+                enableAutoStart: false,
+                healthCheckInterval: 30000,
+                reportingInterval: 300000,
+                systemSettings: {
+                    maxConcurrentRepairs: 3,
+                    emergencyStopOnFailure: true,
+                    enableDetailedLogging: true,
+                    enablePerformanceMonitoring: true,
+                },
+            };
+            const controller = new MCPPlaywrightMasterController(masterConfig);
+            await controller.initialize();
+            setMasterController(controller);
+            setIsInitialized(true);
+            setSystemStatus(prev => ({ ...prev, masterController: true }));
+            console.log('✅ マスターコントローラーの初期化完了');
+            // 定期的な統計更新を開始
+            startRealtimeUpdates(controller);
+        }
+        catch (error) {
+            console.error('❌ マスターコントローラー初期化エラー:', error);
+            setInitializationError(error instanceof Error ? error.message : '初期化に失敗しました');
+        }
+        finally {
+            setIsInitializing(false);
+        }
+    };
+    // リアルタイム更新の開始
+    const startRealtimeUpdates = (controller) => {
+        const updateInterval = setInterval(async () => {
+            try {
+                await updateStatistics(controller);
+            }
+            catch (error) {
+                console.error('❌ 統計更新エラー:', error);
+            }
+        }, 3000);
+        return () => clearInterval(updateInterval);
+    };
     // 初期化
     useEffect(() => {
-        const monitor = new InfiniteLoopMonitor(errorDetectionEngine, autoRepairEngine, validationSystem, defaultInfiniteLoopConfig);
-        // イベントリスナーの設定
-        monitor.onIterationComplete((iteration) => {
-            console.log('反復完了:', iteration);
-            updateStatistics();
-        });
-        monitor.onErrorFixed((error, repair) => {
-            console.log('エラー修復:', error.id);
-            updateStatistics();
-        });
-        monitor.onEmergencyStop((reason, session) => {
-            console.log('緊急停止:', reason);
-            setSystemStatus(prev => ({ ...prev, infiniteLoop: false }));
-        });
-        monitor.onSuccess((session) => {
-            console.log('成功完了:', session.id);
-            setSystemStatus(prev => ({ ...prev, infiniteLoop: false }));
-        });
-        setInfiniteLoopMonitor(monitor);
-        updateStatistics();
-        // 定期的な統計更新
-        const interval = setInterval(updateStatistics, 5000);
+        initializeMasterController();
         return () => {
-            clearInterval(interval);
-            monitor.dispose();
+            // クリーンアップ
+            if (masterController) {
+                masterController.stop().catch(console.error);
+            }
         };
     }, []);
     // 統計情報の更新

@@ -80,11 +80,26 @@ const BrowserErrorMonitorPage: React.FC = () => {
     <Container maxWidth="xl" sx={{ py: 3 }}>
       {/* ページヘッダー */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h3" component="h1" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-          <SecurityIcon sx={{ mr: 2, fontSize: 40 }} />
+        <Typography 
+          variant="h3" 
+          component="h1" 
+          gutterBottom 
+          sx={{ display: 'flex', alignItems: 'center' }}
+          aria-label="MCP Playwright WebUI ブラウザエラー検知・修復システム"
+        >
+          <SecurityIcon 
+            sx={{ mr: 2, fontSize: 40 }} 
+            aria-hidden="true"
+            color="primary"
+          />
           MCP Playwright WebUI ブラウザエラー検知・修復システム
         </Typography>
-        <Typography variant="h6" color="textSecondary" gutterBottom>
+        <Typography 
+          variant="h6" 
+          color="textSecondary" 
+          gutterBottom
+          aria-label="監視対象URL: http://192.168.3.135:3000"
+        >
           http://192.168.3.135:3000 での自動エラー検知・修復・検証システム
         </Typography>
         
@@ -93,17 +108,36 @@ const BrowserErrorMonitorPage: React.FC = () => {
             severity="warning" 
             sx={{ mt: 2 }}
             action={
-              <Button color="inherit" size="small" onClick={handleSystemInitialization}>
+              <Button 
+                color="inherit" 
+                size="small" 
+                onClick={handleSystemInitialization}
+                aria-label="システムを初期化"
+                aria-describedby="init-help-text"
+              >
                 初期化
               </Button>
             }
+            role="status"
+            aria-live="polite"
           >
             システムが初期化されていません。初期化ボタンをクリックして開始してください。
+            <Typography 
+              variant="srOnly" 
+              id="init-help-text"
+            >
+              初期化により、ブラウザエラー検知システムとMCP Playwrightが起動されます
+            </Typography>
           </Alert>
         )}
         
         {isInitialized && (
-          <Alert severity="success" sx={{ mt: 2 }}>
+          <Alert 
+            severity="success" 
+            sx={{ mt: 2 }}
+            role="status"
+            aria-live="polite"
+          >
             システムは正常に初期化されました。監視を開始できます。
           </Alert>
         )}
@@ -128,30 +162,47 @@ const BrowserErrorMonitorPage: React.FC = () => {
       </Paper>
 
       {/* メインタブナビゲーション */}
-      <Paper sx={{ mb: 2 }}>
+      <Paper sx={{ mb: 2 }} elevation={2}>
         <Tabs 
           value={tabValue} 
           onChange={handleTabChange}
-          aria-label="browser error monitor tabs"
+          aria-label="ブラウザエラー監視システムのタブ"
           variant="fullWidth"
+          indicatorColor="primary"
+          textColor="primary"
+          sx={{
+            '& .MuiTab-root': {
+              minHeight: 64,
+              fontSize: '1rem',
+              '&:hover': {
+                backgroundColor: 'action.hover',
+              },
+              '&.Mui-selected': {
+                fontWeight: 'bold',
+              },
+            },
+          }}
         >
           <Tab 
             label="エラー監視" 
-            icon={<MonitorIcon />} 
+            icon={<MonitorIcon aria-hidden="true" />} 
             id="monitor-tab-0"
             aria-controls="monitor-tabpanel-0"
+            aria-label="エラー監視タブ - リアルタイムでブラウザエラーを監視"
           />
           <Tab 
             label="管理ダッシュボード" 
-            icon={<AdminIcon />} 
+            icon={<AdminIcon aria-hidden="true" />} 
             id="monitor-tab-1"
             aria-controls="monitor-tabpanel-1"
+            aria-label="管理ダッシュボードタブ - システム全体の監視と制御"
           />
           <Tab 
             label="リアルタイムレポート" 
-            icon={<ReportIcon />} 
+            icon={<ReportIcon aria-hidden="true" />} 
             id="monitor-tab-2"
             aria-controls="monitor-tabpanel-2"
+            aria-label="リアルタイムレポートタブ - エラー検知と修復の履歴表示"
           />
         </Tabs>
       </Paper>
@@ -160,29 +211,59 @@ const BrowserErrorMonitorPage: React.FC = () => {
       
       {/* エラー監視タブ */}
       <TabPanel value={tabValue} index={0}>
-        <Paper sx={{ p: 2 }}>
-          <Typography variant="h5" gutterBottom>
+        <Paper 
+          sx={{ p: { xs: 2, sm: 3 } }} 
+          elevation={1}
+          role="region"
+          aria-labelledby="error-monitor-heading"
+        >
+          <Typography 
+            variant="h5" 
+            gutterBottom
+            id="error-monitor-heading"
+            component="h2"
+          >
             ブラウザエラー監視システム
           </Typography>
-          <Typography variant="body2" color="textSecondary" gutterBottom>
+          <Typography 
+            variant="body2" 
+            color="textSecondary" 
+            gutterBottom
+            aria-describedby="error-monitor-description"
+          >
             リアルタイムでブラウザのコンソールエラーを監視し、自動修復を実行します。
           </Typography>
-          <BrowserErrorMonitor
-            targetUrl="http://192.168.3.135:3000"
-            autoStart={systemSettings.autoStart}
-            onErrorDetected={(error) => {
-              console.log('エラー検知:', error);
-              if (systemSettings.enableNotifications) {
-                // 通知処理（実装要）
-              }
+          <Box
+            sx={{
+              mt: 2,
+              '& > *': {
+                width: '100%',
+              },
             }}
-            onErrorFixed={(error) => {
-              console.log('エラー修復:', error);
-              if (systemSettings.enableNotifications) {
-                // 通知処理（実装要）
-              }
-            }}
-          />
+          >
+            <BrowserErrorMonitor
+              targetUrl="http://192.168.3.135:3000"
+              autoStart={systemSettings.autoStart}
+              onErrorDetected={(error) => {
+                console.log('エラー検知:', error);
+                if (systemSettings.enableNotifications) {
+                  // 通知処理（実装要）
+                }
+              }}
+              onErrorFixed={(error) => {
+                console.log('エラー修復:', error);
+                if (systemSettings.enableNotifications) {
+                  // 通知処理（実装要）
+                }
+              }}
+              onInfiniteLoopStarted={() => {
+                console.log('無限ループ監視開始');
+              }}
+              onInfiniteLoopStopped={() => {
+                console.log('無限ループ監視停止');
+              }}
+            />
+          </Box>
         </Paper>
       </TabPanel>
 
