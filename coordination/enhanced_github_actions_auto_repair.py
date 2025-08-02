@@ -1142,9 +1142,65 @@ class EnhancedGitHubActionsAutoRepair:
             self.logger.error(f"Failed to get workflow runs: {e}")
             return []
 
+    async def check_realtime_repair_trigger(self) -> List[Dict]:
+        """リアルタイム修復トリガーチェック"""
+        trigger_file = self.base_path / "github_actions_repair_trigger.json"
+        monitor_file = self.base_path / "github_actions_monitor_report.json"
+        
+        triggered_repairs = []
+        
+        # リアルタイムトリガーチェック
+        if trigger_file.exists():
+            try:
+                with open(trigger_file, 'r') as f:
+                    trigger_data = json.load(f)
+                
+                # トリガー時刻が5分以内の場合のみ処理
+                trigger_time = datetime.fromisoformat(trigger_data['trigger_time'].replace('Z', '+00:00'))
+                if (datetime.now() - trigger_time.replace(tzinfo=None)).seconds < 300:
+                    triggered_repairs.append({
+                        'id': trigger_data['workflow_id'],
+                        'name': trigger_data['workflow_name'],
+                        'conclusion': 'failure',
+                        'created_at': trigger_data['trigger_time'],
+                        'head_sha': trigger_data['head_sha'],
+                        'priority': 'high',
+                        'source': 'realtime_trigger'
+                    })
+                
+                # 処理済みトリガーファイルを削除
+                trigger_file.unlink()
+                self.logger.info(f"Processed realtime repair trigger for {trigger_data['workflow_name']}")
+                
+            except Exception as e:
+                self.logger.error(f"Error processing realtime trigger: {e}")
+        
+        # 監視レポートからクリティカルな失敗をチェック
+        if monitor_file.exists():
+            try:
+                with open(monitor_file, 'r') as f:
+                    monitor_data = json.load(f)
+                
+                if monitor_data.get('status') == 'critical':
+                    for workflow in monitor_data.get('failed_workflows', []):
+                        triggered_repairs.append({
+                            'id': workflow['id'],
+                            'name': workflow['name'],
+                            'conclusion': 'failure',
+                            'created_at': workflow['created_at'],
+                            'head_sha': workflow.get('head_sha', 'unknown'),
+                            'priority': 'critical',
+                            'source': 'monitor_report'
+                        })
+                
+            except Exception as e:
+                self.logger.error(f"Error processing monitor report: {e}")
+        
+        return triggered_repairs
+
     async def monitoring_loop(self):
-        """拡張監視ループ"""
-        self.logger.info("Starting enhanced GitHub Actions monitoring loop")
+        """拡張監視ループ（リアルタイム修復統合）"""
+        self.logger.info("Starting enhanced GitHub Actions monitoring loop with realtime integration")
         self.state["monitoring"] = True
         self.save_state()
         
@@ -1157,23 +1213,46 @@ class EnhancedGitHubActionsAutoRepair:
                     await asyncio.sleep(60)
                     continue
                 
-                # 失敗したワークフロー実行を取得
+                # リアルタイム修復トリガーチェック（優先処理）
+                realtime_repairs = await self.check_realtime_repair_trigger()
+                
+                # 通常の失敗したワークフロー実行を取得
                 failed_runs = await self.get_failed_workflow_runs()
                 
-                if failed_runs:
-                    self.logger.info(f"Found {len(failed_runs)} failed workflow runs")
+                # リアルタイム修復と通常修復をマージ（リアルタイムを優先）
+                all_failed_runs = realtime_repairs + [
+                    run for run in failed_runs 
+                    if str(run['id']) not in [str(r['id']) for r in realtime_repairs]
+                ]
+                
+                if all_failed_runs:
+                    self.logger.info(f"Found {len(all_failed_runs)} failed workflow runs ({len(realtime_repairs)} realtime)")
                     self.state["consecutive_clean_cycles"] = 0
                     
-                    # 並行処理制限
-                    semaphore = asyncio.Semaphore(self.config["monitoring"]["max_concurrent_repairs"])
+                    # 並行処理制限（リアルタイム修復は優先度が高い）
+                    max_concurrent = self.config["monitoring"]["max_concurrent_repairs"]
+                    if realtime_repairs:
+                        max_concurrent = min(max_concurrent * 2, 5)  # リアルタイム時は並行処理数を増加
+                    
+                    semaphore = asyncio.Semaphore(max_concurrent)
                     
                     async def process_run(run_info):
                         async with semaphore:
                             await self.process_failed_run(run_info)
                     
-                    # 失敗したワークフローを並行処理
-                    tasks = [process_run(run_info) for run_info in failed_runs]
-                    await asyncio.gather(*tasks, return_exceptions=True)
+                    # 失敗したワークフローを並行処理（リアルタイム優先）
+                    priority_runs = [r for r in all_failed_runs if r.get('priority') in ['high', 'critical']]
+                    normal_runs = [r for r in all_failed_runs if r.get('priority') not in ['high', 'critical']]
+                    
+                    # 優先度の高いタスクを先に処理
+                    if priority_runs:
+                        priority_tasks = [process_run(run_info) for run_info in priority_runs]
+                        await asyncio.gather(*priority_tasks, return_exceptions=True)
+                    
+                    # 通常タスクを処理
+                    if normal_runs:
+                        normal_tasks = [process_run(run_info) for run_info in normal_runs]
+                        await asyncio.gather(*normal_tasks, return_exceptions=True)
                     
                 else:
                     # クリーンサイクル
@@ -1184,8 +1263,12 @@ class EnhancedGitHubActionsAutoRepair:
                         self.logger.info("🎉 Success! All workflow runs are clean for required cycles")
                         break
                 
-                # 次のチェックまで待機
-                await asyncio.sleep(self.config["monitoring"]["poll_interval"])
+                # リアルタイム統合状態レポート更新
+                await self.update_integration_status()
+                
+                # 次のチェックまで待機（リアルタイム修復時は短縮）
+                wait_time = 10 if realtime_repairs else self.config["monitoring"]["poll_interval"]
+                await asyncio.sleep(wait_time)
                 
             except KeyboardInterrupt:
                 self.logger.info("Monitoring interrupted by user")
@@ -1197,6 +1280,52 @@ class EnhancedGitHubActionsAutoRepair:
         self.state["monitoring"] = False
         self.save_state()
         self.logger.info("Enhanced GitHub Actions monitoring stopped")
+
+    async def update_integration_status(self):
+        """リアルタイム統合状態の更新"""
+        try:
+            integration_status = {
+                "timestamp": datetime.now().isoformat(),
+                "monitoring_active": self.state["monitoring"],
+                "repair_cycles": self.state["repair_cycles"],
+                "consecutive_clean_cycles": self.state["consecutive_clean_cycles"],
+                "active_repairs": len(self.state["active_repairs"]),
+                "metrics": self.state["metrics"],
+                "realtime_integration": True,
+                "github_actions_connected": await self.check_github_cli(),
+                "last_check": self.state.get("last_check")
+            }
+            
+            # 統合状態ファイルに保存
+            status_file = self.base_path / "realtime_integration_status.json"
+            with open(status_file, 'w') as f:
+                json.dump(integration_status, f, indent=2)
+            
+            # 5秒間隔修復エンジンに状態を通知
+            await self.notify_realtime_system(integration_status)
+            
+        except Exception as e:
+            self.logger.error(f"Error updating integration status: {e}")
+
+    async def notify_realtime_system(self, status: Dict):
+        """5秒間隔修復エンジンへの状態通知"""
+        try:
+            notification_file = self.base_path / "github_actions_status_notification.json"
+            notification = {
+                "timestamp": datetime.now().isoformat(),
+                "type": "github_actions_status",
+                "status": status,
+                "source": "enhanced_github_actions_auto_repair",
+                "integration_active": True
+            }
+            
+            with open(notification_file, 'w') as f:
+                json.dump(notification, f, indent=2)
+            
+            self.logger.debug("Notified realtime system of GitHub Actions status")
+            
+        except Exception as e:
+            self.logger.error(f"Error notifying realtime system: {e}")
 
     async def process_failed_run(self, run_info: Dict):
         """失敗したワークフローの処理"""
