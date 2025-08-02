@@ -1,9 +1,8 @@
 {
-  "timestamp": "2025-08-02T17:50:01.340748",
+  "timestamp": "2025-08-02T17:50:45.665776",
   "total_errors": 0,
   "error_categories": {},
   "error_severities": {},
-  "fix_success_rate": 100,
-  "health_status": "healthy",
-  "last_health_fix": "2025-08-02T17:50:13.075142"
+  "fix_success_rate": 0,
+  "health_status": "unhealthy"
 }
