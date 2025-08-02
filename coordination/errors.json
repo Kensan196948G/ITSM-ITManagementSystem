@@ -1,6 +1,6 @@
 {
   "summary": {
-    "sessionStart": "2025-08-02T03:31:42.044703+00:00",
+    "sessionStart": "2025-08-02T03:34:06.527853+00:00",
     "monitoringDuration": 30,
     "totalErrors": 0,
     "errorTypes": {},
@@ -22,7 +22,7 @@
   },
   "errors": [
     {
-      "timestamp": "2025-08-02T03:30:14.157207+00:00",
+      "timestamp": "2025-08-02T03:32:36.906207+00:00",
       "type": "unknown_error",
       "severity": "low",
       "message": "HTTP 403: Forbidden",
@@ -41,23 +41,23 @@
           "content-length": "113",
           "content-security-policy": "default-src 'self'",
           "content-type": "application/json",
-          "date": "Sat, 02 Aug 2025 03:30:13 GMT",
+          "date": "Sat, 02 Aug 2025 03:32:36 GMT",
           "referrer-policy": "strict-origin-when-cross-origin",
           "server": "uvicorn",
           "strict-transport-security": "max-age=31536000; includeSubDomains",
           "x-content-type-options": "nosniff",
           "x-frame-options": "DENY",
-          "x-process-time": "0.007",
+          "x-process-time": "0.005",
           "x-ratelimit-limit": "1000",
-          "x-ratelimit-remaining": "984",
-          "x-ratelimit-reset": "1754105460",
-          "x-request-id": "0428dc7a-0a9e-481a-9035-77cb3231f395",
+          "x-ratelimit-remaining": "970",
+          "x-ratelimit-reset": "1754105580",
+          "x-request-id": "8cf5d923-ae82-4750-9b6c-bd158b0c1501",
           "x-xss-protection": "1; mode=block"
         }
       }
     },
     {
-      "timestamp": "2025-08-02T03:30:14.164686+00:00",
+      "timestamp": "2025-08-02T03:32:36.911553+00:00",
       "type": "unknown_error",
       "severity": "low",
       "message": "Failed to load resource: the server responded with a status of 403 (Forbidden)",
@@ -69,7 +69,7 @@
       "originalType": "console_error"
     },
     {
-      "timestamp": "2025-08-02T03:30:14.169050+00:00",
+      "timestamp": "2025-08-02T03:32:36.914842+00:00",
       "type": "security_error",
       "severity": "medium",
       "message": "Refused to apply inline style because it violates the following Content Security Policy directive: \"default-src 'self'\". Either the 'unsafe-inline' keyword, a hash ('sha256-4Su6mBWzEIFnH4pAGMOuaeBrstwJN4Z3pq/s1Kn4/KQ='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. Note also that 'style-src' was not explicitly set, so 'default-src' is used as a fallback.\n",
@@ -81,7 +81,7 @@
       "originalType": "console_error"
     },
     {
-      "timestamp": "2025-08-02T03:30:15.264091+00:00",
+      "timestamp": "2025-08-02T03:32:38.011261+00:00",
       "type": "security_error",
       "severity": "medium",
       "message": "Refused to apply inline style because it violates the following Content Security Policy directive: \"default-src 'self'\". Either the 'unsafe-inline' keyword, a hash ('sha256-4Su6mBWzEIFnH4pAGMOuaeBrstwJN4Z3pq/s1Kn4/KQ='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. Note also that 'style-src' was not explicitly set, so 'default-src' is used as a fallback.\n",
@@ -93,7 +93,7 @@
       "originalType": "console_error"
     },
     {
-      "timestamp": "2025-08-02T03:30:16.393456+00:00",
+      "timestamp": "2025-08-02T03:32:39.088963+00:00",
       "type": "security_error",
       "severity": "medium",
       "message": "Refused to apply inline style because it violates the following Content Security Policy directive: \"default-src 'self'\". Either the 'unsafe-inline' keyword, a hash ('sha256-4Su6mBWzEIFnH4pAGMOuaeBrstwJN4Z3pq/s1Kn4/KQ='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. Note also that 'style-src' was not explicitly set, so 'default-src' is used as a fallback.\n",
@@ -105,7 +105,7 @@
       "originalType": "console_error"
     },
     {
-      "timestamp": "2025-08-02T03:30:17.491417+00:00",
+      "timestamp": "2025-08-02T03:32:40.124231+00:00",
       "type": "unknown_error",
       "severity": "low",
       "message": "HTTP 403: Forbidden",
@@ -124,7 +124,7 @@
           "content-length": "113",
           "content-security-policy": "default-src 'self'",
           "content-type": "application/json",
-          "date": "Sat, 02 Aug 2025 03:30:16 GMT",
+          "date": "Sat, 02 Aug 2025 03:32:39 GMT",
           "expires": "0",
           "pragma": "no-cache",
           "referrer-policy": "strict-origin-when-cross-origin",
@@ -132,17 +132,17 @@
           "strict-transport-security": "max-age=31536000; includeSubDomains",
           "x-content-type-options": "nosniff",
           "x-frame-options": "DENY",
-          "x-process-time": "0.017",
+          "x-process-time": "0.004",
           "x-ratelimit-limit": "1000",
-          "x-ratelimit-remaining": "979",
-          "x-ratelimit-reset": "1754105460",
-          "x-request-id": "4a789db8-84b0-45cb-8131-4e0f7620ddf8",
+          "x-ratelimit-remaining": "965",
+          "x-ratelimit-reset": "1754105580",
+          "x-request-id": "a88e09af-09f4-4c18-928e-6e0b3b347eee",
           "x-xss-protection": "1; mode=block"
         }
       }
     },
     {
-      "timestamp": "2025-08-02T03:30:17.503945+00:00",
+      "timestamp": "2025-08-02T03:32:40.130216+00:00",
       "type": "unknown_error",
       "severity": "low",
       "message": "Failed to load resource: the server responded with a status of 403 (Forbidden)",
@@ -154,7 +154,7 @@
       "originalType": "console_error"
     },
     {
-      "timestamp": "2025-08-02T03:30:17.511949+00:00",
+      "timestamp": "2025-08-02T03:32:40.134197+00:00",
       "type": "security_error",
       "severity": "medium",
       "message": "Refused to apply inline style because it violates the following Content Security Policy directive: \"default-src 'self'\". Either the 'unsafe-inline' keyword, a hash ('sha256-4Su6mBWzEIFnH4pAGMOuaeBrstwJN4Z3pq/s1Kn4/KQ='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. Note also that 'style-src' was not explicitly set, so 'default-src' is used as a fallback.\n",
@@ -166,7 +166,7 @@
       "originalType": "console_error"
     },
     {
-      "timestamp": "2025-08-02T03:30:18.610314+00:00",
+      "timestamp": "2025-08-02T03:32:41.169631+00:00",
       "type": "network_error",
       "severity": "low",
       "message": "HTTP 404: Not Found",
@@ -185,7 +185,7 @@
           "content-length": "22",
           "content-security-policy": "default-src 'self'",
           "content-type": "application/json",
-          "date": "Sat, 02 Aug 2025 03:30:17 GMT",
+          "date": "Sat, 02 Aug 2025 03:32:40 GMT",
           "expires": "0",
           "pragma": "no-cache",
           "referrer-policy": "strict-origin-when-cross-origin",
@@ -193,17 +193,17 @@
           "strict-transport-security": "max-age=31536000; includeSubDomains",
           "x-content-type-options": "nosniff",
           "x-frame-options": "DENY",
-          "x-process-time": "0.017",
+          "x-process-time": "0.005",
           "x-ratelimit-limit": "1000",
-          "x-ratelimit-remaining": "978",
-          "x-ratelimit-reset": "1754105460",
-          "x-request-id": "f74109be-a938-4e40-ad0b-731c87831370",
+          "x-ratelimit-remaining": "964",
+          "x-ratelimit-reset": "1754105580",
+          "x-request-id": "67035225-0f41-4179-9cb6-20a2c61a1bf5",
           "x-xss-protection": "1; mode=block"
         }
       }
     },
     {
-      "timestamp": "2025-08-02T03:30:18.622437+00:00",
+      "timestamp": "2025-08-02T03:32:41.177187+00:00",
       "type": "network_error",
       "severity": "low",
       "message": "Failed to load resource: the server responded with a status of 404 (Not Found)",
@@ -215,7 +215,7 @@
       "originalType": "console_error"
     },
     {
-      "timestamp": "2025-08-02T03:30:18.630835+00:00",
+      "timestamp": "2025-08-02T03:32:41.178262+00:00",
       "type": "security_error",
       "severity": "medium",
       "message": "Refused to apply inline style because it violates the following Content Security Policy directive: \"default-src 'self'\". Either the 'unsafe-inline' keyword, a hash ('sha256-4Su6mBWzEIFnH4pAGMOuaeBrstwJN4Z3pq/s1Kn4/KQ='), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. Note also that 'style-src' was not explicitly set, so 'default-src' is used as a fallback.\n",
@@ -227,5 +227,5 @@
       "originalType": "console_error"
     }
   ],
-  "lastUpdate": "2025-08-02T03:31:42.044717+00:00"
+  "lastUpdate": "2025-08-02T03:34:06.527879+00:00"
 }

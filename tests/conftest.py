@@ -41,8 +41,11 @@ def test_config():
     """Basic test configuration"""
     return {
         "api_base_url": "http://127.0.0.1:8000",
+        "auth_url": "http://127.0.0.1:8000/api/v1/auth",
         "timeout": 30,
         "test_database_url": "sqlite:///./test.db",
+        "client_id": "test-client-id",
+        "client_secret": "test-client-secret",
         "debug": True
     }
 
