@@ -1,0 +1,24 @@
+# .github/workflows/mcp-run.yml
+name: MCP ClaudeCode Auto Repair
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'  # 30分毎
+  workflow_dispatch:
+
+jobs:
+  repair-loop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Claude MCP loop
+        run: |
+          npx claude-flow@alpha mcp start \
+            --target 0:claude:@agent-ITSM-DevUI \
+            --target 1:claude:@agent-ITSM-DevAPI \
+            --file "./Docs/*.md" \
+            --mode full-auto \
+            --max-iterations 5 \
+            --dangerously-skip-permissions
