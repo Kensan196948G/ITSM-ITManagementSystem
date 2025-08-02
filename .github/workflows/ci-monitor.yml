@@ -77,7 +77,7 @@ jobs:
             local runs=$(gh run list --limit 10 --json status,conclusion,workflowName,createdAt,url)
             
             # Check for failed runs in the last 10 minutes
-            local recent_failures=$(echo "$runs" | jq -r '.[] | select(.conclusion == "failure") | select(.createdAt) | .workflowName' | wc -l)
+            local recent_failures=$(echo "$runs" | jq -r '.[] | select(.conclusion == "failure" and (.createdAt | fromdateiso8601) > (now - 600)) | .workflowName' | wc -l)
             
             if [ "$recent_failures" -gt 0 ]; then
               echo "⚠️ Detected $recent_failures recent CI failures"
@@ -126,7 +126,7 @@ jobs:
               echo "Status: FAILURE DETECTED"
               
               # Check if we need to trigger auto-repair
-              local consecutive=$(jq -r '.consecutive_failures' .claude-flow/monitor-state.json)
+              consecutive=$(jq -r '.consecutive_failures' .claude-flow/monitor-state.json)
               echo "Consecutive failures: $consecutive"
               
               if [ "$consecutive" -ge "$MAX_CONSECUTIVE_FAILURES" ]; then
