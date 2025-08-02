@@ -23,13 +23,7 @@ import {
   FormControlLabel,
   Switch,
   Divider,
-  Timeline,
-  TimelineItem,
-  TimelineSeparator,
-  TimelineConnector,
-  TimelineContent,
-  TimelineDot,
-  TimelineOppositeContent,
+  Stack,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -487,57 +481,52 @@ const RealtimeErrorReport: React.FC = () => {
               フィルタ条件に一致するアクティビティがありません
             </Alert>
           ) : (
-            <Timeline>
+            <Stack spacing={2}>
               {filteredActivities.map((activity, index) => (
-                <TimelineItem key={activity.id}>
-                  <TimelineOppositeContent color="textSecondary">
-                    {activity.timestamp.toLocaleTimeString()}
-                  </TimelineOppositeContent>
-                  
-                  <TimelineSeparator>
-                    <TimelineDot>
-                      {getActivityIcon(activity)}
-                    </TimelineDot>
-                    {index < filteredActivities.length - 1 && <TimelineConnector />}
-                  </TimelineSeparator>
-                  
-                  <TimelineContent>
-                    <Card variant="outlined" sx={{ mb: 1 }}>
-                      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                          <Box sx={{ flex: 1 }}>
+                <Card key={activity.id} variant="outlined">
+                  <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, flex: 1 }}>
+                        <Box sx={{ mt: 0.5 }}>
+                          {getActivityIcon(activity)}
+                        </Box>
+                        <Box sx={{ flex: 1 }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                             <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                               {activity.title}
                             </Typography>
-                            <Typography variant="body2" color="textSecondary" sx={{ mt: 0.5 }}>
-                              {activity.description}
+                            <Typography variant="caption" color="textSecondary">
+                              {activity.timestamp.toLocaleTimeString()}
                             </Typography>
-                            <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
-                              <Chip 
-                                label={activity.type.replace('_', ' ')} 
-                                size="small" 
-                                variant="outlined"
-                              />
-                              <Chip 
-                                label={activity.severity} 
-                                size="small" 
-                                color={getSeverityColor(activity.severity) as any}
-                              />
-                            </Box>
                           </Box>
-                          <IconButton 
-                            size="small"
-                            onClick={() => showActivityDetail(activity)}
-                          >
-                            <VisibilityIcon />
-                          </IconButton>
+                          <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                            {activity.description}
+                          </Typography>
+                          <Box sx={{ display: 'flex', gap: 1 }}>
+                            <Chip 
+                              label={activity.type.replace('_', ' ')} 
+                              size="small" 
+                              variant="outlined"
+                            />
+                            <Chip 
+                              label={activity.severity} 
+                              size="small" 
+                              color={getSeverityColor(activity.severity) as any}
+                            />
+                          </Box>
                         </Box>
-                      </CardContent>
-                    </Card>
-                  </TimelineContent>
-                </TimelineItem>
+                      </Box>
+                      <IconButton 
+                        size="small"
+                        onClick={() => showActivityDetail(activity)}
+                      >
+                        <VisibilityIcon />
+                      </IconButton>
+                    </Box>
+                  </CardContent>
+                </Card>
               ))}
-            </Timeline>
+            </Stack>
           )}
         </CardContent>
       </Card>

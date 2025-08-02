@@ -31,6 +31,9 @@ const LazyRealTimeMonitoring = lazy(() => import('./pages/dashboards/RealTimeMon
 // システム設定ページの動的インポート
 const LazySystemSettings = lazy(() => import('./pages/settings/SystemSettings'))
 
+// ブラウザエラー監視ページの動的インポート
+const LazyBrowserErrorMonitor = lazy(() => import('./pages/BrowserErrorMonitorPage'))
+
 // Protected Routes Component
 const ProtectedApp: React.FC = () => {
   return (
@@ -378,6 +381,28 @@ const ProtectedApp: React.FC = () => {
             <ProtectedRoute>
               <Suspense fallback={<DashboardSkeleton />}>
                 <div>ナレッジ管理ページ（開発中）</div>
+              </Suspense>
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* ブラウザエラー監視システム */}
+        <Route 
+          path="/browser-error-monitor" 
+          element={
+            <ProtectedRoute roles={['admin', 'manager']}>
+              <Suspense fallback={<DashboardSkeleton />}>
+                <LazyBrowserErrorMonitor />
+              </Suspense>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/browser-error-monitor" 
+          element={
+            <ProtectedRoute roles={['admin']}>
+              <Suspense fallback={<DashboardSkeleton />}>
+                <LazyBrowserErrorMonitor />
               </Suspense>
             </ProtectedRoute>
           } 

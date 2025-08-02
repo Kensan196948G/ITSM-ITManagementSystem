@@ -867,6 +867,32 @@ export const itsmMenuStructure: MenuSection[] = [
     ],
   },
 
+  // ブラウザエラー監視・修復システム
+  {
+    id: 'browser-error-monitoring',
+    title: 'ブラウザエラー監視・修復システム',
+    items: [
+      {
+        id: 'browser-error-monitor',
+        path: '/browser-error-monitor',
+        label: 'ブラウザエラー監視システム',
+        icon: { name: 'Security' },
+        description: 'MCP Playwright WebUIエラー検知・修復システム',
+        quickAccess: true,
+        badge: { text: 'LIVE', color: 'success' },
+        permission: { roles: ['admin', 'manager'] },
+      },
+      {
+        id: 'browser-error-admin',
+        path: '/admin/browser-error-monitor',
+        label: '管理者ダッシュボード',
+        icon: { name: 'AdminPanelSettings' },
+        description: 'ブラウザエラー監視システムの管理画面',
+        permission: { roles: ['admin'] },
+      },
+    ],
+  },
+
   // CI/CD・自動修復管理
   {
     id: 'cicd-automation',
