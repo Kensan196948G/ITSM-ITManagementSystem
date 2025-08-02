@@ -39,10 +39,22 @@ env:
   INFINITE_LOOP_STATE: coordination/infinite_loop_state.json
   RETRY_INTERVAL: 30  # seconds between retries
 
+permissions:
+  contents: write
+  actions: write
+  issues: write
+  pull-requests: write
+  metadata: read
+
 jobs:
   analyze-failure:
     name: Analyze CI Failure & Plan Repair
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+      issues: write
+      metadata: read
     outputs:
       repair-strategy: ${{ steps.analyze.outputs.repair-strategy }}
       failed-jobs: ${{ steps.analyze.outputs.failed-jobs }}
@@ -153,6 +165,10 @@ jobs:
     needs: analyze-failure
     if: needs.analyze-failure.outputs.retry-count < 5
     timeout-minutes: 45
+    permissions:
+      contents: write
+      actions: read
+      metadata: read
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
