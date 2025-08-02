@@ -271,13 +271,23 @@ class InfiniteLoopMonitor:
                 "pytest>=7.4.3",
                 "pytest-asyncio>=0.21.1", 
                 "pytest-cov>=4.1.0",
+                "pytest-mock>=3.12.0",
+                "pytest-xdist>=3.4.0",
                 "httpx>=0.25.2",
                 "fastapi[all]>=0.104.1",
                 "redis>=5.0.1",
                 "sqlalchemy>=2.0.23",
                 "alembic>=1.12.1",
                 "python-jose[cryptography]>=3.3.0",
-                "passlib[bcrypt]>=1.7.4"
+                "passlib[bcrypt]>=1.7.4",
+                "aiofiles>=23.2.1",
+                "aiohttp>=3.9.1",
+                "python-multipart>=0.0.6",
+                "python-dotenv>=1.0.0",
+                "python-json-logger>=2.0.7",
+                "aiosqlite>=0.19.0",
+                "jinja2>=3.1.2",
+                "factory-boy>=3.3.0"
             ]
             
             for req in test_requirements:
