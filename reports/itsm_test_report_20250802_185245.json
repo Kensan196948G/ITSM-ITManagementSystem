@@ -1,0 +1,173 @@
+{
+  "timestamp": "2025-08-02T09:52:45.221444+00:00",
+  "test_summary": {
+    "total_tests": 11,
+    "passed": 2,
+    "failed": 10,
+    "skipped": 0,
+    "errors": []
+  },
+  "api_tests": {
+    "total_tests": 3,
+    "passed": 1,
+    "failed": 2,
+    "test_cases": [
+      {
+        "endpoint": "GET /health",
+        "status": "passed",
+        "response_time": 0.01927042007446289,
+        "details": {
+          "status_code": 200,
+          "response_size": 297
+        },
+        "errors": []
+      },
+      {
+        "endpoint": "GET /api/status",
+        "status": "failed",
+        "response_time": 0.008019685745239258,
+        "details": {
+          "status_code": 404,
+          "response_size": 22
+        },
+        "errors": [
+          "期待値: 200, 実際: 404"
+        ]
+      },
+      {
+        "endpoint": "GET /api/metrics",
+        "status": "failed",
+        "response_time": 0.008103609085083008,
+        "details": {
+          "status_code": 404,
+          "response_size": 22
+        },
+        "errors": [
+          "期待値: 200, 実際: 404"
+        ]
+      }
+    ],
+    "errors": []
+  },
+  "ui_tests": {
+    "total_tests": 4,
+    "passed": 1,
+    "failed": 3,
+    "test_cases": [
+      {
+        "test_case": "test_page_load",
+        "status": "failed",
+        "duration": 0,
+        "details": {},
+        "errors": [
+          "net::ERR_CONNECTION_REFUSED at http://localhost:3000/"
+        ]
+      },
+      {
+        "test_case": "test_navigation",
+        "status": "failed",
+        "duration": 0,
+        "details": {},
+        "errors": [
+          "net::ERR_CONNECTION_REFUSED at http://localhost:3000/"
+        ]
+      },
+      {
+        "test_case": "test_form_submission",
+        "status": "failed",
+        "duration": 0,
+        "details": {},
+        "errors": [
+          "net::ERR_CONNECTION_REFUSED at http://localhost:3000/"
+        ]
+      },
+      {
+        "test_case": "test_error_handling",
+        "status": "passed",
+        "duration": 0.02506113052368164,
+        "details": {},
+        "errors": []
+      }
+    ],
+    "errors": []
+  },
+  "e2e_tests": {
+    "total_tests": 4,
+    "passed": 0,
+    "failed": 4,
+    "test_scenarios": [
+      {
+        "scenario": "user_registration_flow",
+        "status": "failed",
+        "duration": 0,
+        "steps": [],
+        "errors": [
+          "net::ERR_CONNECTION_REFUSED at http://localhost:3000/"
+        ]
+      },
+      {
+        "scenario": "login_logout_flow",
+        "status": "skipped",
+        "duration": 4.0531158447265625e-06,
+        "steps": [],
+        "errors": [
+          "未実装シナリオ: login_logout_flow"
+        ]
+      },
+      {
+        "scenario": "data_crud_operations",
+        "status": "skipped",
+        "duration": 1.1920928955078125e-06,
+        "steps": [],
+        "errors": [
+          "未実装シナリオ: data_crud_operations"
+        ]
+      },
+      {
+        "scenario": "api_frontend_integration",
+        "status": "failed",
+        "duration": 0,
+        "steps": [],
+        "errors": [
+          "net::ERR_CONNECTION_REFUSED at http://localhost:3000/"
+        ]
+      }
+    ],
+    "errors": []
+  },
+  "load_tests": {
+    "total_requests": 10,
+    "successful_requests": 10,
+    "failed_requests": 0,
+    "average_response_time": 0.017693328857421874,
+    "max_response_time": 0.03159379959106445,
+    "requests_per_second": 56.51246107807828,
+    "errors": []
+  },
+  "code_quality": {
+    "overall_score": 84.0,
+    "coverage": 75,
+    "linting_issues": [
+      {
+        "file": "example.py",
+        "line": 1,
+        "issue": "Unused import"
+      },
+      {
+        "file": "example.py",
+        "line": 15,
+        "issue": "Line too long"
+      }
+    ],
+    "security_issues": [],
+    "complexity_score": 6,
+    "recommendations": [
+      "テストカバレッジを80%以上に向上",
+      "リンティング問題の修正"
+    ]
+  },
+  "ci_compliance": false,
+  "recommendations": [
+    "テスト成功率が基準未満: 18.2% < 90%"
+  ]
+}
