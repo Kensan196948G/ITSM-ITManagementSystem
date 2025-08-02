@@ -22,4 +22,3 @@ black==23.11.0
 isort==5.12.0
 mypy==1.7.5
 bandit==1.7.5
-safety==3.2.3
