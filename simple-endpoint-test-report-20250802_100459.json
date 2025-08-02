@@ -1,0 +1,143 @@
+{
+  "summary": {
+    "timestamp": "2025-08-02T10:04:16.316739",
+    "total_tests": 7,
+    "passed": 0,
+    "failed": 7,
+    "success_rate": 0.0,
+    "test_duration": "completed"
+  },
+  "errors": [
+    {
+      "url": "http://192.168.3.135:3000/",
+      "status": "connection_error",
+      "error_message": "Connection error: [Errno 111] Connection refused",
+      "timestamp": "2025-08-02T10:04:16.317323"
+    },
+    {
+      "url": "http://192.168.3.135:3000/admin",
+      "status": "connection_error",
+      "error_message": "Connection error: [Errno 111] Connection refused",
+      "timestamp": "2025-08-02T10:04:16.851829"
+    },
+    {
+      "url": "http://192.168.3.135:3000/manifest.json",
+      "status": "connection_error",
+      "error_message": "Connection error: [Errno 111] Connection refused",
+      "timestamp": "2025-08-02T10:04:17.352319"
+    },
+    {
+      "url": "http://192.168.3.135:8000/",
+      "status": "timeout",
+      "error_message": "Timeout after 10s",
+      "timestamp": "2025-08-02T10:04:17.853060"
+    },
+    {
+      "url": "http://192.168.3.135:8000/health",
+      "status": "timeout",
+      "error_message": "Timeout after 10s",
+      "timestamp": "2025-08-02T10:04:28.362803"
+    },
+    {
+      "url": "http://192.168.3.135:8000/docs",
+      "status": "timeout",
+      "error_message": "Timeout after 10s",
+      "timestamp": "2025-08-02T10:04:38.872848"
+    },
+    {
+      "url": "http://192.168.3.135:8000/openapi.json",
+      "status": "timeout",
+      "error_message": "Timeout after 10s",
+      "timestamp": "2025-08-02T10:04:49.383493"
+    }
+  ],
+  "detailed_results": {
+    "frontend": [
+      {
+        "service": "frontend",
+        "url": "http://192.168.3.135:3000/",
+        "path": "/",
+        "status": "connection_error",
+        "status_code": null,
+        "response_time": null,
+        "content_type": null,
+        "error_message": "Connection error: [Errno 111] Connection refused",
+        "timestamp": "2025-08-02T10:04:16.317323"
+      },
+      {
+        "service": "frontend",
+        "url": "http://192.168.3.135:3000/admin",
+        "path": "/admin",
+        "status": "connection_error",
+        "status_code": null,
+        "response_time": null,
+        "content_type": null,
+        "error_message": "Connection error: [Errno 111] Connection refused",
+        "timestamp": "2025-08-02T10:04:16.851829"
+      },
+      {
+        "service": "frontend",
+        "url": "http://192.168.3.135:3000/manifest.json",
+        "path": "/manifest.json",
+        "status": "connection_error",
+        "status_code": null,
+        "response_time": null,
+        "content_type": null,
+        "error_message": "Connection error: [Errno 111] Connection refused",
+        "timestamp": "2025-08-02T10:04:17.352319"
+      }
+    ],
+    "backend": [
+      {
+        "service": "backend",
+        "url": "http://192.168.3.135:8000/",
+        "path": "/",
+        "status": "timeout",
+        "status_code": null,
+        "response_time": 10,
+        "content_type": null,
+        "error_message": "Timeout after 10s",
+        "timestamp": "2025-08-02T10:04:17.853060"
+      },
+      {
+        "service": "backend",
+        "url": "http://192.168.3.135:8000/health",
+        "path": "/health",
+        "status": "timeout",
+        "status_code": null,
+        "response_time": 10,
+        "content_type": null,
+        "error_message": "Timeout after 10s",
+        "timestamp": "2025-08-02T10:04:28.362803"
+      },
+      {
+        "service": "backend",
+        "url": "http://192.168.3.135:8000/docs",
+        "path": "/docs",
+        "status": "timeout",
+        "status_code": null,
+        "response_time": 10,
+        "content_type": null,
+        "error_message": "Timeout after 10s",
+        "timestamp": "2025-08-02T10:04:38.872848"
+      },
+      {
+        "service": "backend",
+        "url": "http://192.168.3.135:8000/openapi.json",
+        "path": "/openapi.json",
+        "status": "timeout",
+        "status_code": null,
+        "response_time": 10,
+        "content_type": null,
+        "error_message": "Timeout after 10s",
+        "timestamp": "2025-08-02T10:04:49.383493"
+      }
+    ]
+  },
+  "recommendations": [
+    "❌ エラーが検出されました。詳細を確認して修復してください。",
+    "⚠️ 成功率が80%未満です。システムの安定性を確認してください。",
+    "⏰ タイムアウトエラーが発生しています。サーバーパフォーマンスを確認してください。",
+    "🔌 接続エラーが発生しています。ネットワーク設定やサービス起動状態を確認してください。"
+  ]
+}
