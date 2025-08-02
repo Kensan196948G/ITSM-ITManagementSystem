@@ -61,9 +61,8 @@ def client():
     if app is None or TestClient is None:
         pytest.skip("FastAPI app or TestClient not available")
     
-    test_client = TestClient(app)
-    yield test_client
-    test_client.close()
+    with TestClient(app) as test_client:
+        yield test_client
 
 @pytest.fixture
 def mock_client():
