@@ -119,6 +119,15 @@ import {
   StarBorder,
   Build as ConfigIcon,
   FileDownload,
+  
+  // CI/CD & Automation
+  AutoFixHigh,
+  Build,
+  GitHub,
+  Timeline,
+  History,
+  Link,
+  Description,
 } from '@mui/icons-material'
 import { useAuth } from '../../contexts/AuthContext'
 import { 
@@ -324,6 +333,15 @@ const Sidebar: React.FC<SidebarProps> = ({ onItemClick }) => {
       // UI Controls
       ConfigIcon,
       FileDownload,
+      
+      // CI/CD & Automation
+      AutoFixHigh,
+      Build,
+      GitHub,
+      Timeline,
+      History,
+      Link,
+      Description,
     }
     
     const IconComponent = iconMap[iconName] || Dashboard

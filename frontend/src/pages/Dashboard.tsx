@@ -46,6 +46,9 @@ import {
   CloudQueue as CloudIcon,
   MonitorHeart as MonitorIcon,
   AssessmentOutlined as ReportIcon,
+  AutoFixHigh as AutoFixIcon,
+  Build as BuildIcon,
+  BugReport as BugIcon,
 } from '@mui/icons-material'
 import { priorityColors, statusColors } from '../theme/theme'
 import ContentArea from '../components/layout/ContentArea'
@@ -165,6 +168,18 @@ const Dashboard: React.FC = () => {
     totalServices: 203,
     systemHealth: 'good',
     securityAlerts: 3,
+  }
+
+  // CI/CD自動修復システムのメトリクス
+  const cicdMetrics = {
+    totalLoops: 149,
+    totalErrors: 447,
+    fixSuccessRate: 100.0,
+    activeRepairs: 0,
+    lastScan: '2025-08-02T15:59:42',
+    systemHealth: 'warning',
+    uptime: '99.2%',
+    averageLoopTime: 95,
   }
 
   const ticketTrendData: TimeSeriesData[] = [
@@ -451,6 +466,16 @@ const Dashboard: React.FC = () => {
       >
         詳細分析
       </Button>
+      
+      <Button
+        variant="outlined"
+        startIcon={<AutoFixIcon />}
+        onClick={() => console.log('CI/CDダッシュボードへ')}
+        size={isMobile ? 'small' : 'medium'}
+        color="success"
+      >
+        CI/CD監視
+      </Button>
     </Stack>
   )
 
@@ -513,6 +538,21 @@ const Dashboard: React.FC = () => {
               }
             >
               {systemMetrics.securityAlerts}件のセキュリティアラートが検出されました
+            </Alert>
+          )}
+
+          {/* CI/CD自動修復アラート */}
+          {cicdMetrics.systemHealth === 'warning' && (
+            <Alert 
+              severity="info" 
+              sx={{ mb: 3 }}
+              action={
+                <Button color="inherit" size="small">
+                  CI/CD監視へ
+                </Button>
+              }
+            >
+              CI/CD自動修復システムが稼働中です - ループ回数: {cicdMetrics.totalLoops}、修復成功率: {cicdMetrics.fixSuccessRate}%
             </Alert>
           )}
 
