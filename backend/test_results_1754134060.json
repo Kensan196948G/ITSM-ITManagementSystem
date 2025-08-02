@@ -1,0 +1,89 @@
+{
+  "timestamp": "2025-08-02T20:27:40.736182",
+  "total_tests": 6,
+  "passed_tests": 3,
+  "failed_tests": 3,
+  "success_rate": 50.0,
+  "test_details": [
+    {
+      "test": "API Connectivity Test",
+      "passed": false,
+      "details": {
+        "health": true,
+        "version": true,
+        "docs": false
+      },
+      "timestamp": "2025-08-02T20:27:38.365964"
+    },
+    {
+      "test": "MCP Playwright Monitor Test",
+      "passed": true,
+      "details": {
+        "health_check": true,
+        "database_check": true,
+        "performance_check": true,
+        "security_check": true,
+        "total_endpoints": 7,
+        "error_rate": 0.2857142857142857
+      },
+      "timestamp": "2025-08-02T20:27:39.589171"
+    },
+    {
+      "test": "Infinite Loop Controller Test",
+      "passed": true,
+      "details": {
+        "status_check": true,
+        "config_check": true,
+        "error_detection": true,
+        "detected_errors": 5,
+        "initial_status": {
+          "active": false,
+          "current_cycle": 0,
+          "total_cycles": 0,
+          "error_free_cycles": 0,
+          "consecutive_failures": 0,
+          "emergency_stop": false,
+          "pause_requested": false,
+          "total_repairs": 0,
+          "last_repair": null
+        }
+      },
+      "timestamp": "2025-08-02T20:27:40.590859"
+    },
+    {
+      "test": "Error Detection API Test",
+      "passed": false,
+      "details": {
+        "status_code": 404,
+        "response_available": true
+      },
+      "timestamp": "2025-08-02T20:27:40.663089"
+    },
+    {
+      "test": "Manual Repair API Test",
+      "passed": false,
+      "details": {
+        "status_code": 404,
+        "endpoint_available": true
+      },
+      "timestamp": "2025-08-02T20:27:40.735819"
+    },
+    {
+      "test": "System Integration Test",
+      "passed": true,
+      "details": {
+        "directories": {
+          "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/backend/logs": true,
+          "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/coordination": true
+        },
+        "config_files": {
+          "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/backend/api_error_metrics.json": true,
+          "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/coordination/infinite_loop_state.json": true
+        },
+        "monitor_integration": true,
+        "controller_integration": true
+      },
+      "timestamp": "2025-08-02T20:27:40.736129"
+    }
+  ]
+}
