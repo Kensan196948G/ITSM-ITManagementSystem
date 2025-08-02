@@ -126,14 +126,18 @@ jobs:
               echo "Status: FAILURE DETECTED"
               
               # Check if we need to trigger auto-repair
-              consecutive=$(jq -r '.consecutive_failures' .claude-flow/monitor-state.json)
+              local consecutive=$(jq -r '.consecutive_failures' .claude-flow/monitor-state.json)
               echo "Consecutive failures: $consecutive"
               
               if [ "$consecutive" -ge "$MAX_CONSECUTIVE_FAILURES" ]; then
                 echo "🚨 THRESHOLD EXCEEDED - Triggering auto-repair sequence"
                 
                 # Trigger ci-retry workflow
-                gh workflow run ci-retry.yml --ref main || echo "Failed to trigger ci-retry workflow"
+                if gh workflow run ci-retry.yml --ref main; then
+                  echo "Successfully triggered ci-retry workflow"
+                else
+                  echo "Failed to trigger ci-retry workflow"
+                fi
                 
                 # Update repairs triggered counter
                 jq '.repairs_triggered += 1' .claude-flow/monitor-state.json > .claude-flow/monitor-state-tmp.json
