@@ -2,7 +2,18 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState, useEffect, useRef } from 'react';
 import { Box, Card, CardContent, Typography, Switch, FormControlLabel, Alert, LinearProgress, Chip, Grid, Paper, List, ListItem, ListItemText, ListItemIcon, Button, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Badge, Tooltip, IconButton } from '@mui/material';
 import { Error as ErrorIcon, Warning as WarningIcon, CheckCircle as CheckCircleIcon, PlayArrow as PlayIcon, Stop as StopIcon, Refresh as RefreshIcon, BugReport as BugReportIcon, Build as BuildIcon, Visibility as VisibilityIcon, Assessment as AssessmentIcon } from '@mui/icons-material';
-const BrowserErrorMonitor = ({ targetUrl = 'http://192.168.3.135:3000', autoStart = false, onErrorDetected, onErrorFixed }) => {
+// MCP Playwright サービス
+import { MCPPlaywrightErrorDetector, defaultConfig } from '../../services/mcpPlaywrightErrorDetector';
+import { InfiniteLoopController, defaultInfiniteLoopConfig } from '../../services/infiniteLoopController';
+import { AutoRepairEngine } from '../../services/autoRepairEngine';
+import { ValidationSystem } from '../../services/validationSystem';
+const BrowserErrorMonitor = ({ targetUrl = 'http://192.168.3.135:3000', autoStart = false, onErrorDetected, onErrorFixed, onInfiniteLoopStarted, onInfiniteLoopStopped }) => {
+    // MCP Playwright サービスインスタンス
+    const mcpDetector = useRef(null);
+    const infiniteLoopController = useRef(null);
+    const autoRepairEngine = useRef(null);
+    const validationSystem = useRef(null);
+    // 状態管理
     const [isMonitoring, setIsMonitoring] = useState(autoStart);
     const [errors, setErrors] = useState([]);
     const [stats, setStats] = useState({
@@ -11,147 +22,261 @@ const BrowserErrorMonitor = ({ targetUrl = 'http://192.168.3.135:3000', autoStar
         activeMonitoring: false,
         lastCheck: new Date(),
         cycleCount: 0,
-        successRate: 0
+        successRate: 0,
+        infiniteLoopActive: false,
+        currentIteration: 0,
+        healthScore: 100,
+        activeBrowsers: 0,
+        systemUptime: 0
     });
     const [isFixing, setIsFixing] = useState(false);
     const [selectedError, setSelectedError] = useState(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
     const [autoFix, setAutoFix] = useState(true);
     const [infiniteLoop, setInfiniteLoop] = useState(false);
+    const [isInitializing, setIsInitializing] = useState(false);
+    const [initializationError, setInitializationError] = useState(null);
+    const [expandedAccordion, setExpandedAccordion] = useState(false);
     const monitoringInterval = useRef(null);
-    const fixingQueue = useRef([]);
-    // エラー検知関数
-    const detectErrors = async () => {
+    const systemStartTime = useRef(new Date());
+    // システム初期化
+    const initializeSystem = async () => {
+        if (isInitializing)
+            return;
+        setIsInitializing(true);
+        setInitializationError(null);
         try {
-            // Playwright による実際のページ検査をシミュレート
-            const mockErrors = [
-                {
-                    id: `error-${Date.now()}-1`,
-                    type: 'error',
-                    message: 'TypeError: Cannot read property of undefined',
-                    source: 'http://192.168.3.135:3000/assets/index.js:123:45',
-                    timestamp: new Date(),
-                    stack: 'at Component.render (index.js:123:45)\nat ReactDOM.render (react-dom.js:456:78)',
-                    fixed: false,
-                    fixAttempts: 0
-                },
-                {
-                    id: `error-${Date.now()}-2`,
-                    type: 'warning',
-                    message: 'React Hook useEffect has a missing dependency',
-                    source: 'http://192.168.3.135:3000/components/Dashboard.tsx:89:12',
-                    timestamp: new Date(),
-                    fixed: false,
-                    fixAttempts: 0
-                }
-            ];
+            console.log('🚀 MCP Playwright システムを初期化中...');
+            // MCP Playwright エラー検知器を作成
+            const detectorConfig = {
+                ...defaultConfig,
+                targetUrls: [targetUrl, `${targetUrl}/admin`],
+                monitoringInterval: 5000,
+                browsers: ['chromium', 'firefox'],
+            };
+            mcpDetector.current = new MCPPlaywrightErrorDetector(detectorConfig);
+            await mcpDetector.current.initialize();
+            // 自動修復エンジンを初期化
+            autoRepairEngine.current = new AutoRepairEngine();
+            // 検証システムを初期化
+            validationSystem.current = new ValidationSystem();
+            // 無限ループコントローラーを初期化
+            infiniteLoopController.current = new InfiniteLoopController(detectorConfig, defaultInfiniteLoopConfig);
+            console.log('✅ MCP Playwright システムの初期化完了');
+        }
+        catch (error) {
+            console.error('❌ システム初期化エラー:', error);
+            setInitializationError(error instanceof Error ? error.message : 'システム初期化に失敗しました');
+        }
+        finally {
+            setIsInitializing(false);
+        }
+    };
+    // エラー検知関数（実際のMCP Playwrightを使用）
+    const detectErrors = async () => {
+        if (!mcpDetector.current) {
+            console.warn('⚠️ MCP Playwright エラー検知器が初期化されていません');
+            return;
+        }
+        try {
+            // MCP Playwright からエラー状況を取得
+            const detectorStatus = mcpDetector.current.getStatus();
+            const recentErrors = detectorStatus.recentErrors;
+            // BrowserError を ExtendedBrowserError に変換
+            const extendedErrors = recentErrors.map(error => ({
+                ...error,
+                fixed: false,
+                fixAttempts: 0,
+                validationPassed: false,
+                repairHistory: []
+            }));
             // 新しいエラーのみを追加
-            const newErrors = mockErrors.filter(mockError => !errors.some(existingError => existingError.message === mockError.message));
+            const newErrors = extendedErrors.filter(newError => !errors.some(existingError => existingError.id === newError.id));
             if (newErrors.length > 0) {
                 setErrors(prev => [...prev, ...newErrors]);
                 newErrors.forEach(error => onErrorDetected?.(error));
-                if (autoFix) {
-                    fixingQueue.current.push(...newErrors);
-                    if (!isFixing) {
-                        startAutoFix();
-                    }
+                console.log(`🔍 新しいエラー ${newErrors.length} 件を検知しました`);
+                // 自動修復が有効な場合は修復を開始
+                if (autoFix && !isFixing) {
+                    await startAutoFix(newErrors);
                 }
             }
-            setStats(prev => ({
-                ...prev,
-                lastCheck: new Date(),
-                cycleCount: prev.cycleCount + 1,
-                totalErrors: prev.totalErrors + newErrors.length,
-                successRate: prev.totalErrors > 0 ? (prev.fixedErrors / prev.totalErrors) * 100 : 100
-            }));
+            // 統計情報を更新
+            updateSystemStats();
         }
         catch (error) {
-            console.error('Error detection failed:', error);
+            console.error('❌ エラー検知に失敗:', error);
         }
     };
-    // 自動修復処理
-    const startAutoFix = async () => {
-        if (isFixing || fixingQueue.current.length === 0)
+    // システム統計情報を更新
+    const updateSystemStats = () => {
+        if (!mcpDetector.current)
+            return;
+        const detectorStatus = mcpDetector.current.getStatus();
+        const loopStatus = infiniteLoopController.current?.getStatus();
+        const repairStats = autoRepairEngine.current?.getRepairStatistics();
+        const systemUptime = Date.now() - systemStartTime.current.getTime();
+        const healthScore = calculateSystemHealthScore();
+        setStats(prev => ({
+            ...prev,
+            lastCheck: new Date(),
+            cycleCount: detectorStatus.totalErrors,
+            totalErrors: detectorStatus.totalErrors,
+            fixedErrors: repairStats?.successfulRepairs || 0,
+            successRate: repairStats?.successRate ? parseFloat(repairStats.successRate.replace('%', '')) : 0,
+            activeMonitoring: detectorStatus.isMonitoring,
+            infiniteLoopActive: loopStatus?.isRunning || false,
+            currentIteration: loopStatus?.currentIteration || 0,
+            healthScore,
+            activeBrowsers: detectorStatus.activeBrowsers,
+            systemUptime
+        }));
+    };
+    // システム健康度スコアを計算
+    const calculateSystemHealthScore = () => {
+        const errorPenalty = errors.filter(e => !e.fixed).length * 5;
+        const fixedBonus = errors.filter(e => e.fixed).length * 2;
+        const uptimeFactor = Math.min(stats.systemUptime / (1000 * 60 * 60), 1) * 10; // 最大1時間で10ポイント
+        const score = Math.max(0, Math.min(100, 100 - errorPenalty + fixedBonus + uptimeFactor));
+        return score;
+    };
+    // 自動修復処理（実際のMCP Playwrightを使用）
+    const startAutoFix = async (errorsToFix) => {
+        if (isFixing || !autoRepairEngine.current)
+            return;
+        const targetErrors = errorsToFix || errors.filter(e => !e.fixed);
+        if (targetErrors.length === 0)
             return;
         setIsFixing(true);
-        while (fixingQueue.current.length > 0) {
-            const errorToFix = fixingQueue.current.shift();
-            if (!errorToFix)
-                break;
-            try {
-                // エラー修復のシミュレート
-                await new Promise(resolve => setTimeout(resolve, 2000)); // 修復時間をシミュレート
-                // 修復成功の確率をシミュレート
-                const fixSuccess = Math.random() > 0.3; // 70%の成功率
-                setErrors(prev => prev.map(error => error.id === errorToFix.id
-                    ? {
-                        ...error,
-                        fixed: fixSuccess,
-                        fixAttempts: error.fixAttempts + 1
+        console.log(`🔧 ${targetErrors.length} 件のエラーの自動修復を開始...`);
+        try {
+            for (const errorToFix of targetErrors) {
+                try {
+                    console.log(`🔄 修復中: ${errorToFix.message}`);
+                    // 実際の修復を実行
+                    const repairResult = await autoRepairEngine.current.repairError(errorToFix);
+                    // エラー状態を更新
+                    setErrors(prev => prev.map(error => error.id === errorToFix.id
+                        ? {
+                            ...error,
+                            fixed: repairResult.success,
+                            fixAttempts: (error.fixAttempts || 0) + 1,
+                            repairHistory: [
+                                ...(error.repairHistory || []),
+                                `${repairResult.success ? '成功' : '失敗'}: ${repairResult.description || 'N/A'}`
+                            ]
+                        }
+                        : error));
+                    if (repairResult.success) {
+                        console.log(`✅ 修復成功: ${errorToFix.message}`);
+                        // 検証を実行
+                        if (validationSystem.current) {
+                            const validationResult = await validationSystem.current.validateAfterRepair(errorToFix);
+                            if (validationResult) {
+                                setErrors(prev => prev.map(error => error.id === errorToFix.id
+                                    ? { ...error, validationPassed: validationResult.overallScore > 80 }
+                                    : error));
+                            }
+                        }
+                        onErrorFixed?.(errorToFix);
                     }
-                    : error));
-                if (fixSuccess) {
-                    setStats(prev => ({
-                        ...prev,
-                        fixedErrors: prev.fixedErrors + 1,
-                        successRate: prev.totalErrors > 0 ? ((prev.fixedErrors + 1) / prev.totalErrors) * 100 : 100
-                    }));
-                    onErrorFixed?.(errorToFix);
+                    else {
+                        console.log(`❌ 修復失敗: ${errorToFix.message} - ${repairResult.error || 'unknown error'}`);
+                    }
+                    // 修復間隔
+                    await new Promise(resolve => setTimeout(resolve, 1000));
                 }
-                else if (errorToFix.fixAttempts < 3) {
-                    // 修復失敗時は再試行キューに追加
-                    fixingQueue.current.push({
-                        ...errorToFix,
-                        fixAttempts: errorToFix.fixAttempts + 1
-                    });
+                catch (error) {
+                    console.error(`❌ エラー修復中に例外発生:`, error);
                 }
-            }
-            catch (error) {
-                console.error('Auto-fix failed:', error);
             }
         }
-        setIsFixing(false);
+        finally {
+            setIsFixing(false);
+            updateSystemStats();
+            console.log('🔧 自動修復プロセス完了');
+        }
     };
     // 監視開始/停止
-    const toggleMonitoring = () => {
-        if (isMonitoring) {
-            if (monitoringInterval.current) {
-                clearInterval(monitoringInterval.current);
-                monitoringInterval.current = null;
+    const toggleMonitoring = async () => {
+        if (!mcpDetector.current) {
+            console.warn('⚠️ システムが初期化されていません');
+            return;
+        }
+        try {
+            if (isMonitoring) {
+                // 監視停止
+                console.log('🛑 監視を停止中...');
+                await mcpDetector.current.stopMonitoring();
+                if (monitoringInterval.current) {
+                    clearInterval(monitoringInterval.current);
+                    monitoringInterval.current = null;
+                }
+                setStats(prev => ({ ...prev, activeMonitoring: false }));
+                console.log('✅ 監視を停止しました');
             }
-            setStats(prev => ({ ...prev, activeMonitoring: false }));
+            else {
+                // 監視開始
+                console.log('🔍 監視を開始中...');
+                await mcpDetector.current.startMonitoring();
+                // 定期的な統計更新
+                monitoringInterval.current = setInterval(() => {
+                    detectErrors();
+                    updateSystemStats();
+                }, 5000);
+                setStats(prev => ({ ...prev, activeMonitoring: true }));
+                // 即座に実行
+                await detectErrors();
+                console.log('✅ 監視を開始しました');
+            }
+            setIsMonitoring(!isMonitoring);
         }
-        else {
-            monitoringInterval.current = setInterval(detectErrors, 5000);
-            setStats(prev => ({ ...prev, activeMonitoring: true }));
-            detectErrors(); // 即座に実行
+        catch (error) {
+            console.error('❌ 監視状態の切り替えに失敗:', error);
         }
-        setIsMonitoring(!isMonitoring);
     };
     // 無限ループモードの切り替え
-    const toggleInfiniteLoop = () => {
-        setInfiniteLoop(!infiniteLoop);
-        if (!infiniteLoop && !isMonitoring) {
-            toggleMonitoring();
+    const toggleInfiniteLoop = async () => {
+        if (!infiniteLoopController.current) {
+            console.warn('⚠️ 無限ループコントローラーが初期化されていません');
+            return;
+        }
+        try {
+            if (infiniteLoop) {
+                // 無限ループ停止
+                console.log('🛑 無限ループを停止中...');
+                await infiniteLoopController.current.stopInfiniteLoop();
+                setStats(prev => ({ ...prev, infiniteLoopActive: false }));
+                onInfiniteLoopStopped?.();
+                console.log('✅ 無限ループを停止しました');
+            }
+            else {
+                // 無限ループ開始
+                console.log('🔄 無限ループを開始中...');
+                await infiniteLoopController.current.startInfiniteLoop();
+                setStats(prev => ({ ...prev, infiniteLoopActive: true }));
+                onInfiniteLoopStarted?.();
+                console.log('✅ 無限ループを開始しました');
+                // 監視も開始していない場合は開始
+                if (!isMonitoring) {
+                    await toggleMonitoring();
+                }
+            }
+            setInfiniteLoop(!infiniteLoop);
+        }
+        catch (error) {
+            console.error('❌ 無限ループ状態の切り替えに失敗:', error);
         }
     };
     // 手動修復
     const fixError = async (error) => {
         setIsFixing(true);
         try {
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            setErrors(prev => prev.map(e => e.id === error.id
-                ? { ...e, fixed: true, fixAttempts: e.fixAttempts + 1 }
-                : e));
-            setStats(prev => ({
-                ...prev,
-                fixedErrors: prev.fixedErrors + 1,
-                successRate: prev.totalErrors > 0 ? ((prev.fixedErrors + 1) / prev.totalErrors) * 100 : 100
-            }));
-            onErrorFixed?.(error);
+            console.log(`🔧 手動修復を開始: ${error.message}`);
+            await startAutoFix([error]);
         }
         catch (error) {
-            console.error('Manual fix failed:', error);
+            console.error('❌ 手動修復に失敗:', error);
         }
         finally {
             setIsFixing(false);

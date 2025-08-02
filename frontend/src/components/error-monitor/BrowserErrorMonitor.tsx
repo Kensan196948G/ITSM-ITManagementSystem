@@ -400,71 +400,134 @@ const BrowserErrorMonitor: React.FC<BrowserErrorMonitorProps> = ({
   };
 
   // 手動修復
-  const fixError = async (error: ConsoleError) => {
+  const fixError = async (error: ExtendedBrowserError) => {
     setIsFixing(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      setErrors(prev => prev.map(e => 
-        e.id === error.id 
-          ? { ...e, fixed: true, fixAttempts: e.fixAttempts + 1 }
-          : e
-      ));
-      
-      setStats(prev => ({
-        ...prev,
-        fixedErrors: prev.fixedErrors + 1,
-        successRate: prev.totalErrors > 0 ? ((prev.fixedErrors + 1) / prev.totalErrors) * 100 : 100
-      }));
-      
-      onErrorFixed?.(error);
+      console.log(`🔧 手動修復を開始: ${error.message}`);
+      await startAutoFix([error]);
     } catch (error) {
-      console.error('Manual fix failed:', error);
+      console.error('❌ 手動修復に失敗:', error);
     } finally {
       setIsFixing(false);
     }
   };
 
   // エラー詳細表示
-  const showErrorDetails = (error: ConsoleError) => {
+  const showErrorDetails = (error: ExtendedBrowserError) => {
     setSelectedError(error);
     setDetailsOpen(true);
   };
 
   // エラー統計のリセット
-  const resetStats = () => {
-    setErrors([]);
-    setStats({
-      totalErrors: 0,
-      fixedErrors: 0,
-      activeMonitoring: isMonitoring,
-      lastCheck: new Date(),
-      cycleCount: 0,
-      successRate: 0
-    });
-    fixingQueue.current = [];
+  const resetStats = async () => {
+    try {
+      console.log('🔄 統計情報をリセット中...');
+      
+      // システムを停止
+      if (isMonitoring) {
+        await toggleMonitoring();
+      }
+      if (infiniteLoop) {
+        await toggleInfiniteLoop();
+      }
+      
+      // 状態をリセット
+      setErrors([]);
+      setStats({
+        totalErrors: 0,
+        fixedErrors: 0,
+        activeMonitoring: false,
+        lastCheck: new Date(),
+        cycleCount: 0,
+        successRate: 0,
+        infiniteLoopActive: false,
+        currentIteration: 0,
+        healthScore: 100,
+        activeBrowsers: 0,
+        systemUptime: 0
+      });
+      
+      systemStartTime.current = new Date();
+      console.log('✅ 統計情報をリセットしました');
+      
+    } catch (error) {
+      console.error('❌ 統計リセットに失敗:', error);
+    }
   };
 
-  // コンポーネントのクリーンアップ
+  // アコーディオンの展開制御
+  const handleAccordionChange = (panel: string) => (
+    event: React.SyntheticEvent,
+    isExpanded: boolean
+  ) => {
+    setExpandedAccordion(isExpanded ? panel : false);
+  };
+
+  // 時間フォーマット関数
+  const formatUptime = (milliseconds: number): string => {
+    const seconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (days > 0) {
+      return `${days}日 ${hours % 24}時間 ${minutes % 60}分`;
+    } else if (hours > 0) {
+      return `${hours}時間 ${minutes % 60}分`;
+    } else if (minutes > 0) {
+      return `${minutes}分 ${seconds % 60}秒`;
+    } else {
+      return `${seconds}秒`;
+    }
+  };
+
+  // エラータイプアイコンを取得
+  const getErrorTypeIcon = (type: string) => {
+    switch (type) {
+      case 'console': return <CodeIcon />;
+      case 'network': return <NetworkCheckIcon />;
+      case 'javascript': return <BugReportIcon />;
+      case 'security': return <SecurityIcon />;
+      case 'accessibility': return <VisibilityIcon />;
+      default: return <ErrorIcon />;
+    }
+  };
+
+  // 初期化とクリーンアップ
   useEffect(() => {
+    // システムを初期化
+    initializeSystem();
+
     return () => {
+      // クリーンアップ
       if (monitoringInterval.current) {
         clearInterval(monitoringInterval.current);
+      }
+      
+      // サービスをクリーンアップ
+      if (mcpDetector.current) {
+        mcpDetector.current.stopMonitoring().catch(console.error);
+      }
+      if (infiniteLoopController.current) {
+        infiniteLoopController.current.stopInfiniteLoop().catch(console.error);
       }
     };
   }, []);
 
-  // 無限ループモードでの自動再開
+  // 自動開始
   useEffect(() => {
-    if (infiniteLoop && !isMonitoring && errors.filter(e => !e.fixed).length === 0) {
-      const timeout = setTimeout(() => {
-        if (!isMonitoring) {
-          toggleMonitoring();
-        }
-      }, 3000);
-      return () => clearTimeout(timeout);
+    if (autoStart && !isMonitoring && mcpDetector.current) {
+      toggleMonitoring();
     }
-  }, [infiniteLoop, isMonitoring, errors]);
+  }, [autoStart, mcpDetector.current]);
+
+  // 統計情報の定期更新
+  useEffect(() => {
+    if (isMonitoring) {
+      const interval = setInterval(updateSystemStats, 2000);
+      return () => clearInterval(interval);
+    }
+  }, [isMonitoring]);
 
   const unfixedErrors = errors.filter(e => !e.fixed);
   const criticalErrors = errors.filter(e => e.type === 'error' && !e.fixed);
