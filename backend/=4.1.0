@@ -1,7 +1,0 @@
-Defaulting to user installation because normal site-packages is not writeable
-Requirement already satisfied: pytest-cov in /home/kensan/.local/lib/python3.12/site-packages (4.1.0)
-Requirement already satisfied: pytest>=4.6 in /home/kensan/.local/lib/python3.12/site-packages (from pytest-cov) (7.4.3)
-Requirement already satisfied: coverage>=5.2.1 in /home/kensan/.local/lib/python3.12/site-packages (from coverage[toml]>=5.2.1->pytest-cov) (7.10.1)
-Requirement already satisfied: iniconfig in /home/kensan/.local/lib/python3.12/site-packages (from pytest>=4.6->pytest-cov) (2.1.0)
-Requirement already satisfied: packaging in /home/kensan/.local/lib/python3.12/site-packages (from pytest>=4.6->pytest-cov) (25.0)
-Requirement already satisfied: pluggy<2.0,>=0.12 in /home/kensan/.local/lib/python3.12/site-packages (from pytest>=4.6->pytest-cov) (1.6.0)
