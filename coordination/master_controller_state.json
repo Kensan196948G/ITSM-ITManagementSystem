@@ -1,9 +1,9 @@
 {
-  "timestamp": "2025-08-02T17:06:53.205690",
+  "timestamp": "2025-08-02T17:07:49.473382",
   "master_mode": "emergency",
-  "running": true,
-  "uptime_seconds": 11.671091,
-  "uptime_formatted": "0:00:11",
+  "running": false,
+  "uptime_seconds": 16.42255,
+  "uptime_formatted": "0:00:16",
   "config": {
     "github_check_interval": 5,
     "max_parallel_repairs": 3,
@@ -20,7 +20,7 @@
     "successful_repairs": 1,
     "failed_repairs": 2,
     "itsm_incidents_created": 0,
-    "average_repair_time": 1.857454925775528,
+    "average_repair_time": 1.5986611545085907,
     "current_success_streak": 1,
     "max_success_streak": 1
   },
@@ -28,18 +28,18 @@
     "infinite_loop": {
       "component": "infinite_loop",
       "status": "active",
-      "last_check": "2025-08-02T17:05:29.047428",
+      "last_check": "2025-08-02T17:06:56.042439",
       "error_count": 0,
-      "success_count": 546,
-      "uptime_seconds": 11.670949
+      "success_count": 549,
+      "uptime_seconds": 11.744936
     },
     "api_metrics": {
       "component": "api_metrics",
       "status": "healthy",
-      "last_check": "2025-08-02T17:06:53.205667",
+      "last_check": "2025-08-02T17:07:44.795870",
       "error_count": 0,
       "success_count": 0,
-      "uptime_seconds": 11.671073
+      "uptime_seconds": 11.745046
     }
   },
   "github_failures_tracked": 7

@@ -1,0 +1,27 @@
+{
+  "timestamp": "2025-08-02T17:09:08.786635",
+  "loop_counter": 1,
+  "emergency_mode": true,
+  "running": true,
+  "statistics": {
+    "total_detections": 1,
+    "successful_repairs": 4,
+    "failed_repairs": 0,
+    "avg_detection_time": 0.5192258358001709,
+    "avg_repair_time": 2.136829286813736,
+    "current_streak": 0,
+    "max_streak": 0
+  },
+  "active_incidents_count": 4,
+  "tracked_workflows_count": 4,
+  "config": {
+    "error_detection_interval": 5,
+    "max_auto_repair_attempts": 50,
+    "critical_error_threshold": 1,
+    "success_threshold": 0,
+    "consecutive_success_required": 3,
+    "auto_rerun_delay": 10,
+    "force_repair_timeout": 300,
+    "emergency_escalation_time": 600
+  }
+}
