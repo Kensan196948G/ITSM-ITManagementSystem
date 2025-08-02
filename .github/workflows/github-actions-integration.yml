@@ -180,6 +180,54 @@ jobs:
           coordination/github_actions_monitor_report.json
           coordination/github_actions_repair_trigger.json
         retention-days: 7
+
+    - name: Configure Git for Auto-commit
+      if: success()
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config --global init.defaultBranch main
+
+    - name: Auto-commit monitoring data
+      if: success()
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Check if there are any changes to commit
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "📊 Changes detected in monitoring data"
+          git add coordination/github_actions_monitor_report.json || true
+          git add coordination/github_actions_repair_trigger.json || true
+          git add coordination/realtime_repair_state.json || true
+          git add .claude-flow/metrics/ || true
+          
+          # Check if there are staged changes
+          if [ -n "$(git diff --cached --name-only)" ]; then
+            git commit -m "Auto-update GitHub Actions monitoring data
+
+- Monitor report: $(date -u +%Y-%m-%d\ %H:%M:%S\ UTC)
+- Workflow integration status updated
+- Repair triggers synchronized
+
+🤖 Automated commit by GitHub Actions Integration Monitor"
+            
+            # Push with authentication using GITHUB_TOKEN
+            git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+            git push origin HEAD:${GITHUB_REF#refs/heads/} || {
+              echo "⚠️ Push failed, attempting alternative method..."
+              git push origin HEAD:main || {
+                echo "❌ Failed to push monitoring data updates"
+                echo "This may indicate a permissions issue or branch protection"
+                exit 1
+              }
+            }
+            echo "✅ Monitoring data committed and pushed successfully"
+          else
+            echo "ℹ️ No staged changes to commit"
+          fi
+        else
+          echo "ℹ️ No changes detected in monitoring data"
+        fi
         
     - name: Log monitoring summary
       if: success()
@@ -187,6 +235,7 @@ jobs:
         echo "✅ GitHub Actions monitoring completed successfully"
         echo "📊 Report stored as workflow artifact"
         echo "🔄 Local repair triggers created if needed"
+        echo "💾 Monitoring data auto-committed to repository"
         echo "ℹ️ Monitoring data available for $(date -u +%Y-%m-%d\ %H:%M:%S\ UTC)"
 
     - name: Create Issue for Critical Failures
@@ -240,6 +289,10 @@ jobs:
 
   integration-health-check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      metadata: read
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     
     steps:
