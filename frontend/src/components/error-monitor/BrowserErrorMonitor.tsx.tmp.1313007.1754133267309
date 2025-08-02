@@ -400,26 +400,13 @@ const BrowserErrorMonitor: React.FC<BrowserErrorMonitorProps> = ({
   };
 
   // 手動修復
-  const fixError = async (error: ConsoleError) => {
+  const fixError = async (error: ExtendedBrowserError) => {
     setIsFixing(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      setErrors(prev => prev.map(e => 
-        e.id === error.id 
-          ? { ...e, fixed: true, fixAttempts: e.fixAttempts + 1 }
-          : e
-      ));
-      
-      setStats(prev => ({
-        ...prev,
-        fixedErrors: prev.fixedErrors + 1,
-        successRate: prev.totalErrors > 0 ? ((prev.fixedErrors + 1) / prev.totalErrors) * 100 : 100
-      }));
-      
-      onErrorFixed?.(error);
+      console.log(`🔧 手動修復を開始: ${error.message}`);
+      await startAutoFix([error]);
     } catch (error) {
-      console.error('Manual fix failed:', error);
+      console.error('❌ 手動修復に失敗:', error);
     } finally {
       setIsFixing(false);
     }
