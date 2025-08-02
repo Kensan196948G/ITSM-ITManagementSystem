@@ -83,7 +83,7 @@ jobs:
               echo "⚠️ Detected $recent_failures recent CI failures"
               
               # Get failure details
-              local failure_details=$(echo "$runs" | jq -r '.[] | select(.conclusion == "failure" and (.createdAt | fromdateiso8601) > (now - 600)) | "Workflow: \(.workflowName), URL: \(.url)"')
+              local failure_details=$(echo "$runs" | jq -r '.[] | select(.conclusion == "failure") | "Workflow: \(.workflowName), URL: \(.url)"')
               
               echo "Failure details:"
               echo "$failure_details"
