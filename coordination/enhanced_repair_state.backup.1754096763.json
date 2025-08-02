@@ -1,0 +1,42 @@
+{
+  "monitoring": true,
+  "repair_cycles": 0,
+  "consecutive_clean_cycles": 0,
+  "last_check": null,
+  "active_repairs": {
+    "16680830625": {
+      "started": "2025-08-02T10:05:44.371092",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16676206884": {
+      "started": "2025-08-02T10:05:48.720629",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16676206857": {
+      "started": "2025-08-02T10:05:53.043638",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16676206845": {
+      "started": "2025-08-02T10:05:57.378030",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16675516887": {
+      "started": "2025-08-02T10:06:01.692691",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    }
+  },
+  "repair_history": [],
+  "metrics": {
+    "total_repairs": 0,
+    "successful_repairs": 0,
+    "failed_repairs": 0,
+    "manual_approvals": 0,
+    "auto_approvals": 0
+  },
+  "last_updated": "2025-08-02T10:06:03.155708"
+}

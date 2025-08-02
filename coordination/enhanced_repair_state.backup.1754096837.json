@@ -1,0 +1,152 @@
+{
+  "monitoring": true,
+  "repair_cycles": 0,
+  "consecutive_clean_cycles": 0,
+  "last_check": null,
+  "active_repairs": {
+    "16680830625": {
+      "started": "2025-08-02T10:05:44.371092",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16676206884": {
+      "started": "2025-08-02T10:05:48.720629",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16676206857": {
+      "started": "2025-08-02T10:05:53.043638",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16676206845": {
+      "started": "2025-08-02T10:05:57.378030",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16675516887": {
+      "started": "2025-08-02T10:06:01.692691",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16675516881": {
+      "started": "2025-08-02T10:06:03.156585",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16675516861": {
+      "started": "2025-08-02T10:06:04.898212",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16675275197": {
+      "started": "2025-08-02T10:06:06.620027",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16675275188": {
+      "started": "2025-08-02T10:06:11.246749",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16675275178": {
+      "started": "2025-08-02T10:06:15.403181",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16674950869": {
+      "started": "2025-08-02T10:06:19.934499",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16674950862": {
+      "started": "2025-08-02T10:06:24.658549",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16674950850": {
+      "started": "2025-08-02T10:06:26.241950",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16674181347": {
+      "started": "2025-08-02T10:06:30.536039",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16674181344": {
+      "started": "2025-08-02T10:06:35.097712",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16674181341": {
+      "started": "2025-08-02T10:06:36.747029",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16674048796": {
+      "started": "2025-08-02T10:06:41.364446",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16674048783": {
+      "started": "2025-08-02T10:06:42.929081",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16674048779": {
+      "started": "2025-08-02T10:06:47.601535",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16673908789": {
+      "started": "2025-08-02T10:06:52.187564",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16673908781": {
+      "started": "2025-08-02T10:06:53.585051",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16673908770": {
+      "started": "2025-08-02T10:06:58.222847",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16673608905": {
+      "started": "2025-08-02T10:07:03.765751",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16673608893": {
+      "started": "2025-08-02T10:07:07.965267",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16673608890": {
+      "started": "2025-08-02T10:07:12.690642",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16673204853": {
+      "started": "2025-08-02T10:07:14.283374",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    },
+    "16673204852": {
+      "started": "2025-08-02T10:07:15.654305",
+      "status": "failed",
+      "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
+    }
+  },
+  "repair_history": [],
+  "metrics": {
+    "total_repairs": 0,
+    "successful_repairs": 0,
+    "failed_repairs": 0,
+    "manual_approvals": 0,
+    "auto_approvals": 0
+  },
+  "last_updated": "2025-08-02T10:07:17.166071"
+}
