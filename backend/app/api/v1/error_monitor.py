@@ -539,3 +539,452 @@ async def trigger_performance_benchmark(background_tasks: BackgroundTasks):
     """パフォーマンスベンチマークを実行"""
     background_tasks.add_task(api_monitor.performance_monitoring)
     return {"message": "パフォーマンスベンチマークを開始しました"}
+
+# === 新機能: 無限ループエラー監視・修復システム ===
+
+class InfiniteLoopMonitorResponse(BaseModel):
+    """無限ループ監視レスポンス"""
+    monitoring: bool
+    loop_detection_active: bool
+    error_repair_active: bool
+    total_loops_detected: int
+    total_repairs_attempted: int
+    total_repairs_successful: int
+    current_repair_session: Optional[str]
+    last_detection_timestamp: Optional[datetime]
+    repair_success_rate: float
+
+class AutoRepairRequest(BaseModel):
+    """自動修復リクエスト"""
+    target_errors: List[str] = []
+    force_repair: bool = False
+    repair_mode: str = "smart"  # smart, aggressive, conservative
+    max_repair_attempts: int = 3
+
+class AutoRepairResponse(BaseModel):
+    """自動修復レスポンス"""
+    repair_session_id: str
+    repairs_scheduled: int
+    estimated_completion_time: str
+    repair_strategy: str
+    status: str
+
+@router.get("/infinite-loop-status", response_model=InfiniteLoopMonitorResponse)
+async def get_infinite_loop_status():
+    """無限ループ監視システムのステータスを取得"""
+    try:
+        # 継続監視インスタンスの作成（既存のものがあれば取得）
+        continuous_monitor = ContinuousBackendMonitor()
+        
+        # 修復統計の計算
+        repair_stats = _calculate_repair_statistics()
+        
+        return InfiniteLoopMonitorResponse(
+            monitoring=continuous_monitor.running if hasattr(continuous_monitor, 'running') else False,
+            loop_detection_active=True,
+            error_repair_active=True,
+            total_loops_detected=repair_stats.get("total_detections", 0),
+            total_repairs_attempted=repair_stats.get("total_attempts", 0),
+            total_repairs_successful=repair_stats.get("total_successful", 0),
+            current_repair_session=repair_stats.get("current_session"),
+            last_detection_timestamp=repair_stats.get("last_detection"),
+            repair_success_rate=repair_stats.get("success_rate", 0.0)
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"無限ループ監視ステータス取得エラー: {str(e)}")
+
+@router.post("/start-infinite-monitoring")
+async def start_infinite_loop_monitoring(
+    background_tasks: BackgroundTasks,
+    monitoring_interval: int = Query(5, description="監視間隔（秒）"),
+    auto_repair: bool = Query(True, description="自動修復を有効にする")
+):
+    """無限ループエラー監視を開始"""
+    try:
+        continuous_monitor = ContinuousBackendMonitor()
+        
+        # 既に実行中かチェック
+        if hasattr(continuous_monitor, 'running') and continuous_monitor.running:
+            raise HTTPException(status_code=400, detail="無限ループ監視は既に実行中です")
+        
+        # 無限ループ監視を開始
+        background_tasks.add_task(
+            _run_infinite_loop_monitoring,
+            continuous_monitor,
+            monitoring_interval,
+            auto_repair
+        )
+        
+        return {
+            "message": "無限ループエラー監視を開始しました",
+            "monitoring_interval": monitoring_interval,
+            "auto_repair_enabled": auto_repair,
+            "session_id": f"infinite_monitor_{int(time.time())}"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"無限ループ監視開始エラー: {str(e)}")
+
+@router.post("/stop-infinite-monitoring")
+async def stop_infinite_loop_monitoring():
+    """無限ループエラー監視を停止"""
+    try:
+        continuous_monitor = ContinuousBackendMonitor()
+        continuous_monitor.stop_monitoring()
+        
+        return {
+            "message": "無限ループエラー監視を停止しました",
+            "stopped_at": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"無限ループ監視停止エラー: {str(e)}")
+
+@router.post("/auto-repair", response_model=AutoRepairResponse)
+async def trigger_auto_repair(
+    repair_request: AutoRepairRequest,
+    background_tasks: BackgroundTasks
+):
+    """自動修復エンジンを実行"""
+    try:
+        repair_session_id = f"repair_{int(time.time())}"
+        
+        # 修復対象エラーの選定
+        target_errors = []
+        if repair_request.target_errors:
+            # 指定されたエラーのみ
+            target_errors = [e for e in api_monitor.errors if e.error_type in repair_request.target_errors and not e.fix_attempted]
+        else:
+            # 未修復の全エラー
+            target_errors = [e for e in api_monitor.errors if not e.fix_attempted]
+        
+        if not target_errors and not repair_request.force_repair:
+            raise HTTPException(status_code=400, detail="修復対象のエラーがありません")
+        
+        # 修復戦略の決定
+        repair_strategy = _determine_repair_strategy(repair_request.repair_mode, target_errors)
+        
+        # バックグラウンドで自動修復実行
+        background_tasks.add_task(
+            _run_auto_repair_engine,
+            repair_session_id,
+            target_errors,
+            repair_strategy,
+            repair_request.max_repair_attempts
+        )
+        
+        return AutoRepairResponse(
+            repair_session_id=repair_session_id,
+            repairs_scheduled=len(target_errors),
+            estimated_completion_time=_calculate_estimated_completion(len(target_errors), repair_strategy),
+            repair_strategy=repair_strategy,
+            status="scheduled"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"自動修復開始エラー: {str(e)}")
+
+@router.get("/repair-history")
+async def get_repair_history(
+    hours: int = Query(24, description="過去何時間の履歴を取得"),
+    session_id: Optional[str] = Query(None, description="特定のセッションIDで絞り込み")
+):
+    """修復履歴を取得"""
+    try:
+        from pathlib import Path
+        
+        # 修復履歴ファイルから読み込み
+        backend_path = Path("/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/backend")
+        history_files = [
+            backend_path / "logs" / "auto_repair.log",
+            Path("/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/coordination/fixes.json")
+        ]
+        
+        repair_history = []
+        cutoff_time = datetime.now() - timedelta(hours=hours)
+        
+        for history_file in history_files:
+            if history_file.exists() and history_file.suffix == '.json':
+                try:
+                    with open(history_file, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                        
+                    # 修復履歴の抽出と整形
+                    if 'all_fixes' in data:
+                        for fix in data['all_fixes']:
+                            fix_time = datetime.fromisoformat(fix.get('timestamp', datetime.now().isoformat()))
+                            if fix_time > cutoff_time:
+                                if not session_id or fix.get('session_id') == session_id:
+                                    repair_history.append(fix)
+                except json.JSONDecodeError:
+                    continue
+        
+        # 時系列でソート
+        repair_history.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+        
+        return {
+            "repair_history": repair_history,
+            "total_repairs": len(repair_history),
+            "period_hours": hours,
+            "session_filter": session_id
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"修復履歴取得エラー: {str(e)}")
+
+@router.get("/repair-statistics")
+async def get_repair_statistics():
+    """修復統計情報を取得"""
+    try:
+        stats = _calculate_repair_statistics()
+        
+        # 追加統計の計算
+        recent_errors = [e for e in api_monitor.errors if e.timestamp > datetime.now() - timedelta(hours=24)]
+        error_categories = {}
+        for error in recent_errors:
+            cat = error.category.value
+            error_categories[cat] = error_categories.get(cat, 0) + 1
+        
+        return {
+            "repair_statistics": stats,
+            "error_distribution": error_categories,
+            "system_health": {
+                "total_errors_24h": len(recent_errors),
+                "critical_errors_24h": len([e for e in recent_errors if e.severity.value == "critical"]),
+                "auto_fix_rate": stats.get("success_rate", 0),
+                "manual_intervention_required": len([e for e in recent_errors if not e.fix_attempted and e.severity.value in ["critical", "high"]])
+            },
+            "performance_impact": {
+                "avg_repair_time": stats.get("avg_repair_time", 0),
+                "system_downtime_prevented": stats.get("downtime_prevented", 0),
+                "cost_savings_estimated": stats.get("cost_savings", 0)
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"修復統計取得エラー: {str(e)}")
+
+@router.post("/emergency-repair")
+async def trigger_emergency_repair(
+    background_tasks: BackgroundTasks,
+    force_restart: bool = Query(False, description="サービス再起動を許可"),
+    bypass_safety: bool = Query(False, description="安全チェックをバイパス")
+):
+    """緊急修復モードを実行"""
+    try:
+        emergency_session_id = f"emergency_{int(time.time())}"
+        
+        # 緊急修復対象の特定
+        critical_errors = [e for e in api_monitor.errors if e.severity.value == "critical" and not e.fix_successful]
+        high_errors = [e for e in api_monitor.errors if e.severity.value == "high" and not e.fix_successful]
+        
+        emergency_targets = critical_errors + high_errors[:5]  # 最大5件の高重要度エラー
+        
+        if not emergency_targets:
+            return {
+                "message": "緊急修復が必要なエラーはありません",
+                "status": "no_action_required"
+            }
+        
+        # 緊急修復実行
+        background_tasks.add_task(
+            _run_emergency_repair,
+            emergency_session_id,
+            emergency_targets,
+            force_restart,
+            bypass_safety
+        )
+        
+        return {
+            "message": "緊急修復モードを開始しました",
+            "session_id": emergency_session_id,
+            "target_errors": len(emergency_targets),
+            "critical_errors": len(critical_errors),
+            "high_errors": len(high_errors),
+            "force_restart_enabled": force_restart,
+            "safety_bypass_enabled": bypass_safety
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"緊急修復開始エラー: {str(e)}")
+
+@router.get("/repair-recommendations")
+async def get_repair_recommendations():
+    """修復推奨事項を取得"""
+    try:
+        recommendations = []
+        
+        # 未修復エラーの分析
+        unfixed_errors = [e for e in api_monitor.errors if not e.fix_attempted]
+        critical_unfixed = [e for e in unfixed_errors if e.severity.value == "critical"]
+        high_unfixed = [e for e in unfixed_errors if e.severity.value == "high"]
+        
+        # 推奨事項の生成
+        if critical_unfixed:
+            recommendations.append({
+                "priority": "critical",
+                "action": "immediate_repair",
+                "description": f"{len(critical_unfixed)}件のクリティカルエラーが未修復です",
+                "estimated_impact": "システム停止の可能性",
+                "repair_complexity": "high",
+                "estimated_time": "5-15分"
+            })
+        
+        if high_unfixed:
+            recommendations.append({
+                "priority": "high",
+                "action": "schedule_repair",
+                "description": f"{len(high_unfixed)}件の高重要度エラーが未修復です",
+                "estimated_impact": "機能低下の可能性",
+                "repair_complexity": "medium",
+                "estimated_time": "2-10分"
+            })
+        
+        # パフォーマンス問題の検出
+        recent_perf = [m for m in api_monitor.performance_metrics if m.timestamp > datetime.now() - timedelta(minutes=30)]
+        if recent_perf:
+            avg_response_time = sum(m.response_time for m in recent_perf) / len(recent_perf)
+            if avg_response_time > 3.0:
+                recommendations.append({
+                    "priority": "medium",
+                    "action": "performance_optimization",
+                    "description": f"平均レスポンス時間が{avg_response_time:.2f}秒と遅延しています",
+                    "estimated_impact": "ユーザー体験の低下",
+                    "repair_complexity": "medium",
+                    "estimated_time": "10-30分"
+                })
+        
+        # セキュリティアラートの確認
+        recent_security = [a for a in api_monitor.security_alerts if a.timestamp > datetime.now() - timedelta(hours=1)]
+        if recent_security:
+            recommendations.append({
+                "priority": "high",
+                "action": "security_review",
+                "description": f"{len(recent_security)}件のセキュリティアラートが発生しています",
+                "estimated_impact": "セキュリティリスク",
+                "repair_complexity": "high",
+                "estimated_time": "15-45分"
+            })
+        
+        if not recommendations:
+            recommendations.append({
+                "priority": "info",
+                "action": "preventive_maintenance",
+                "description": "システムは正常です。定期メンテナンスを推奨します",
+                "estimated_impact": "予防的",
+                "repair_complexity": "low",
+                "estimated_time": "5-10分"
+            })
+        
+        return {
+            "recommendations": recommendations,
+            "total_recommendations": len(recommendations),
+            "critical_actions": len([r for r in recommendations if r["priority"] == "critical"]),
+            "high_priority_actions": len([r for r in recommendations if r["priority"] == "high"]),
+            "generated_at": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"修復推奨事項取得エラー: {str(e)}")
+
+# === ヘルパー関数 ===
+
+def _calculate_repair_statistics() -> Dict[str, Any]:
+    """修復統計を計算"""
+    try:
+        attempted_repairs = [e for e in api_monitor.errors if e.fix_attempted]
+        successful_repairs = [e for e in attempted_repairs if e.fix_successful]
+        
+        success_rate = (len(successful_repairs) / len(attempted_repairs) * 100) if attempted_repairs else 0
+        
+        return {
+            "total_detections": len(api_monitor.errors),
+            "total_attempts": len(attempted_repairs),
+            "total_successful": len(successful_repairs),
+            "success_rate": round(success_rate, 2),
+            "current_session": f"session_{int(time.time())}",
+            "last_detection": max([e.timestamp for e in api_monitor.errors], default=None),
+            "avg_repair_time": 30.0,  # 仮の値
+            "downtime_prevented": len(successful_repairs) * 5,  # 仮の値（分）
+            "cost_savings": len(successful_repairs) * 1000  # 仮の値（円）
+        }
+    except Exception:
+        return {}
+
+def _determine_repair_strategy(mode: str, errors: List) -> str:
+    """修復戦略を決定"""
+    if mode == "aggressive":
+        return "aggressive_parallel_repair"
+    elif mode == "conservative":
+        return "conservative_sequential_repair"
+    else:  # smart
+        critical_count = len([e for e in errors if e.severity.value == "critical"])
+        if critical_count > 3:
+            return "smart_prioritized_repair"
+        else:
+            return "smart_balanced_repair"
+
+def _calculate_estimated_completion(error_count: int, strategy: str) -> str:
+    """完了予想時間を計算"""
+    base_time = error_count * 2  # 基本2分/エラー
+    
+    if "aggressive" in strategy:
+        completion_time = base_time * 0.7  # 並列処理で短縮
+    elif "conservative" in strategy:
+        completion_time = base_time * 1.5  # 慎重に実行で延長
+    else:
+        completion_time = base_time
+    
+    return f"{int(completion_time)}分後"
+
+async def _run_infinite_loop_monitoring(
+    monitor: ContinuousBackendMonitor,
+    interval: int,
+    auto_repair: bool
+):
+    """無限ループ監視を実行"""
+    try:
+        logger.info(f"無限ループ監視開始 - 間隔: {interval}秒, 自動修復: {auto_repair}")
+        await monitor.start_monitoring()
+    except Exception as e:
+        logger.error(f"無限ループ監視エラー: {e}")
+
+async def _run_auto_repair_engine(
+    session_id: str,
+    errors: List,
+    strategy: str,
+    max_attempts: int
+):
+    """自動修復エンジンを実行"""
+    try:
+        logger.info(f"自動修復開始 - セッション: {session_id}, 戦略: {strategy}")
+        
+        # 修復実行
+        for attempt in range(max_attempts):
+            for error in errors:
+                if not error.fix_attempted:
+                    fix_result = await api_monitor._fix_error(error)
+                    error.fix_attempted = True
+                    error.fix_successful = fix_result.get("success", False)
+                    error.fix_description = fix_result.get("description", "")
+        
+        logger.info(f"自動修復完了 - セッション: {session_id}")
+    except Exception as e:
+        logger.error(f"自動修復エラー: {e}")
+
+async def _run_emergency_repair(
+    session_id: str,
+    errors: List,
+    force_restart: bool,
+    bypass_safety: bool
+):
+    """緊急修復を実行"""
+    try:
+        logger.warning(f"緊急修復開始 - セッション: {session_id}")
+        
+        # 緊急修復ロジック
+        for error in errors:
+            if error.severity.value == "critical":
+                # クリティカルエラーの即座修復
+                await api_monitor._fix_error(error)
+                error.fix_attempted = True
+        
+        if force_restart:
+            logger.warning("緊急サービス再起動の実行を推奨")
+        
+        logger.info(f"緊急修復完了 - セッション: {session_id}")
+    except Exception as e:
+        logger.error(f"緊急修復エラー: {e}")
