@@ -211,8 +211,8 @@ async def trigger_error_fixes(background_tasks: BackgroundTasks):
 
 @router.post("/start-monitoring")
 async def start_monitoring(
-    interval: int = Query(30, description="監視間隔（秒）"),
-    background_tasks: BackgroundTasks
+    background_tasks: BackgroundTasks,
+    interval: int = Query(30, description="監視間隔（秒）")
 ):
     """継続監視を開始"""
     if api_monitor.monitoring:
