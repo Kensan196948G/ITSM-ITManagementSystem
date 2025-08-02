@@ -212,7 +212,7 @@ jobs:
           echo "- Integration: Infinite Loop System Active"
 
       - name: Upload Monitor Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: monitor-artifacts-${{ github.run_id }}
           path: |
