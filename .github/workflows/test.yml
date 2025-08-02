@@ -173,14 +173,14 @@ jobs:
         uvicorn app.main:app --host 0.0.0.0 --port 8000 &
         sleep 10
     
-    - name: Run database migrations
+    - name: Initialize test database
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/itsm_test
         ASYNC_DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/itsm_test
         ENCRYPTION_KEY: test-encryption-key-32chars-long!
       run: |
         cd backend
-        alembic upgrade head
+        python init_sqlite_db.py
     
     - name: Build and start frontend server
       run: |
