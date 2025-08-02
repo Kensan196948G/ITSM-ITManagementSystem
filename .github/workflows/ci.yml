@@ -398,9 +398,10 @@ jobs:
             --body "$(cat ci-failure-report.md)" \
             --label "ci-failure,auto-repair,infinite-loop" || echo "Issue creation failed"
           
-          # Trigger ci-monitor workflow
+          # Trigger ci-monitor workflow with delay to prevent loops
+          sleep 5
           gh workflow run ci-monitor.yml \
-            --ref ${{ github.ref_name }} || echo "Monitor trigger failed"
+            --ref ${{ github.ref_name }} 2>/dev/null || echo "Monitor trigger failed (expected if rate limited)"
       
       - name: Success Notification
         if: "!contains(needs.*.result, 'failure')"
