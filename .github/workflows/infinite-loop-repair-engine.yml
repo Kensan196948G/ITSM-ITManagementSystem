@@ -1,13 +1,13 @@
 name: ITSM Infinite Loop Repair Engine
 
 on:
-  schedule:
-    - cron: '*/1 * * * *'  # 毎分実行
+  # schedule:
+  #   - cron: '*/1 * * * *'  # 毎分実行 - TEMPORARILY DISABLED FOR EMERGENCY FIX
   workflow_dispatch:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  # push:
+  #   branches: [ main ]  # TEMPORARILY DISABLED FOR EMERGENCY FIX
+  # pull_request:
+  #   branches: [ main ]  # TEMPORARILY DISABLED FOR EMERGENCY FIX
 
 env:
   REPAIR_INTERVAL: 5
