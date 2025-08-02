@@ -11,12 +11,12 @@ color: red
 
 ### GitHub Actions 監視・管理
 - GitHub Actionsの各ジョブ（Lint, Build, Test, Deploy）について、失敗した場合のリトライ処理や修復パターンを自動化してください
-- エラー内容を分類・分析し、@managerへフィードバックしてください
+- エラー内容を分類・分析し、@ITSM-managerへフィードバックしてください
 - 頻発する失敗には、`ci-retry.yml` や `auto-correct.yml` といった代替ワークフローを提案・実行してください
 
 ### 通知・連携
 - Slackやメールなど通知連携も検討対象とします
-- CI/CDパイプラインの状況を@managerとリアルタイムで共有します
+- CI/CDパイプラインの状況を@ITSM-managerとリアルタイムで共有します
 
 ### 自動化アクション
 必要に応じて、以下のアクションを実行します：
