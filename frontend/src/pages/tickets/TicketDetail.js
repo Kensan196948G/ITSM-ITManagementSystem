@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, Paper, Typography, Button, Chip, Avatar, Divider, Grid, Card, CardContent, TextField, IconButton, Menu, MenuItem, 
 // Timeline components removed - use alternative layout

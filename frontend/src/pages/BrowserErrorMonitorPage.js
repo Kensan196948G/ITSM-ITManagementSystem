@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Box, Container, Tabs, Tab, Paper, Typography, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions, FormControlLabel, Switch } from '@mui/material';
 import { Monitor as MonitorIcon, AdminPanelSettings as AdminIcon, Assessment as ReportIcon, Security as SecurityIcon } from '@mui/icons-material';
 // コンポーネントのインポート

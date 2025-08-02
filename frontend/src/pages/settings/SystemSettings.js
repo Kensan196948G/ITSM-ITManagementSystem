@@ -3,7 +3,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
  * システム設定メインページ
  * 各設定カテゴリへのナビゲーションと共通機能を提供
  */
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Box, Paper, Typography, Tabs, Tab, Alert, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Button, CircularProgress, Breadcrumbs, Link, Chip, IconButton, Tooltip, } from '@mui/material';
 import { Settings as SettingsIcon, Security as SecurityIcon, Notifications as NotificationsIcon, Timer as TimerIcon, Timeline as WorkFlowIcon, Storage as StorageIcon, Link as IntegrationIcon, MonitorHeart as MonitorIcon, Save as SaveIcon, Refresh as RefreshIcon, History as HistoryIcon, FileDownload as ExportIcon, FileUpload as ImportIcon, Warning as WarningIcon, } from '@mui/icons-material';

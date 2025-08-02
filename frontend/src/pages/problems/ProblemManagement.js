@@ -3,7 +3,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
  * 問題管理ページ
  * 包括的な問題管理機能を提供（根本原因分析、既知エラー管理を含む）
  */
-import React, { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Box, Grid, Typography, Card, CardContent, Avatar, IconButton, Chip, useTheme, Tabs, Tab, Button, useMediaQuery, Stack, Alert, Tooltip, FormControl, InputLabel, Select, MenuItem, Fab, alpha, CircularProgress, Paper, LinearProgress, Accordion, AccordionSummary, AccordionDetails, TextField, InputAdornment, Stepper, Step, StepLabel, StepContent, List, ListItem, ListItemIcon, ListItemText, } from '@mui/material';
 import { SearchOff as ProblemIcon, Psychology as RCAIcon, Warning as WarningIcon, CheckCircle as CheckCircleIcon, Schedule as ScheduleIcon, TrendingUp as TrendingUpIcon, Refresh as RefreshIcon, Add as AddIcon, PlayArrow as StartIcon, PriorityHigh as PriorityHighIcon, AccessTime as TimeIcon, ViewList as ListViewIcon, ViewModule as CardViewIcon, Search as SearchIcon, ExpandMore as ExpandMoreIcon, Engineering as EngineeringIcon, BugReport as BugIcon, DataUsage as AnalysisIcon, Group as TeamIcon, Link as LinkIcon, Assessment as ReportIcon, } from '@mui/icons-material';
 import { priorityColors, statusColors } from '../../theme/theme';

@@ -1,9 +1,4 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-/**
- * 右側コンテンツエリアコンポーネント
- * ブレッドクラム、関連メニュー、動的コンテンツローディングを提供
- */
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Breadcrumbs, Typography, Link, Paper, Chip, Card, CardContent, List, ListItemButton, ListItemIcon, ListItemText, Alert, Skeleton, useTheme, alpha, } from '@mui/material';
 import { NavigateNext as NavigateNextIcon, Home as HomeIcon, KeyboardArrowRight, TrendingUp, AccessTime, Star, } from '@mui/icons-material';

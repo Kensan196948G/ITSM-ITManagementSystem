@@ -1,9 +1,4 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-/**
- * 統合設定ページ
- * API設定、LDAP/AD連携、外部システム連携、Webhook管理
- */
-import React from 'react';
 import { Box, Typography, Card, CardContent, CardHeader, Grid, Alert, } from '@mui/material';
 import { Link as IntegrationIcon } from '@mui/icons-material';
 const IntegrationSettings = ({ settings }) => {

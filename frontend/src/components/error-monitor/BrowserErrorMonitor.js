@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Box, Card, CardContent, Typography, Switch, FormControlLabel, Alert, LinearProgress, Chip, Grid, Paper, List, ListItem, ListItemText, ListItemIcon, Button, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Badge, Tooltip, IconButton } from '@mui/material';
 import { Error as ErrorIcon, Warning as WarningIcon, CheckCircle as CheckCircleIcon, PlayArrow as PlayIcon, Stop as StopIcon, Refresh as RefreshIcon, BugReport as BugReportIcon, Build as BuildIcon, Visibility as VisibilityIcon, Assessment as AssessmentIcon, Security as SecurityIcon, NetworkCheck as NetworkCheckIcon, Code as CodeIcon } from '@mui/icons-material';
 // MCP Playwright サービス
