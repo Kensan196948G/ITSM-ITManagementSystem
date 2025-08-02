@@ -8,6 +8,9 @@ from datetime import datetime, timedelta
 from pydantic import BaseModel
 
 from app.services.api_error_monitor import api_monitor, ErrorSeverity, ErrorCategory, SecurityAlert, PerformanceMetric, DatabaseHealthResult
+from app.services.continuous_monitor import ContinuousBackendMonitor
+from app.services.enhanced_infinite_loop_monitor import enhanced_monitor
+from app.services.advanced_auto_repair_engine import advanced_repair_engine
 
 router = APIRouter(prefix="/error-monitor", tags=["error-monitor"])
 
