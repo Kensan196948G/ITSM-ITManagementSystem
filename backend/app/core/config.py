@@ -47,6 +47,10 @@ class Settings(BaseSettings):
     # ログ
     LOG_LEVEL: str = Field("INFO", env="LOG_LEVEL")
     
+    # 開発環境設定
+    DEVELOPMENT_MODE: bool = Field(True, env="DEVELOPMENT_MODE")
+    DISABLE_AUTH_FOR_TESTING: bool = Field(True, env="DISABLE_AUTH_FOR_TESTING")
+    
     # 添付ファイル設定
     MAX_FILE_SIZE: int = Field(50 * 1024 * 1024, env="MAX_FILE_SIZE")  # 50MB
     MAX_FILES_PER_UPLOAD: int = Field(10, env="MAX_FILES_PER_UPLOAD")
