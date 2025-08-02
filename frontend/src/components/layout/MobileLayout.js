@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItemIcon, ListItemText, Divider, Avatar, Badge, BottomNavigation, BottomNavigationAction, Paper, useTheme, SwipeableDrawer, ListItemButton, Collapse, Chip, } from '@mui/material';
 import { Menu as MenuIcon, Dashboard as DashboardIcon, Assignment as TicketIcon, People as UsersIcon, Settings as SettingsIcon, Notifications as NotificationsIcon, AccountCircle as ProfileIcon, ExpandLess, ExpandMore, BugReport as IncidentIcon, Build as ChangeIcon, Help as ProblemIcon, Assessment as ReportsIcon, Book as KnowledgeIcon, ExitToApp as LogoutIcon, Brightness4 as DarkModeIcon, Brightness7 as LightModeIcon, } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';

@@ -1,5 +1,4 @@
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
-import React from 'react';
 import { TextField, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel } from '@mui/material';
 export const FormBuilder = ({ fields }) => {
     return (_jsx(_Fragment, { children: fields.map((field) => {

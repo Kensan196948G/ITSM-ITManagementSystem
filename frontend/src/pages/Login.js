@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, CardContent, TextField, Button, Typography, Alert, IconButton, InputAdornment, Container, Paper, useTheme, useMediaQuery, CircularProgress, } from '@mui/material';
 import { Visibility, VisibilityOff, Login as LoginIcon, Security, } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';

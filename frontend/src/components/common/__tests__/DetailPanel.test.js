@@ -1,5 +1,4 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ThemeProvider } from '@mui/material';
 import { vi } from 'vitest';
@@ -46,8 +45,7 @@ describe('DetailPanel', () => {
         it('パネルが正しく表示される', () => {
             renderDetailPanel();
             expect(screen.getByRole('complementary')).toBeInTheDocument();
-            // 複数の要素を回避するため、getByTextを使用して基本的な存在確認
-            expect(screen.getByText('テストチケット')).toBeInTheDocument();
+            expect(screen.getByRole('heading', { name: 'テストチケット' })).toBeInTheDocument();
             expect(screen.getByText('#1 • テストカテゴリ')).toBeInTheDocument();
         });
         it('閉じているときは表示されない', () => {
@@ -139,15 +137,9 @@ describe('DetailPanel', () => {
             const closeButton = screen.getByLabelText('詳細パネルを閉じる');
             const refreshButton = screen.getByLabelText('情報を更新');
             const editButton = screen.getByLabelText('編集');
-            // ボタンが存在することを確認（tabindexはMUIが自動で設定）
-            expect(closeButton).toBeInTheDocument();
-            expect(refreshButton).toBeInTheDocument();
-            expect(editButton).toBeInTheDocument();
-            
-            // フォーカス可能であることを確認
-            expect(closeButton).not.toHaveAttribute('disabled');
-            expect(refreshButton).not.toHaveAttribute('disabled');
-            expect(editButton).not.toHaveAttribute('disabled');
+            expect(closeButton).toHaveAttribute('tabindex', '0');
+            expect(refreshButton).toHaveAttribute('tabindex', '0');
+            expect(editButton).toHaveAttribute('tabindex', '0');
         });
     });
     describe('パフォーマンス', () => {

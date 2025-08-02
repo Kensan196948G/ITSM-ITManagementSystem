@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Box, Typography, Card, CardContent, CardHeader, Chip, List, ListItem, ListItemText, ListItemIcon, ListItemButton, Avatar, LinearProgress, Tabs, Tab, IconButton, Button, TextField, Collapse, Alert, } from '@mui/material';
 import { Person as PersonIcon, Assignment as TicketIcon, History as HistoryIcon, Comment as CommentIcon, Attachment as AttachmentIcon, Timeline as TimelineIcon, Schedule as ScheduleIcon, ExpandMore as ExpandMoreIcon, ExpandLess as ExpandLessIcon, Edit as EditIcon, Save as SaveIcon, Cancel as CancelIcon, } from '@mui/icons-material';
 import { priorityColors, statusColors } from '../../theme/theme';

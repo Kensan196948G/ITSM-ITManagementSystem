@@ -3,7 +3,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
  * 一般設定ページ
  * システム基本情報、タイムゾーン、言語・地域設定、テーマ設定
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Box, Typography, Grid, TextField, Select, MenuItem, FormControl, InputLabel, Switch, FormControlLabel, Button, Card, CardContent, CardHeader, Avatar, Alert, Accordion, AccordionSummary, AccordionDetails, Chip, RadioGroup, Radio, FormLabel, } from '@mui/material';
 import { ExpandMore as ExpandMoreIcon, Info as InfoIcon, Schedule as ScheduleIcon, Language as LanguageIcon, Palette as PaletteIcon, Upload as UploadIcon, Preview as PreviewIcon, RestoreFromTrash as RestoreIcon, } from '@mui/icons-material';
 const timezones = [

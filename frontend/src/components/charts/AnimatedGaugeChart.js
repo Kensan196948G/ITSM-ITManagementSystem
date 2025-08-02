@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 const AnimatedGaugeChart = ({ value, max, title, unit = '', size = 200, thickness = 20, colors = {
     good: '#10B981',
     warning: '#F59E0B',

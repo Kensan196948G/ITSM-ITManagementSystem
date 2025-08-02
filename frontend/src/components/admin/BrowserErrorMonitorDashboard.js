@@ -3,7 +3,7 @@ import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-run
  * ブラウザエラー監視管理者ダッシュボード
  * MCP Playwrightエラー検知・修復システムの管理画面
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Box, Card, CardContent, CardHeader, Grid, Typography, Button, Switch, FormControlLabel, Chip, Alert, AlertTitle, LinearProgress, Tab, Tabs, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Tooltip, Accordion, AccordionSummary, AccordionDetails, List, ListItem, ListItemIcon, ListItemText, Divider, } from '@mui/material';
 import { Refresh as RefreshIcon, Settings as SettingsIcon, BugReport as BugReportIcon, Build as BuildIcon, CheckCircle as CheckCircleIcon, Error as ErrorIcon, Warning as WarningIcon, Info as InfoIcon, ExpandMore as ExpandMoreIcon, Visibility as VisibilityIcon, GetApp as DownloadIcon, Timeline as TimelineIcon, Speed as SpeedIcon, Security as SecurityIcon, Accessibility as AccessibilityIcon, } from '@mui/icons-material';
 // サービスのインポート（実際の実装では適切なパスに調整）

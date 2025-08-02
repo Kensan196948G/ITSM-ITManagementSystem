@@ -1,5 +1,4 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 const GradientAreaChart = ({ data, dataKey, xAxisKey, title, gradientColors, height = 300, animated = true }) => {
     const gradientId = `gradient-${dataKey}-${Math.random().toString(36).substr(2, 9)}`;
