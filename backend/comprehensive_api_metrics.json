@@ -1,13 +1,17 @@
 {
-  "timestamp": "2025-08-02T12:00:36.914627",
+  "timestamp": "2025-08-02T12:03:58.182715",
   "monitoring_status": {
-    "is_monitoring": true,
-    "uptime_hours": -2.7777777777777777e-10
+    "is_monitoring": false,
+    "uptime_hours": -5.555555555555555e-10
   },
   "error_metrics": {
-    "total_errors": 0,
-    "error_categories": {},
-    "error_severities": {},
+    "total_errors": 1,
+    "error_categories": {
+      "server": 1
+    },
+    "error_severities": {
+      "high": 1
+    },
     "fix_success_rate": 0
   },
   "security_metrics": {
@@ -17,10 +21,10 @@
     "alert_types": {}
   },
   "performance_metrics": {
-    "avg_response_time": 0.024443626403808594,
-    "max_response_time": 0.03147077560424805,
-    "current_cpu_usage": 85.1,
-    "current_memory_usage": 60.0
+    "avg_response_time": 0.014534632364908854,
+    "max_response_time": 0.02019786834716797,
+    "current_cpu_usage": 73.3,
+    "current_memory_usage": 58.6
   },
   "database_health": {
     "is_healthy": true,

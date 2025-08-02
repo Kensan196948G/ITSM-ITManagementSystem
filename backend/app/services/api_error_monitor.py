@@ -382,7 +382,9 @@ class ApiErrorMonitor:
                 stack_trace="",
                 endpoint=endpoint,
                 status_code=status_code,
-                response_time=None
+                response_time=None,
+                user_agent=None,
+                ip_address=None
             )
             
         except Exception as e:
@@ -967,7 +969,9 @@ class ApiErrorMonitor:
             stack_trace="",
             endpoint=endpoint,
             status_code=None,
-            response_time=value if "response" in alert_type else None
+            response_time=value if "response" in alert_type else None,
+            user_agent=None,
+            ip_address=None
         )
         
         self.errors.append(error)
@@ -983,7 +987,9 @@ class ApiErrorMonitor:
             stack_trace="",
             endpoint=endpoint,
             status_code=status_code,
-            response_time=None
+            response_time=None,
+            user_agent=None,
+            ip_address=None
         )
         
         self.errors.append(error)
@@ -1000,7 +1006,9 @@ class ApiErrorMonitor:
                 stack_trace="",
                 endpoint="/database",
                 status_code=None,
-                response_time=None
+                response_time=None,
+                user_agent=None,
+                ip_address=None
             )
             self.errors.append(error)
         
@@ -1014,7 +1022,9 @@ class ApiErrorMonitor:
                 stack_trace="",
                 endpoint="/database",
                 status_code=None,
-                response_time=None
+                response_time=None,
+                user_agent=None,
+                ip_address=None
             )
             self.errors.append(error)
     
