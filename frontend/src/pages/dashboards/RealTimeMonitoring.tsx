@@ -863,75 +863,241 @@ const RealTimeMonitoring: React.FC = React.memo(() => {
           </RichChartCard>
         </Grid>
 
-          {/* システム負荷履歴 */}
-          <ChartCard title="システム負荷履歴" subtitle="過去20回の負荷推移" className="lg:col-span-2">
-            <ResponsiveContainer width="100%" height={200}>
-              <AreaChart data={systemLoadHistory}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="time" tick={{ fontSize: 12 }} />
-                <YAxis domain={[0, 100]} unit="%" />
-                <Tooltip formatter={(value: number) => [`${value}%`, 'システム負荷']} />
-                <Area 
-                  type="monotone" 
-                  dataKey="load" 
-                  stroke="#3b82f6" 
-                  fill="#93c5fd"
-                  fillOpacity={0.6}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </ChartCard>
-        </div>
+        {/* システム負荷履歴 */}
+        <Grid item xs={12}>
+          <RichChartCard 
+            title="システム負荷履歴" 
+            subtitle="過去20回の負荷推移 - リアルタイム更新"
+            icon={<TimelineIcon />}
+            isLive={true}
+            actions={
+              <Stack direction="row" spacing={1}>
+                <Button size="small" variant="outlined" startIcon={<AnalyticsIcon />}>
+                  詳細分析
+                </Button>
+                <IconButton size="small">
+                  <RefreshIcon />
+                </IconButton>
+              </Stack>
+            }
+          >
+            <Box sx={{ height: 250, width: '100%' }}>
+              <ResponsiveContainer width="100%" height={250}>
+                <AreaChart data={systemLoadHistory}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis 
+                    dataKey="time" 
+                    tick={{ fontSize: 12 }} 
+                    stroke="#666"
+                  />
+                  <YAxis 
+                    domain={[0, 100]} 
+                    unit="%" 
+                    tick={{ fontSize: 12 }}
+                    stroke="#666"
+                  />
+                  <Tooltip 
+                    formatter={(value: number) => [`${value}%`, 'システム負荷']}
+                    contentStyle={{
+                      backgroundColor: 'rgba(255,255,255,0.95)',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    }}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="load" 
+                    stroke="#3b82f6" 
+                    fill="url(#areaGradient)"
+                    fillOpacity={0.8}
+                    strokeWidth={3}
+                  />
+                  <defs>
+                    <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1}/>
+                    </linearGradient>
+                  </defs>
+                </AreaChart>
+              </ResponsiveContainer>
+            </Box>
+          </RichChartCard>
+        </Grid>
+      </Grid>
 
-        {/* ライブフィード */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* アラート一覧 */}
-          <ChartCard title="アクティブアラート" subtitle="現在のシステムアラート">
-            <div className="space-y-3 max-h-64 overflow-y-auto">
-              {data.liveMetrics.alerts.map((alert) => (
-                <div key={alert.id} className={`p-3 border rounded-lg ${getAlertColor(alert.type)}`}>
-                  <div className="flex items-start space-x-3">
-                    <span className="text-lg">{getAlertIcon(alert.type)}</span>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{alert.message}</p>
-                      <div className="flex justify-between mt-1 text-xs">
-                        <span>{alert.source}</span>
-                        <span>{new Date(alert.timestamp).toLocaleString('ja-JP')}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ChartCard>
+      {/* ライブフィード */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {/* アラート一覧 */}
+        <Grid item xs={12} lg={6}>
+          <RichChartCard 
+            title="アクティブアラート" 
+            subtitle="現在のシステムアラート"
+            icon={<NotificationsIcon />}
+            isLive={true}
+            actions={
+              <IconButton size="small">
+                <SettingsIcon />
+              </IconButton>
+            }
+          >
+            <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+              <Stack spacing={2}>
+                {data.liveMetrics.alerts.map((alert) => {
+                  const getAlertIconComponent = (type: string) => {
+                    switch (type) {
+                      case 'critical': return <ErrorIcon />
+                      case 'warning': return <WarningIcon />
+                      default: return <NotificationsIcon />
+                    }
+                  }
+                  
+                  const getAlertSeverity = (type: string) => {
+                    switch (type) {
+                      case 'critical': return { color: '#EF4444', bg: '#FEF2F2', severity: 'error' as const }
+                      case 'warning': return { color: '#F59E0B', bg: '#FFFBEB', severity: 'warning' as const }
+                      default: return { color: '#3B82F6', bg: '#EFF6FF', severity: 'info' as const }
+                    }
+                  }
+                  
+                  const alertSeverity = getAlertSeverity(alert.type)
+                  
+                  return (
+                    <Paper key={alert.id} sx={{
+                      p: 2,
+                      background: `linear-gradient(135deg, ${alertSeverity.bg} 0%, rgba(255,255,255,0.9) 100%)`,
+                      border: `1px solid ${alertSeverity.color}30`,
+                      borderLeft: `4px solid ${alertSeverity.color}`,
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateX(4px)',
+                        boxShadow: `0 4px 12px ${alertSeverity.color}25`
+                      }
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'start', gap: 2 }}>
+                        <Avatar sx={{ bgcolor: alertSeverity.color, width: 32, height: 32 }}>
+                          {getAlertIconComponent(alert.type)}
+                        </Avatar>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                            {alert.message}
+                          </Typography>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Chip
+                              label={alert.source}
+                              size="small"
+                              variant="outlined"
+                              sx={{ 
+                                borderColor: alertSeverity.color,
+                                color: alertSeverity.color,
+                                fontSize: '11px'
+                              }}
+                            />
+                            <Typography variant="caption" color="text.secondary">
+                              {new Date(alert.timestamp).toLocaleString('ja-JP', {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                    </Paper>
+                  )
+                })}
+              </Stack>
+            </Box>
+          </RichChartCard>
+        </Grid>
 
-          {/* 最新チケット */}
-          <ChartCard title="最新チケット" subtitle="最近作成されたチケット">
-            <div className="space-y-3 max-h-64 overflow-y-auto">
-              {data.liveFeed.recentTickets.map((ticket) => (
-                <div key={ticket.id} className="border rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-sm">{ticket.id}</span>
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                      ticket.priority === 'critical' ? 'bg-red-100 text-red-800' :
-                      ticket.priority === 'high' ? 'bg-orange-100 text-orange-800' :
-                      ticket.priority === 'medium' ? 'bg-blue-100 text-blue-800' :
-                      'bg-green-100 text-green-800'
-                    }`}>
-                      {ticket.priority === 'critical' ? '緊急' :
-                       ticket.priority === 'high' ? '高' :
-                       ticket.priority === 'medium' ? '中' : '低'}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-900 mb-2">{ticket.title}</p>
-                  <div className="flex justify-between text-xs text-gray-600">
-                    <span>担当: {ticket.assignee}</span>
-                    <span>{new Date(ticket.created).toLocaleString('ja-JP')}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ChartCard>
+        {/* 最新チケット */}
+        <Grid item xs={12} lg={6}>
+          <RichChartCard 
+            title="最新チケット" 
+            subtitle="最近作成されたチケット"
+            icon={<AssignmentIcon />}
+            isLive={true}
+            actions={
+              <Button size="small" variant="outlined" startIcon={<AssignmentIcon />}>
+                全件表示
+              </Button>
+            }
+          >
+            <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+              <Stack spacing={2}>
+                {data.liveFeed.recentTickets.map((ticket) => {
+                  const getPriorityColor = (priority: string) => {
+                    switch (priority) {
+                      case 'critical': return { color: '#EF4444', bg: '#FEF2F2', label: '緊急' }
+                      case 'high': return { color: '#F59E0B', bg: '#FFFBEB', label: '高' }
+                      case 'medium': return { color: '#3B82F6', bg: '#EFF6FF', label: '中' }
+                      default: return { color: '#10B981', bg: '#F0FDF4', label: '低' }
+                    }
+                  }
+                  
+                  const priorityInfo = getPriorityColor(ticket.priority)
+                  
+                  return (
+                    <Paper key={ticket.id} sx={{
+                      p: 3,
+                      background: `linear-gradient(135deg, ${priorityInfo.bg} 0%, rgba(255,255,255,0.9) 100%)`,
+                      border: `1px solid ${priorityInfo.color}30`,
+                      transition: 'all 0.3s ease',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: `0 6px 15px ${priorityInfo.color}25`
+                      }
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Avatar sx={{ bgcolor: priorityInfo.color, width: 32, height: 32 }}>
+                            <AssignmentIcon sx={{ fontSize: 18 }} />
+                          </Avatar>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: priorityInfo.color }}>
+                            {ticket.id}
+                          </Typography>
+                        </Box>
+                        <Chip
+                          label={priorityInfo.label}
+                          size="small"
+                          sx={{
+                            bgcolor: priorityInfo.color,
+                            color: 'white',
+                            fontWeight: 600
+                          }}
+                        />
+                      </Box>
+                      
+                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>
+                        {ticket.title}
+                      </Typography>
+                      
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <PersonIcon color="action" sx={{ fontSize: 16 }} />
+                          <Typography variant="caption" color="text.secondary">
+                            {ticket.assignee}
+                          </Typography>
+                        </Box>
+                        <Typography variant="caption" color="text.secondary">
+                          {new Date(ticket.created).toLocaleString('ja-JP', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </Typography>
+                      </Box>
+                    </Paper>
+                  )
+                })}
+              </Stack>
+            </Box>
+          </RichChartCard>
+        </Grid>
 
           {/* システムイベント */}
           <ChartCard title="システムイベント" subtitle="最新のシステムイベント">
