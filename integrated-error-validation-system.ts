@@ -554,4 +554,5 @@ if (require.main === module) {
   main().catch(console.error);
 }
 
-export { IntegratedErrorValidationSystem, ValidationResult, ValidationSummary };
+export type { ValidationResult, ValidationSummary };
+export { IntegratedErrorValidationSystem };

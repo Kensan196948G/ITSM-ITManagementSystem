@@ -1,0 +1,88 @@
+{
+  "summary": {
+    "totalErrors": 4,
+    "criticalErrors": 0,
+    "repairedErrors": 0,
+    "remainingErrors": 4,
+    "validationCycles": 4,
+    "lastValidation": "2025-08-02T04:17:36.020Z",
+    "overallStatus": "warning"
+  },
+  "results": [
+    {
+      "component": "webui",
+      "url": "http://192.168.3.135:3000",
+      "status": "error",
+      "errors": [
+        {
+          "type": "validation_error",
+          "message": "WebUI検証エラー: Command failed: Command failed: ./frontend/run-comprehensive-webui-monitor.sh --status\nsudo: a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper\nsudo: パスワードが必要です\n",
+          "severity": "high",
+          "autoRepaired": false
+        }
+      ],
+      "timestamp": "2025-08-02T04:17:26.125Z",
+      "repairActions": []
+    },
+    {
+      "component": "admin",
+      "url": "http://192.168.3.135:3000/admin",
+      "status": "error",
+      "errors": [
+        {
+          "type": "admin_validation_error",
+          "message": "管理者ダッシュボード検証エラー: Command failed: Command failed: ./frontend/run-comprehensive-webui-monitor.sh --admin-only\nsudo: a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper\nsudo: パスワードが必要です\n",
+          "severity": "high",
+          "autoRepaired": false
+        }
+      ],
+      "timestamp": "2025-08-02T04:17:30.996Z",
+      "repairActions": []
+    },
+    {
+      "component": "api",
+      "url": "http://192.168.3.135:8000",
+      "status": "error",
+      "errors": [
+        {
+          "type": "api_validation_error",
+          "message": "API検証エラー: Command failed: Command failed: cd backend && source venv/bin/activate && python comprehensive_monitoring.py --once\n/bin/sh: 1: source: not found\n",
+          "severity": "high",
+          "autoRepaired": false
+        }
+      ],
+      "timestamp": "2025-08-02T04:17:35.950Z",
+      "repairActions": []
+    },
+    {
+      "component": "docs",
+      "url": "http://192.168.3.135:8000/docs",
+      "status": "error",
+      "errors": [
+        {
+          "type": "docs_validation_error",
+          "message": "ドキュメント検証エラー: Request failed with status code 404",
+          "severity": "medium",
+          "autoRepaired": false
+        }
+      ],
+      "timestamp": "2025-08-02T04:17:35.976Z",
+      "repairActions": []
+    }
+  ],
+  "metadata": {
+    "generatedAt": "2025-08-02T04:17:36.020Z",
+    "validationCycle": 4,
+    "systemInfo": {
+      "nodeVersion": "v22.17.0",
+      "platform": "linux",
+      "memory": {
+        "rss": 219877376,
+        "heapTotal": 129236992,
+        "heapUsed": 124796048,
+        "external": 8961615,
+        "arrayBuffers": 4940813
+      }
+    }
+  }
+}
