@@ -144,7 +144,7 @@ class IntegratedErrorValidationSystem {
       result.status = 'error';
       result.errors.push({
         type: 'validation_error',
-        message: `WebUI検証エラー: ${error.message}`,
+        message: `WebUI検証エラー: ${error instanceof Error ? error.message : String(error)}`,
         severity: 'high',
         autoRepaired: false
       });
@@ -189,7 +189,7 @@ class IntegratedErrorValidationSystem {
       result.status = 'error';
       result.errors.push({
         type: 'admin_validation_error',
-        message: `管理者ダッシュボード検証エラー: ${error.message}`,
+        message: `管理者ダッシュボード検証エラー: ${error instanceof Error ? error.message : String(error)}`,
         severity: 'high',
         autoRepaired: false
       });
@@ -235,7 +235,7 @@ class IntegratedErrorValidationSystem {
         } catch (error) {
           result.errors.push({
             type: 'endpoint_error',
-            message: `エンドポイント ${endpoint} でエラー: ${error.message}`,
+            message: `エンドポイント ${endpoint} でエラー: ${error instanceof Error ? error.message : String(error)}`,
             severity: 'medium',
             autoRepaired: false
           });
@@ -254,7 +254,7 @@ class IntegratedErrorValidationSystem {
       result.status = 'error';
       result.errors.push({
         type: 'api_validation_error',
-        message: `API検証エラー: ${error.message}`,
+        message: `API検証エラー: ${error instanceof Error ? error.message : String(error)}`,
         severity: 'high',
         autoRepaired: false
       });
@@ -304,7 +304,7 @@ class IntegratedErrorValidationSystem {
       result.status = 'error';
       result.errors.push({
         type: 'docs_validation_error',
-        message: `ドキュメント検証エラー: ${error.message}`,
+        message: `ドキュメント検証エラー: ${error instanceof Error ? error.message : String(error)}`,
         severity: 'medium',
         autoRepaired: false
       });
@@ -485,7 +485,7 @@ class IntegratedErrorValidationSystem {
   /**
    * サマリーの表示
    */
-  private displaySummary(summary: ValidationSummary): void {
+  public displaySummary(summary: ValidationSummary): void {
     const statusEmoji = {
       healthy: '🟢',
       warning: '🟡',

@@ -1,0 +1,268 @@
+{
+  "session_id": "13d15e19-45b8-4a61-a21c-7180399147e0",
+  "start_time": "2025-08-02T13:09:57.504140",
+  "end_time": "2025-08-02T13:09:57.536596",
+  "total_duration": 0.032456,
+  "phases_executed": [
+    "initialization",
+    "component_test",
+    "integration_test",
+    "end_to_end_test",
+    "stress_test",
+    "reporting",
+    "cleanup"
+  ],
+  "results": {
+    "total_tests": 10,
+    "passed": 2,
+    "failed": 1,
+    "skipped": 5,
+    "errors": 0
+  },
+  "critical_failures": [],
+  "phase_results": {
+    "initialization": {
+      "phase": "initialization",
+      "start_time": "2025-08-02T13:09:57.504287",
+      "end_time": "2025-08-02T13:09:57.505274",
+      "duration": 0.000987,
+      "total_tests": 2,
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "errors": 0,
+      "executions": [
+        {
+          "test_id": "init_001",
+          "test_name": "システム初期化テスト",
+          "phase": "TestPhase.INITIALIZATION",
+          "start_time": "2025-08-02 13:09:57.504431",
+          "end_time": "2025-08-02 13:09:57.504714",
+          "duration": 0.000283,
+          "result": "TestResult.PASS",
+          "error_message": null,
+          "details": {
+            "backend_path": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/backend",
+            "coordination_path": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/coordination",
+            "test_results_path": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/coordination/test_results"
+          },
+          "output_log": [
+            "Test started: init_001",
+            "Initializing system components...",
+            "Path exists: /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/backend",
+            "Path exists: /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/coordination",
+            "Path exists: /media/kensan/LinuxHDD/ITSM-ITmanagementSystem/coordination/test_results",
+            "System initialization successful",
+            "Test completed: pass"
+          ]
+        },
+        {
+          "test_id": "init_002",
+          "test_name": "コンポーネントロードテスト",
+          "phase": "TestPhase.INITIALIZATION",
+          "start_time": "2025-08-02 13:09:57.504939",
+          "end_time": "2025-08-02 13:09:57.505106",
+          "duration": 0.000167,
+          "result": "TestResult.PASS",
+          "error_message": null,
+          "details": {
+            "loaded_components": [
+              "monitor",
+              "validator",
+              "reporter"
+            ]
+          },
+          "output_log": [
+            "Test started: init_002",
+            "Loading system components...",
+            "Component loaded: monitor",
+            "Component loaded: validator",
+            "Component loaded: reporter",
+            "All components loaded successfully",
+            "Test completed: pass"
+          ]
+        }
+      ]
+    },
+    "component_test": {
+      "phase": "component_test",
+      "start_time": "2025-08-02T13:09:57.505395",
+      "end_time": "2025-08-02T13:09:57.530769",
+      "duration": 0.025374,
+      "total_tests": 3,
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "errors": 0,
+      "executions": [
+        {
+          "test_id": "comp_001",
+          "test_name": "監視システム単体テスト",
+          "phase": "TestPhase.COMPONENT_TEST",
+          "start_time": "2025-08-02 13:09:57.505599",
+          "end_time": "2025-08-02 13:09:57.527540",
+          "duration": 0.021941,
+          "result": "TestResult.FAIL",
+          "error_message": "Missing required field in status: monitoring",
+          "details": {},
+          "output_log": [
+            "Test started: comp_001",
+            "Testing monitoring system...",
+            "Monitor status retrieved: 1 fields",
+            "Test completed: fail"
+          ]
+        }
+      ]
+    },
+    "integration_test": {
+      "phase": "integration_test",
+      "start_time": "2025-08-02T13:09:57.530904",
+      "end_time": "2025-08-02T13:09:57.534926",
+      "duration": 0.004022,
+      "total_tests": 2,
+      "passed": 0,
+      "failed": 0,
+      "skipped": 2,
+      "errors": 0,
+      "executions": [
+        {
+          "test_id": "integ_001",
+          "test_name": "監視-検証連携テスト",
+          "phase": "TestPhase.INTEGRATION_TEST",
+          "start_time": "2025-08-02 13:09:57.531089",
+          "end_time": "2025-08-02 13:09:57.531177",
+          "duration": 8.8e-05,
+          "result": "TestResult.SKIP",
+          "error_message": "Dependencies not satisfied",
+          "details": {},
+          "output_log": [
+            "Test started: integ_001",
+            "Test skipped: Dependencies not satisfied"
+          ]
+        },
+        {
+          "test_id": "integ_002",
+          "test_name": "検証-レポート連携テスト",
+          "phase": "TestPhase.INTEGRATION_TEST",
+          "start_time": "2025-08-02 13:09:57.531329",
+          "end_time": "2025-08-02 13:09:57.531432",
+          "duration": 0.000103,
+          "result": "TestResult.SKIP",
+          "error_message": "Dependencies not satisfied",
+          "details": {},
+          "output_log": [
+            "Test started: integ_002",
+            "Test skipped: Dependencies not satisfied"
+          ]
+        }
+      ]
+    },
+    "end_to_end_test": {
+      "phase": "end_to_end_test",
+      "start_time": "2025-08-02T13:09:57.535069",
+      "end_time": "2025-08-02T13:09:57.535711",
+      "duration": 0.000642,
+      "total_tests": 2,
+      "passed": 0,
+      "failed": 0,
+      "skipped": 2,
+      "errors": 0,
+      "executions": [
+        {
+          "test_id": "e2e_001",
+          "test_name": "無限ループ結合テスト",
+          "phase": "TestPhase.END_TO_END_TEST",
+          "start_time": "2025-08-02 13:09:57.535245",
+          "end_time": "2025-08-02 13:09:57.535333",
+          "duration": 8.8e-05,
+          "result": "TestResult.SKIP",
+          "error_message": "Dependencies not satisfied",
+          "details": {},
+          "output_log": [
+            "Test started: e2e_001",
+            "Test skipped: Dependencies not satisfied"
+          ]
+        },
+        {
+          "test_id": "e2e_002",
+          "test_name": "エラーシナリオテスト",
+          "phase": "TestPhase.END_TO_END_TEST",
+          "start_time": "2025-08-02 13:09:57.535476",
+          "end_time": "2025-08-02 13:09:57.535575",
+          "duration": 9.9e-05,
+          "result": "TestResult.SKIP",
+          "error_message": "Dependencies not satisfied",
+          "details": {},
+          "output_log": [
+            "Test started: e2e_002",
+            "Test skipped: Dependencies not satisfied"
+          ]
+        }
+      ]
+    },
+    "stress_test": {
+      "phase": "stress_test",
+      "start_time": "2025-08-02T13:09:57.535800",
+      "end_time": "2025-08-02T13:09:57.536138",
+      "duration": 0.000338,
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 0,
+      "skipped": 1,
+      "errors": 0,
+      "executions": [
+        {
+          "test_id": "stress_001",
+          "test_name": "高負荷ストレステスト",
+          "phase": "TestPhase.STRESS_TEST",
+          "start_time": "2025-08-02 13:09:57.535940",
+          "end_time": "2025-08-02 13:09:57.536010",
+          "duration": 7e-05,
+          "result": "TestResult.SKIP",
+          "error_message": "Dependencies not satisfied",
+          "details": {},
+          "output_log": [
+            "Test started: stress_001",
+            "Test skipped: Dependencies not satisfied"
+          ]
+        }
+      ]
+    },
+    "reporting": {
+      "phase": "reporting",
+      "start_time": "2025-08-02T13:09:57.536233",
+      "end_time": "2025-08-02T13:09:57.536317",
+      "duration": 8.4e-05,
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0,
+      "errors": 0,
+      "executions": []
+    },
+    "cleanup": {
+      "phase": "cleanup",
+      "start_time": "2025-08-02T13:09:57.536401",
+      "end_time": "2025-08-02T13:09:57.536487",
+      "duration": 8.6e-05,
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0,
+      "errors": 0,
+      "executions": []
+    }
+  },
+  "summary": {
+    "overall_status": "critical",
+    "success_rate": 20.0,
+    "has_critical_failures": false,
+    "critical_failure_count": 0,
+    "phases_completed": 7,
+    "total_phases": 7,
+    "execution_time_minutes": 0.0,
+    "recommended_actions": [
+      "❌ 1件のテストが失敗しています。テストログを確認して原因を特定してください。"
+    ]
+  }
+}
