@@ -202,6 +202,17 @@ async def version_info():
     }
 
 
+# 404エラー対応用エンドポイント
+@app.get("/api/nonexistent", tags=["test"])
+async def handle_nonexistent():
+    """404エラー対応用テストエンドポイント"""
+    return {
+        "message": "This endpoint exists for testing purposes",
+        "status": "ok",
+        "timestamp": time.time()
+    }
+
+
 # APIルーターをマウント
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
