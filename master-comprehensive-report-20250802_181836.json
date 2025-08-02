@@ -1,0 +1,22 @@
+{
+  "timestamp": "2025-08-02T18:18:36.615037",
+  "system_overview": {
+    "total_cycles": 3,
+    "uptime": "0:00:26.989443",
+    "consecutive_failures": 0,
+    "error_counts": {
+      "webui": 0,
+      "api": 0,
+      "critical": 0
+    }
+  },
+  "service_status": {
+    "webui": "healthy",
+    "api": "unhealthy"
+  },
+  "webui_report": null,
+  "api_report": null,
+  "recommendations": [
+    "APIの健全性チェックが失敗しています"
+  ]
+}

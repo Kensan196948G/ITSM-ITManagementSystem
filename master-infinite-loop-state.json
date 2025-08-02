@@ -1,9 +1,9 @@
 {
   "is_running": true,
-  "start_time": "2025-08-02T18:16:31.881947",
-  "last_check_time": "2025-08-02T18:17:00.612001",
-  "total_cycles": 2,
-  "consecutive_failures": 2,
+  "start_time": "2025-08-02T18:18:09.625619",
+  "last_check_time": "2025-08-02T18:18:10.291058",
+  "total_cycles": 3,
+  "consecutive_failures": 0,
   "webui_status": "healthy",
   "api_status": "unhealthy",
   "processes": {},
