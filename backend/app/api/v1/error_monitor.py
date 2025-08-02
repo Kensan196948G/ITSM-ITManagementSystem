@@ -41,7 +41,7 @@ class MonitorStatusResponse(BaseModel):
     recent_errors: int
     last_health_check: Optional[datetime]
     is_healthy: Optional[bool]
-    uptime: Optional[float]
+    uptime: Optional[float] = None
 
 class ErrorSummaryResponse(BaseModel):
     """エラーサマリーレスポンス"""
