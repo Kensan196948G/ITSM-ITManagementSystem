@@ -61,3 +61,17 @@ class AuditLog(Base):
     # リレーション
     user = relationship("User")
 
+
+class CustomField(Base):
+    """カスタムフィールドモデル"""
+    __tablename__ = "custom_fields"
+
+    id = Column(UUID(), primary_key=True, default=uuid.uuid4)
+    name = Column(String(100), nullable=False)
+    field_type = Column(String(50), nullable=False)
+    is_required = Column(Boolean, default=False)
+    default_value = Column(Text)
+    options = Column(Text)  # JSON形式
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+

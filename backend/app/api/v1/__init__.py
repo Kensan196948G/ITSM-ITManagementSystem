@@ -7,6 +7,6 @@ from .changes import router as changes_router
 from .dashboard import router as dashboard_router
 from .users import router as users_router
 from .attachments import router as attachments_router
-from .custom_fields import router as custom_fields_router
+# from .custom_fields import router as custom_fields_router
 
-__all__ = ["auth_router", "incidents_router", "problems_router", "changes_router", "dashboard_router", "users_router", "attachments_router", "custom_fields_router"]
+__all__ = ["auth_router", "incidents_router", "problems_router", "changes_router", "dashboard_router", "users_router", "attachments_router"]  # , "custom_fields_router"]
