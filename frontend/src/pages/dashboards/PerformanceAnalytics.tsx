@@ -887,97 +887,140 @@ const PerformanceAnalytics: React.FC = React.memo(() => {
           />
         </Grid>
 
-        {/* チャートセクション - 安定したレイアウト */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 解決時間トレンド */}
-          <ChartCard title="🎯 チケット解決時間トレンド" subtitle="過去30日間の平均解決時間">
+        {/* 📊 チャートセクション - アイコン豊富なリッチデザイン */}
+        <Grid item xs={12} lg={6}>
+          <RichChartCard 
+            title="チケット解決時間トレンド" 
+            icon={<TimelineIcon />}
+            color="primary"
+            actions={
+              <IconButton size="small" sx={{ color: 'white' }}>
+                <ChartIcon />
+              </IconButton>
+            }
+          >
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={data.ticketMetrics.resolutionTrend.map(item => ({
                 ...item,
                 date: new Date(item.timestamp).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' })
               }))}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Area type="monotone" dataKey="value" stroke="#667eea" fill="#667eea" />
+                <defs>
+                  <linearGradient id="colorResolution" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#667eea" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#667eea" stopOpacity={0.1}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis 
+                  dataKey="date" 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: '#666' }}
+                />
+                <YAxis 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: '#666' }}
+                />
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: 'rgba(255,255,255,0.95)',
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="value" 
+                  stroke="#667eea" 
+                  strokeWidth={3}
+                  fill="url(#colorResolution)" 
+                />
               </AreaChart>
             </ResponsiveContainer>
-          </ChartCard>
+          </RichChartCard>
+        </Grid>
 
-          {/* サーバー負荷の半円形ゲージ */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div className="mb-6">
-              <h3 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
-                <span className="mr-3">⚡</span>
-                システムパフォーマンス
-              </h3>
-              <p className="text-gray-600">リアルタイム負荷監視</p>
-            </div>
-            
-            <div className="flex flex-col items-center space-y-6">
-              <div className="text-center">
-                <div className="text-6xl font-black text-gray-800 mb-4">
-                  {data.systemMetrics.serverLoad}%
-                </div>
-                <div className="text-xl font-semibold text-gray-600">サーバー負荷</div>
-              </div>
+        {/* ⚡ システムパフォーマンス監視 */}
+        <Grid item xs={12} lg={6}>
+          <RichChartCard 
+            title="システムパフォーマンス監視" 
+            icon={<SpeedIcon />}
+            color="warning"
+            actions={
+              <IconButton size="small" sx={{ color: 'white' }}>
+                <MonitorIcon />
+              </IconButton>
+            }
+          >
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <Box sx={{ 
+                  textAlign: 'center', 
+                  p: 3,
+                  background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                  borderRadius: 3,
+                  color: 'white',
+                  mb: 2
+                }}>
+                  <Typography variant="h2" sx={{ fontWeight: 900, mb: 1 }}>
+                    {data.systemMetrics.serverLoad}%
+                  </Typography>
+                  <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                    <CloudIcon />
+                    サーバー負荷
+                  </Typography>
+                </Box>
+              </Grid>
               
-              <div className="grid grid-cols-2 gap-4 w-full">
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
-                  <div className="text-center">
-                    <div className="text-2xl font-black text-blue-600 mb-2">{data.systemMetrics.dbQueryTime}<span className="text-sm">ms</span></div>
-                    <div className="text-sm font-semibold text-blue-700">データベースクエリ時間</div>
-                  </div>
-                </div>
-                <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200">
-                  <div className="text-center">
-                    <div className="text-2xl font-black text-green-600 mb-2">{data.systemMetrics.pageLoadSpeed}<span className="text-sm">s</span></div>
-                    <div className="text-sm font-semibold text-green-700">ページ読み込み時間</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+              <Grid item xs={6}>
+                <Card sx={{ 
+                  background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                  color: 'white',
+                  textAlign: 'center',
+                  p: 2
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 1 }}>
+                    <StorageIcon />
+                    <Typography variant="h4" fontWeight={800}>
+                      {data.systemMetrics.dbQueryTime}
+                      <Typography component="span" variant="body2">ms</Typography>
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2">DB クエリ時間</Typography>
+                </Card>
+              </Grid>
+              
+              <Grid item xs={6}>
+                <Card sx={{ 
+                  background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                  color: 'white',
+                  textAlign: 'center',
+                  p: 2
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 1 }}>
+                    <NetworkIcon />
+                    <Typography variant="h4" fontWeight={800}>
+                      {data.systemMetrics.pageLoadSpeed}
+                      <Typography component="span" variant="body2">s</Typography>
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2">ページ読み込み</Typography>
+                </Card>
+              </Grid>
+            </Grid>
+          </RichChartCard>
+        </Grid>
 
-          {/* 担当者パフォーマンス */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div className="mb-6">
-              <h3 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
-                <span className="mr-3">👥</span>
-                担当者パフォーマンス
-              </h3>
-              <p className="text-gray-600">解決チケット数の比較</p>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {data.ticketMetrics.agentPerformance.map((agent, index) => {
-                const maxTickets = Math.max(...data.ticketMetrics.agentPerformance.map(a => a.resolvedTickets))
-                const heightPercentage = (agent.resolvedTickets / maxTickets) * 100
-                const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-yellow-500', 'bg-red-500']
-                const colorClass = colors[index % colors.length]
-                
-                return (
-                  <div key={agent.id} className="flex flex-col justify-end h-32">
-                    <div 
-                      className={`${colorClass} rounded-t-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer relative group flex flex-col justify-end p-3 text-white`}
-                      style={{ height: `${Math.max(heightPercentage, 20)}%` }}
-                    >
-                      <div className="text-center">
-                        <div className="text-xl font-black mb-1">{agent.resolvedTickets}</div>
-                        <div className="text-xs font-medium opacity-90">{agent.name.split(' ')[0]}</div>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-gray-100 p-2 rounded-b-lg text-center">
-                      <div className="text-xs text-gray-600 font-medium">{agent.name}</div>
-                      <div className="text-xs text-gray-500">{agent.efficiency}% 効率</div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
+        {/* 👥 担当者パフォーマンステーブル */}
+        <Grid item xs={12} lg={6}>
+          <PerformanceDataTable
+            data={data.ticketMetrics.agentPerformance}
+            title="担当者パフォーマンス"
+            icon={<GroupIcon />}
+          />
+        </Grid>
 
           {/* ボトルネック分析 */}
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
