@@ -319,7 +319,7 @@ timeout = 60
             
             # 修復されたテストのみ実行
             result = subprocess.run([
-                "python", "-m", "pytest", 
+                "python3", "-m", "pytest", 
                 "tests/api/test_comprehensive_api.py::TestAPIPerformance::test_concurrent_api_requests",
                 "-v", "--tb=short", "--timeout=30"
             ], 
