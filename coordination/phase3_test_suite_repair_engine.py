@@ -90,7 +90,7 @@ class Phase3TestSuiteRepairEngine:
         try:
             # pytest収集実行
             result = subprocess.run([
-                "python", "-m", "pytest", "--collect-only", 
+                "python3", "-m", "pytest", "--collect-only", 
                 "tests/", "-q"
             ], 
             cwd=self.base_path, 
