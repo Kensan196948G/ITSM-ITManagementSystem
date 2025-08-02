@@ -272,7 +272,12 @@ class InfiniteLoopMonitor:
                 "pytest-asyncio>=0.21.1", 
                 "pytest-cov>=4.1.0",
                 "httpx>=0.25.2",
-                "fastapi[all]>=0.104.1"
+                "fastapi[all]>=0.104.1",
+                "redis>=5.0.1",
+                "sqlalchemy>=2.0.23",
+                "alembic>=1.12.1",
+                "python-jose[cryptography]>=3.3.0",
+                "passlib[bcrypt]>=1.7.4"
             ]
             
             for req in test_requirements:

@@ -1,7 +1,7 @@
 """インシデントスキーマ"""
 
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from uuid import UUID
 
 from pydantic import BaseModel, Field, ConfigDict
