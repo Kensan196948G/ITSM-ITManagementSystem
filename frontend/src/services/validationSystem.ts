@@ -1,765 +1,773 @@
 /**
- * 内部検証システム - 修復後の検証を実行
+ * 内部検証システム
+ * 修復後のシステム状態を総合的に検証
  */
 
-import { BrowserError } from './errorDetectionEngine';
-import { RepairResult, RepairSession } from './autoRepairEngine';
+import { Page } from '@playwright/test';
+import { BrowserError, RepairAction } from './mcpPlaywrightErrorDetector';
 
 export interface ValidationTest {
   id: string;
   name: string;
   description: string;
-  category: 'functionality' | 'performance' | 'accessibility' | 'security' | 'ui';
-  priority: 'critical' | 'high' | 'medium' | 'low';
-  timeout: number;
-  execute: (context: ValidationContext) => Promise<ValidationResult>;
+  category: 'functional' | 'performance' | 'accessibility' | 'security' | 'ui' | 'integration';
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  execute: (page: Page) => Promise<ValidationTestResult>;
 }
 
-export interface ValidationContext {
-  targetUrl: string;
-  repairSession: RepairSession;
-  originalError: BrowserError;
-  changedFiles: string[];
-}
-
-export interface ValidationResult {
+export interface ValidationTestResult {
   testId: string;
   passed: boolean;
   score: number; // 0-100
   message: string;
-  details: string[];
-  warnings: string[];
-  errors: string[];
-  executionTime: number;
-  retryRecommended: boolean;
-  criticalFailure: boolean;
+  details: any;
+  duration: number;
+  timestamp: Date;
+  screenshots?: string[];
+  logs?: string[];
+}
+
+export interface ValidationSuite {
+  id: string;
+  name: string;
+  description: string;
+  tests: ValidationTest[];
+  config: ValidationConfig;
+}
+
+export interface ValidationConfig {
+  enableScreenshots: boolean;
+  enableDetailedLogs: boolean;
+  timeoutPerTest: number;
+  failureThreshold: number;
+  parallelExecution: boolean;
+  retryFailedTests: boolean;
+  maxRetries: number;
 }
 
 export interface ValidationReport {
   id: string;
-  sessionId: string;
-  startTime: Date;
-  endTime?: Date;
-  status: 'running' | 'completed' | 'failed' | 'cancelled';
-  overallScore: number;
-  passed: boolean;
+  timestamp: Date;
+  duration: number;
   totalTests: number;
   passedTests: number;
   failedTests: number;
-  results: ValidationResult[];
-  summary: string;
+  skippedTests: number;
+  overallScore: number;
+  status: 'passed' | 'failed' | 'warning';
+  results: ValidationTestResult[];
+  summary: ValidationSummary;
   recommendations: string[];
 }
 
+export interface ValidationSummary {
+  functional: { passed: number; total: number; score: number };
+  performance: { passed: number; total: number; score: number };
+  accessibility: { passed: number; total: number; score: number };
+  security: { passed: number; total: number; score: number };
+  ui: { passed: number; total: number; score: number };
+  integration: { passed: number; total: number; score: number };
+}
+
 export class ValidationSystem {
-  private tests: ValidationTest[] = [];
-  private activeValidations: Map<string, ValidationReport> = new Map();
+  private validationSuites: Map<string, ValidationSuite> = new Map();
+  private validationHistory: ValidationReport[] = [];
 
   constructor() {
-    this.initializeTests();
+    this.initializeDefaultSuites();
   }
 
   /**
-   * 検証テストの初期化
+   * デフォルトの検証スイートを初期化
    */
-  private initializeTests(): void {
-    this.tests = [
-      // 基本機能テスト
-      {
-        id: 'page-load-test',
-        name: 'ページロードテスト',
-        description: 'ページが正常にロードされるかテスト',
-        category: 'functionality',
-        priority: 'critical',
-        timeout: 30000,
-        execute: this.executePageLoadTest.bind(this)
-      },
-      {
-        id: 'console-error-test',
-        name: 'コンソールエラーテスト',
-        description: '修復後にコンソールエラーが残っていないかテスト',
-        category: 'functionality',
-        priority: 'critical',
-        timeout: 15000,
-        execute: this.executeConsoleErrorTest.bind(this)
-      },
-      {
-        id: 'javascript-functionality-test',
-        name: 'JavaScript機能テスト',
-        description: 'JavaScript の基本機能が動作するかテスト',
-        category: 'functionality',
-        priority: 'high',
-        timeout: 20000,
-        execute: this.executeJavaScriptFunctionalityTest.bind(this)
-      },
-      {
-        id: 'react-component-test',
-        name: 'React コンポーネントテスト',
-        description: 'React コンポーネントが正常にレンダリングされるかテスト',
-        category: 'functionality',
-        priority: 'high',
-        timeout: 15000,
-        execute: this.executeReactComponentTest.bind(this)
-      },
-      {
-        id: 'api-connectivity-test',
-        name: 'API接続テスト',
-        description: 'APIエンドポイントへの接続をテスト',
-        category: 'functionality',
-        priority: 'high',
-        timeout: 25000,
-        execute: this.executeAPIConnectivityTest.bind(this)
-      },
-      {
-        id: 'performance-test',
-        name: 'パフォーマンステスト',
-        description: 'ページのパフォーマンス指標をテスト',
-        category: 'performance',
-        priority: 'medium',
-        timeout: 30000,
-        execute: this.executePerformanceTest.bind(this)
-      },
-      {
-        id: 'accessibility-test',
-        name: 'アクセシビリティテスト',
-        description: 'WAI-ARIA準拠とアクセシビリティをテスト',
-        category: 'accessibility',
-        priority: 'medium',
-        timeout: 20000,
-        execute: this.executeAccessibilityTest.bind(this)
-      },
-      {
-        id: 'responsive-design-test',
-        name: 'レスポンシブデザインテスト',
-        description: '様々な画面サイズでの表示をテスト',
-        category: 'ui',
-        priority: 'medium',
-        timeout: 25000,
-        execute: this.executeResponsiveDesignTest.bind(this)
-      },
-      {
-        id: 'security-test',
-        name: 'セキュリティテスト',
-        description: '基本的なセキュリティ要件をテスト',
-        category: 'security',
-        priority: 'high',
-        timeout: 20000,
-        execute: this.executeSecurityTest.bind(this)
-      },
-      {
-        id: 'ui-interaction-test',
-        name: 'UI操作テスト',
-        description: 'ユーザーインターフェースの操作をテスト',
-        category: 'ui',
-        priority: 'medium',
-        timeout: 30000,
-        execute: this.executeUIInteractionTest.bind(this)
-      }
-    ];
-  }
-
-  /**
-   * 修復後の検証を実行
-   */
-  async validateRepair(
-    repairSession: RepairSession,
-    originalError: BrowserError,
-    targetUrl: string = 'http://192.168.3.135:3000'
-  ): Promise<ValidationReport> {
-    const reportId = `validation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
-    const report: ValidationReport = {
-      id: reportId,
-      sessionId: repairSession.id,
-      startTime: new Date(),
-      status: 'running',
-      overallScore: 0,
-      passed: false,
-      totalTests: 0,
-      passedTests: 0,
-      failedTests: 0,
-      results: [],
-      summary: '',
-      recommendations: []
-    };
-
-    this.activeValidations.set(reportId, report);
-
-    try {
-      console.log(`検証開始: ${repairSession.id}`);
-
-      const context: ValidationContext = {
-        targetUrl,
-        repairSession,
-        originalError,
-        changedFiles: repairSession.result?.changedFiles || []
-      };
-
-      // 優先度順にテストを実行
-      const priorityOrder = ['critical', 'high', 'medium', 'low'];
-      const sortedTests = this.tests.sort((a, b) => 
-        priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority)
-      );
-
-      report.totalTests = sortedTests.length;
-
-      for (const test of sortedTests) {
-        try {
-          console.log(`検証テスト実行中: ${test.name}`);
-          const startTime = Date.now();
-          
-          const result = await Promise.race([
-            test.execute(context),
-            this.createTimeoutPromise(test.timeout, test.id)
-          ]);
-
-          result.executionTime = Date.now() - startTime;
-          report.results.push(result);
-
-          if (result.passed) {
-            report.passedTests++;
-          } else {
-            report.failedTests++;
-            
-            // クリティカル失敗の場合は他のテストをスキップ
-            if (result.criticalFailure) {
-              console.log(`クリティカル失敗により検証を中止: ${test.name}`);
-              break;
+  private initializeDefaultSuites(): void {
+    // 機能テストスイート
+    this.addValidationSuite({
+      id: 'functional-tests',
+      name: '機能テスト',
+      description: 'Webアプリケーションの基本機能を検証',
+      config: this.getDefaultConfig(),
+      tests: [
+        {
+          id: 'page-load-test',
+          name: 'ページ読み込みテスト',
+          description: 'ページが正常に読み込まれることを確認',
+          category: 'functional',
+          priority: 'critical',
+          execute: async (page: Page) => {
+            const startTime = Date.now();
+            try {
+              await page.waitForLoadState('networkidle');
+              const title = await page.title();
+              const url = page.url();
+              
+              return {
+                testId: 'page-load-test',
+                passed: title.length > 0,
+                score: title.length > 0 ? 100 : 0,
+                message: `ページタイトル: "${title}", URL: ${url}`,
+                details: { title, url },
+                duration: Date.now() - startTime,
+                timestamp: new Date(),
+              };
+            } catch (error) {
+              return {
+                testId: 'page-load-test',
+                passed: false,
+                score: 0,
+                message: `ページ読み込みエラー: ${error.message}`,
+                details: { error: error.message },
+                duration: Date.now() - startTime,
+                timestamp: new Date(),
+              };
             }
           }
+        },
+        {
+          id: 'navigation-test',
+          name: 'ナビゲーションテスト',
+          description: 'メニューとリンクの動作を確認',
+          category: 'functional',
+          priority: 'high',
+          execute: async (page: Page) => {
+            const startTime = Date.now();
+            try {
+              const links = await page.locator('a[href]').count();
+              const buttons = await page.locator('button').count();
+              const forms = await page.locator('form').count();
+              
+              const workingLinks = await page.evaluate(() => {
+                const links = Array.from(document.querySelectorAll('a[href]'));
+                return links.filter(link => {
+                  const href = link.getAttribute('href');
+                  return href && href !== '#' && href !== 'javascript:void(0)';
+                }).length;
+              });
 
-        } catch (error) {
-          console.error(`テスト実行エラー: ${test.name}`, error);
-          
-          const errorResult: ValidationResult = {
-            testId: test.id,
-            passed: false,
-            score: 0,
-            message: `テスト実行中にエラーが発生しました: ${error}`,
-            details: [],
-            warnings: [],
-            errors: [error instanceof Error ? error.message : String(error)],
-            executionTime: 0,
-            retryRecommended: true,
-            criticalFailure: test.priority === 'critical'
-          };
+              const score = links > 0 ? (workingLinks / links) * 100 : 100;
+              
+              return {
+                testId: 'navigation-test',
+                passed: score >= 80,
+                score,
+                message: `有効なリンク: ${workingLinks}/${links}, ボタン: ${buttons}, フォーム: ${forms}`,
+                details: { links, workingLinks, buttons, forms },
+                duration: Date.now() - startTime,
+                timestamp: new Date(),
+              };
+            } catch (error) {
+              return {
+                testId: 'navigation-test',
+                passed: false,
+                score: 0,
+                message: `ナビゲーションテストエラー: ${error.message}`,
+                details: { error: error.message },
+                duration: Date.now() - startTime,
+                timestamp: new Date(),
+              };
+            }
+          }
+        },
+        {
+          id: 'form-validation-test',
+          name: 'フォームバリデーションテスト',
+          description: 'フォームの入力バリデーションを確認',
+          category: 'functional',
+          priority: 'medium',
+          execute: async (page: Page) => {
+            const startTime = Date.now();
+            try {
+              const forms = await page.locator('form').count();
+              const requiredFields = await page.locator('input[required], select[required], textarea[required]').count();
+              
+              let validationScore = 100;
+              const details: any = { forms, requiredFields, validationResults: [] };
 
-          report.results.push(errorResult);
-          report.failedTests++;
+              // 各フォームをテスト
+              for (let i = 0; i < Math.min(forms, 3); i++) {
+                try {
+                  const form = page.locator('form').nth(i);
+                  const submitButton = form.locator('button[type="submit"], input[type="submit"]').first();
+                  
+                  if (await submitButton.count() > 0) {
+                    // 空のフォームで送信を試行
+                    await submitButton.click();
+                    
+                    // バリデーションメッセージの確認
+                    const validationMessages = await page.locator('.error, .invalid, [aria-invalid="true"]').count();
+                    details.validationResults.push({
+                      formIndex: i,
+                      validationMessages,
+                      hasValidation: validationMessages > 0
+                    });
+                  }
+                } catch (error) {
+                  console.log(`フォーム ${i} のテストをスキップ:`, error.message);
+                }
+              }
+
+              return {
+                testId: 'form-validation-test',
+                passed: validationScore >= 70,
+                score: validationScore,
+                message: `フォーム数: ${forms}, 必須フィールド: ${requiredFields}`,
+                details,
+                duration: Date.now() - startTime,
+                timestamp: new Date(),
+              };
+            } catch (error) {
+              return {
+                testId: 'form-validation-test',
+                passed: false,
+                score: 0,
+                message: `フォームバリデーションテストエラー: ${error.message}`,
+                details: { error: error.message },
+                duration: Date.now() - startTime,
+                timestamp: new Date(),
+              };
+            }
+          }
         }
-      }
-
-      // 総合評価の計算
-      this.calculateOverallScore(report);
-      
-      report.endTime = new Date();
-      report.status = 'completed';
-      report.passed = report.overallScore >= 80 && report.failedTests === 0;
-
-      // サマリーと推奨事項の生成
-      this.generateSummaryAndRecommendations(report);
-
-      console.log(`検証完了: ${report.passed ? '成功' : '失敗'} (スコア: ${report.overallScore})`);
-
-    } catch (error) {
-      console.error('検証実行中にエラー:', error);
-      report.endTime = new Date();
-      report.status = 'failed';
-      report.summary = `検証実行中にエラーが発生しました: ${error}`;
-    }
-
-    return report;
-  }
-
-  /**
-   * ページロードテストの実行
-   */
-  private async executePageLoadTest(context: ValidationContext): Promise<ValidationResult> {
-    const result: ValidationResult = {
-      testId: 'page-load-test',
-      passed: false,
-      score: 0,
-      message: '',
-      details: [],
-      warnings: [],
-      errors: [],
-      executionTime: 0,
-      retryRecommended: false,
-      criticalFailure: false
-    };
-
-    try {
-      // ページロードのシミュレート
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // ランダムな成功/失敗をシミュレート
-      const loadSuccess = Math.random() > 0.1; // 90% 成功率
-
-      if (loadSuccess) {
-        result.passed = true;
-        result.score = 100;
-        result.message = 'ページが正常にロードされました';
-        result.details.push('HTTP ステータス: 200');
-        result.details.push('DOM ロード時間: 1.2秒');
-      } else {
-        result.passed = false;
-        result.score = 0;
-        result.message = 'ページのロードに失敗しました';
-        result.errors.push('ネットワークエラーまたはサーバーエラー');
-        result.criticalFailure = true;
-        result.retryRecommended = true;
-      }
-
-    } catch (error) {
-      result.passed = false;
-      result.score = 0;
-      result.message = 'ページロードテスト中にエラーが発生しました';
-      result.errors.push(error instanceof Error ? error.message : String(error));
-      result.criticalFailure = true;
-    }
-
-    return result;
-  }
-
-  /**
-   * コンソールエラーテストの実行
-   */
-  private async executeConsoleErrorTest(context: ValidationContext): Promise<ValidationResult> {
-    const result: ValidationResult = {
-      testId: 'console-error-test',
-      passed: false,
-      score: 0,
-      message: '',
-      details: [],
-      warnings: [],
-      errors: [],
-      executionTime: 0,
-      retryRecommended: false,
-      criticalFailure: false
-    };
-
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // 修復対象エラーの検出をシミュレート
-      const originalErrorFixed = Math.random() > 0.2; // 80% 修復成功率
-      const newErrorsDetected = Math.random() > 0.9; // 10% 新エラー検出率
-
-      if (originalErrorFixed && !newErrorsDetected) {
-        result.passed = true;
-        result.score = 100;
-        result.message = 'コンソールエラーが正常に修復されました';
-        result.details.push('元のエラーが解決されました');
-        result.details.push('新しいエラーは検出されませんでした');
-      } else if (originalErrorFixed && newErrorsDetected) {
-        result.passed = false;
-        result.score = 70;
-        result.message = '元のエラーは修復されましたが、新しいエラーが検出されました';
-        result.warnings.push('新しいコンソールエラーが1件検出されました');
-        result.retryRecommended = true;
-      } else {
-        result.passed = false;
-        result.score = 30;
-        result.message = '元のエラーが完全に修復されていません';
-        result.errors.push('同様のエラーが再発しています');
-        result.retryRecommended = true;
-      }
-
-    } catch (error) {
-      result.passed = false;
-      result.score = 0;
-      result.message = 'コンソールエラーテスト中にエラーが発生しました';
-      result.errors.push(error instanceof Error ? error.message : String(error));
-    }
-
-    return result;
-  }
-
-  /**
-   * JavaScript機能テストの実行
-   */
-  private async executeJavaScriptFunctionalityTest(context: ValidationContext): Promise<ValidationResult> {
-    const result: ValidationResult = {
-      testId: 'javascript-functionality-test',
-      passed: false,
-      score: 0,
-      message: '',
-      details: [],
-      warnings: [],
-      errors: [],
-      executionTime: 0,
-      retryRecommended: false,
-      criticalFailure: false
-    };
-
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1800));
-
-      const functionalityWorking = Math.random() > 0.15; // 85% 成功率
-
-      if (functionalityWorking) {
-        result.passed = true;
-        result.score = 95;
-        result.message = 'JavaScript の基本機能が正常に動作しています';
-        result.details.push('イベントハンドラが正常に動作');
-        result.details.push('DOM 操作が正常に実行');
-        result.details.push('非同期処理が正常に完了');
-      } else {
-        result.passed = false;
-        result.score = 40;
-        result.message = 'JavaScript の一部機能に問題があります';
-        result.errors.push('イベントハンドラの実行に失敗');
-        result.warnings.push('パフォーマンスが低下している可能性があります');
-        result.retryRecommended = true;
-      }
-
-    } catch (error) {
-      result.passed = false;
-      result.score = 0;
-      result.message = 'JavaScript機能テスト中にエラーが発生しました';
-      result.errors.push(error instanceof Error ? error.message : String(error));
-    }
-
-    return result;
-  }
-
-  /**
-   * React コンポーネントテストの実行
-   */
-  private async executeReactComponentTest(context: ValidationContext): Promise<ValidationResult> {
-    const result: ValidationResult = {
-      testId: 'react-component-test',
-      passed: false,
-      score: 0,
-      message: '',
-      details: [],
-      warnings: [],
-      errors: [],
-      executionTime: 0,
-      retryRecommended: false,
-      criticalFailure: false
-    };
-
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1200));
-
-      const componentWorking = Math.random() > 0.1; // 90% 成功率
-
-      if (componentWorking) {
-        result.passed = true;
-        result.score = 100;
-        result.message = 'React コンポーネントが正常にレンダリングされています';
-        result.details.push('コンポーネントマウントが成功');
-        result.details.push('プロパティの受け渡しが正常');
-        result.details.push('ステート更新が正常に動作');
-      } else {
-        result.passed = false;
-        result.score = 20;
-        result.message = 'React コンポーネントに問題があります';
-        result.errors.push('コンポーネントのレンダリングエラー');
-        result.retryRecommended = true;
-      }
-
-    } catch (error) {
-      result.passed = false;
-      result.score = 0;
-      result.message = 'React コンポーネントテスト中にエラーが発生しました';
-      result.errors.push(error instanceof Error ? error.message : String(error));
-    }
-
-    return result;
-  }
-
-  /**
-   * API接続テストの実行
-   */
-  private async executeAPIConnectivityTest(context: ValidationContext): Promise<ValidationResult> {
-    const result: ValidationResult = {
-      testId: 'api-connectivity-test',
-      passed: false,
-      score: 0,
-      message: '',
-      details: [],
-      warnings: [],
-      errors: [],
-      executionTime: 0,
-      retryRecommended: false,
-      criticalFailure: false
-    };
-
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2500));
-
-      const apiWorking = Math.random() > 0.25; // 75% 成功率
-
-      if (apiWorking) {
-        result.passed = true;
-        result.score = 100;
-        result.message = 'API接続が正常に動作しています';
-        result.details.push('バックエンドAPIへの接続成功');
-        result.details.push('データの取得が正常に完了');
-        result.details.push('レスポンス時間: 250ms');
-      } else {
-        result.passed = false;
-        result.score = 30;
-        result.message = 'API接続に問題があります';
-        result.errors.push('APIエンドポイントへの接続失敗');
-        result.warnings.push('タイムアウトまたはネットワークエラー');
-        result.retryRecommended = true;
-      }
-
-    } catch (error) {
-      result.passed = false;
-      result.score = 0;
-      result.message = 'API接続テスト中にエラーが発生しました';
-      result.errors.push(error instanceof Error ? error.message : String(error));
-    }
-
-    return result;
-  }
-
-  /**
-   * その他のテストメソッドも同様に実装...
-   * (パフォーマンス、アクセシビリティ、セキュリティなど)
-   */
-  private async executePerformanceTest(context: ValidationContext): Promise<ValidationResult> {
-    const result: ValidationResult = {
-      testId: 'performance-test',
-      passed: false,
-      score: 0,
-      message: '',
-      details: [],
-      warnings: [],
-      errors: [],
-      executionTime: 0,
-      retryRecommended: false,
-      criticalFailure: false
-    };
-
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    const performanceScore = Math.floor(Math.random() * 40) + 60; // 60-100のスコア
-
-    result.passed = performanceScore >= 80;
-    result.score = performanceScore;
-    result.message = `パフォーマンススコア: ${performanceScore}/100`;
-    result.details.push(`First Contentful Paint: ${(Math.random() * 2 + 1).toFixed(1)}s`);
-    result.details.push(`Largest Contentful Paint: ${(Math.random() * 3 + 2).toFixed(1)}s`);
-
-    if (performanceScore < 80) {
-      result.warnings.push('パフォーマンスの改善が推奨されます');
-    }
-
-    return result;
-  }
-
-  private async executeAccessibilityTest(context: ValidationContext): Promise<ValidationResult> {
-    const result: ValidationResult = {
-      testId: 'accessibility-test',
-      passed: false,
-      score: 0,
-      message: '',
-      details: [],
-      warnings: [],
-      errors: [],
-      executionTime: 0,
-      retryRecommended: false,
-      criticalFailure: false
-    };
-
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    const accessibilityPassed = Math.random() > 0.2; // 80% 成功率
-
-    if (accessibilityPassed) {
-      result.passed = true;
-      result.score = 95;
-      result.message = 'アクセシビリティ要件を満たしています';
-      result.details.push('WAI-ARIA属性が適切に設定されています');
-      result.details.push('キーボードナビゲーションが動作します');
-    } else {
-      result.passed = false;
-      result.score = 65;
-      result.message = 'アクセシビリティに改善の余地があります';
-      result.warnings.push('一部の要素にalt属性が不足しています');
-    }
-
-    return result;
-  }
-
-  private async executeResponsiveDesignTest(context: ValidationContext): Promise<ValidationResult> {
-    const result: ValidationResult = {
-      testId: 'responsive-design-test',
-      passed: false,
-      score: 0,
-      message: '',
-      details: [],
-      warnings: [],
-      errors: [],
-      executionTime: 0,
-      retryRecommended: false,
-      criticalFailure: false
-    };
-
-    await new Promise(resolve => setTimeout(resolve, 1800));
-
-    const responsiveWorking = Math.random() > 0.15; // 85% 成功率
-
-    result.passed = responsiveWorking;
-    result.score = responsiveWorking ? 100 : 70;
-    result.message = responsiveWorking 
-      ? 'レスポンシブデザインが正常に動作しています'
-      : '一部の画面サイズで表示に問題があります';
-
-    if (responsiveWorking) {
-      result.details.push('モバイル表示: 正常');
-      result.details.push('タブレット表示: 正常');
-      result.details.push('デスクトップ表示: 正常');
-    } else {
-      result.warnings.push('モバイル表示でレイアウトが崩れています');
-    }
-
-    return result;
-  }
-
-  private async executeSecurityTest(context: ValidationContext): Promise<ValidationResult> {
-    const result: ValidationResult = {
-      testId: 'security-test',
-      passed: false,
-      score: 0,
-      message: '',
-      details: [],
-      warnings: [],
-      errors: [],
-      executionTime: 0,
-      retryRecommended: false,
-      criticalFailure: false
-    };
-
-    await new Promise(resolve => setTimeout(resolve, 1600));
-
-    const securityPassed = Math.random() > 0.1; // 90% 成功率
-
-    result.passed = securityPassed;
-    result.score = securityPassed ? 100 : 60;
-    result.message = securityPassed 
-      ? 'セキュリティ要件を満たしています'
-      : 'セキュリティに注意が必要な項目があります';
-
-    if (securityPassed) {
-      result.details.push('CSP ヘッダーが適切に設定されています');
-      result.details.push('HTTPS通信が確立されています');
-    } else {
-      result.warnings.push('一部のセキュリティヘッダーが不足しています');
-    }
-
-    return result;
-  }
-
-  private async executeUIInteractionTest(context: ValidationContext): Promise<ValidationResult> {
-    const result: ValidationResult = {
-      testId: 'ui-interaction-test',
-      passed: false,
-      score: 0,
-      message: '',
-      details: [],
-      warnings: [],
-      errors: [],
-      executionTime: 0,
-      retryRecommended: false,
-      criticalFailure: false
-    };
-
-    await new Promise(resolve => setTimeout(resolve, 2200));
-
-    const interactionWorking = Math.random() > 0.2; // 80% 成功率
-
-    result.passed = interactionWorking;
-    result.score = interactionWorking ? 95 : 50;
-    result.message = interactionWorking 
-      ? 'UI操作が正常に動作しています'
-      : 'UI操作に一部問題があります';
-
-    if (interactionWorking) {
-      result.details.push('ボタンクリックが正常に動作');
-      result.details.push('フォーム入力が正常に動作');
-      result.details.push('メニューナビゲーションが正常に動作');
-    } else {
-      result.errors.push('一部のボタンが応答しません');
-    }
-
-    return result;
-  }
-
-  /**
-   * タイムアウト処理
-   */
-  private createTimeoutPromise(timeout: number, testId: string): Promise<ValidationResult> {
-    return new Promise((_, reject) => {
-      setTimeout(() => {
-        reject(new Error(`テスト ${testId} がタイムアウトしました (${timeout}ms)`));
-      }, timeout);
+      ]
+    });
+
+    // パフォーマンステストスイート
+    this.addValidationSuite({
+      id: 'performance-tests',
+      name: 'パフォーマンステスト',
+      description: 'ページの読み込み速度とパフォーマンスを検証',
+      config: this.getDefaultConfig(),
+      tests: [
+        {
+          id: 'load-time-test',
+          name: '読み込み時間テスト',
+          description: 'ページの読み込み時間を測定',
+          category: 'performance',
+          priority: 'high',
+          execute: async (page: Page) => {
+            const startTime = Date.now();
+            try {
+              const performanceMetrics = await page.evaluate(() => {
+                const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+                return {
+                  domContentLoaded: navigation.domContentLoadedEventEnd - navigation.fetchStart,
+                  loadComplete: navigation.loadEventEnd - navigation.fetchStart,
+                  firstPaint: performance.getEntriesByType('paint').find(entry => entry.name === 'first-paint')?.startTime || 0,
+                  firstContentfulPaint: performance.getEntriesByType('paint').find(entry => entry.name === 'first-contentful-paint')?.startTime || 0,
+                };
+              });
+
+              const loadTime = performanceMetrics.loadComplete;
+              let score = 100;
+              
+              if (loadTime > 5000) score = 0;
+              else if (loadTime > 3000) score = 50;
+              else if (loadTime > 2000) score = 75;
+              else if (loadTime > 1000) score = 90;
+
+              return {
+                testId: 'load-time-test',
+                passed: score >= 75,
+                score,
+                message: `読み込み時間: ${loadTime.toFixed(2)}ms`,
+                details: performanceMetrics,
+                duration: Date.now() - startTime,
+                timestamp: new Date(),
+              };
+            } catch (error) {
+              return {
+                testId: 'load-time-test',
+                passed: false,
+                score: 0,
+                message: `パフォーマンステストエラー: ${error.message}`,
+                details: { error: error.message },
+                duration: Date.now() - startTime,
+                timestamp: new Date(),
+              };
+            }
+          }
+        },
+        {
+          id: 'memory-usage-test',
+          name: 'メモリ使用量テスト',
+          description: 'JavaScriptのメモリ使用量を確認',
+          category: 'performance',
+          priority: 'medium',
+          execute: async (page: Page) => {
+            const startTime = Date.now();
+            try {
+              const memoryInfo = await page.evaluate(() => {
+                if ('memory' in performance) {
+                  const mem = (performance as any).memory;
+                  return {
+                    usedJSHeapSize: mem.usedJSHeapSize,
+                    totalJSHeapSize: mem.totalJSHeapSize,
+                    jsHeapSizeLimit: mem.jsHeapSizeLimit,
+                  };
+                }
+                return null;
+              });
+
+              if (!memoryInfo) {
+                return {
+                  testId: 'memory-usage-test',
+                  passed: true,
+                  score: 100,
+                  message: 'メモリ情報が利用できません（Chrome以外のブラウザ）',
+                  details: { message: 'Memory API not available' },
+                  duration: Date.now() - startTime,
+                  timestamp: new Date(),
+                };
+              }
+
+              const usageMB = memoryInfo.usedJSHeapSize / 1024 / 1024;
+              let score = 100;
+              
+              if (usageMB > 100) score = 0;
+              else if (usageMB > 50) score = 50;
+              else if (usageMB > 25) score = 75;
+
+              return {
+                testId: 'memory-usage-test',
+                passed: score >= 75,
+                score,
+                message: `メモリ使用量: ${usageMB.toFixed(2)}MB`,
+                details: { ...memoryInfo, usageMB },
+                duration: Date.now() - startTime,
+                timestamp: new Date(),
+              };
+            } catch (error) {
+              return {
+                testId: 'memory-usage-test',
+                passed: false,
+                score: 0,
+                message: `メモリテストエラー: ${error.message}`,
+                details: { error: error.message },
+                duration: Date.now() - startTime,
+                timestamp: new Date(),
+              };
+            }
+          }
+        }
+      ]
+    });
+
+    // アクセシビリティテストスイート
+    this.addValidationSuite({
+      id: 'accessibility-tests',
+      name: 'アクセシビリティテスト',
+      description: 'WAI-ARIAガイドラインへの準拠を確認',
+      config: this.getDefaultConfig(),
+      tests: [
+        {
+          id: 'alt-text-test',
+          name: 'alt属性テスト',
+          description: '画像にalt属性が設定されているかを確認',
+          category: 'accessibility',
+          priority: 'high',
+          execute: async (page: Page) => {
+            const startTime = Date.now();
+            try {
+              const imageResults = await page.evaluate(() => {
+                const images = Array.from(document.querySelectorAll('img'));
+                const totalImages = images.length;
+                const imagesWithAlt = images.filter(img => img.hasAttribute('alt')).length;
+                const imagesWithEmptyAlt = images.filter(img => img.getAttribute('alt') === '').length;
+                
+                return { totalImages, imagesWithAlt, imagesWithEmptyAlt };
+              });
+
+              const score = imageResults.totalImages > 0 
+                ? (imageResults.imagesWithAlt / imageResults.totalImages) * 100 
+                : 100;
+
+              return {
+                testId: 'alt-text-test',
+                passed: score >= 90,
+                score,
+                message: `画像 ${imageResults.imagesWithAlt}/${imageResults.totalImages} にalt属性設定済み`,
+                details: imageResults,
+                duration: Date.now() - startTime,
+                timestamp: new Date(),
+              };
+            } catch (error) {
+              return {
+                testId: 'alt-text-test',
+                passed: false,
+                score: 0,
+                message: `alt属性テストエラー: ${error.message}`,
+                details: { error: error.message },
+                duration: Date.now() - startTime,
+                timestamp: new Date(),
+              };
+            }
+          }
+        },
+        {
+          id: 'aria-labels-test',
+          name: 'ARIA ラベルテスト',
+          description: 'ARIA ラベルが適切に設定されているかを確認',
+          category: 'accessibility',
+          priority: 'high',
+          execute: async (page: Page) => {
+            const startTime = Date.now();
+            try {
+              const ariaResults = await page.evaluate(() => {
+                const buttons = Array.from(document.querySelectorAll('button'));
+                const links = Array.from(document.querySelectorAll('a'));
+                const inputs = Array.from(document.querySelectorAll('input'));
+
+                const buttonsWithLabels = buttons.filter(btn => 
+                  btn.hasAttribute('aria-label') || 
+                  btn.hasAttribute('aria-labelledby') || 
+                  btn.textContent?.trim()
+                ).length;
+
+                const linksWithLabels = links.filter(link => 
+                  link.hasAttribute('aria-label') || 
+                  link.hasAttribute('aria-labelledby') || 
+                  link.textContent?.trim()
+                ).length;
+
+                const inputsWithLabels = inputs.filter(input => 
+                  input.hasAttribute('aria-label') || 
+                  input.hasAttribute('aria-labelledby') || 
+                  document.querySelector(`label[for="${input.id}"]`)
+                ).length;
+
+                return {
+                  buttons: { total: buttons.length, withLabels: buttonsWithLabels },
+                  links: { total: links.length, withLabels: linksWithLabels },
+                  inputs: { total: inputs.length, withLabels: inputsWithLabels }
+                };
+              });
+
+              const totalElements = ariaResults.buttons.total + ariaResults.links.total + ariaResults.inputs.total;
+              const elementsWithLabels = ariaResults.buttons.withLabels + ariaResults.links.withLabels + ariaResults.inputs.withLabels;
+              
+              const score = totalElements > 0 ? (elementsWithLabels / totalElements) * 100 : 100;
+
+              return {
+                testId: 'aria-labels-test',
+                passed: score >= 80,
+                score,
+                message: `ARIA ラベル: ${elementsWithLabels}/${totalElements} 要素に設定済み`,
+                details: ariaResults,
+                duration: Date.now() - startTime,
+                timestamp: new Date(),
+              };
+            } catch (error) {
+              return {
+                testId: 'aria-labels-test',
+                passed: false,
+                score: 0,
+                message: `ARIA ラベルテストエラー: ${error.message}`,
+                details: { error: error.message },
+                duration: Date.now() - startTime,
+                timestamp: new Date(),
+              };
+            }
+          }
+        }
+      ]
     });
   }
 
   /**
-   * 総合スコアの計算
+   * 検証スイートを追加
    */
-  private calculateOverallScore(report: ValidationReport): void {
-    if (report.results.length === 0) {
-      report.overallScore = 0;
-      return;
-    }
-
-    const totalScore = report.results.reduce((sum, result) => sum + result.score, 0);
-    report.overallScore = Math.round(totalScore / report.results.length);
+  addValidationSuite(suite: ValidationSuite): void {
+    this.validationSuites.set(suite.id, suite);
+    console.log(`✅ 検証スイートを追加: ${suite.name}`);
   }
 
   /**
-   * サマリーと推奨事項の生成
+   * 検証を実行
    */
-  private generateSummaryAndRecommendations(report: ValidationReport): void {
-    const criticalFailures = report.results.filter(r => !r.passed && r.criticalFailure);
-    const warnings = report.results.filter(r => r.warnings.length > 0);
+  async runValidation(page: Page, suiteIds?: string[]): Promise<ValidationReport> {
+    const startTime = Date.now();
+    const reportId = `validation-${Date.now()}`;
+    
+    console.log('🔍 検証を開始...');
 
-    if (report.passed) {
-      report.summary = '全ての検証テストが正常に完了しました。修復は成功です。';
-    } else if (criticalFailures.length > 0) {
-      report.summary = 'クリティカルな問題が検出されました。再修復が必要です。';
-      report.recommendations.push('クリティカルエラーを優先的に修復してください');
+    const suitesToRun = suiteIds 
+      ? Array.from(this.validationSuites.values()).filter(suite => suiteIds.includes(suite.id))
+      : Array.from(this.validationSuites.values());
+
+    const allTests = suitesToRun.flatMap(suite => suite.tests);
+    const results: ValidationTestResult[] = [];
+
+    for (const test of allTests) {
+      console.log(`🧪 テスト実行中: ${test.name}`);
+      
+      try {
+        const result = await Promise.race([
+          test.execute(page),
+          new Promise<ValidationTestResult>((_, reject) => 
+            setTimeout(() => reject(new Error('テストタイムアウト')), 30000)
+          )
+        ]);
+        
+        results.push(result);
+        
+        if (result.passed) {
+          console.log(`✅ ${test.name}: 合格 (スコア: ${result.score})`);
+        } else {
+          console.log(`❌ ${test.name}: 不合格 (スコア: ${result.score})`);
+        }
+        
+      } catch (error) {
+        console.error(`❌ テスト実行エラー [${test.name}]:`, error);
+        
+        results.push({
+          testId: test.id,
+          passed: false,
+          score: 0,
+          message: `テスト実行エラー: ${error.message}`,
+          details: { error: error.message },
+          duration: 0,
+          timestamp: new Date(),
+        });
+      }
+    }
+
+    const duration = Date.now() - startTime;
+    const passedTests = results.filter(r => r.passed).length;
+    const failedTests = results.filter(r => !r.passed).length;
+    const overallScore = results.length > 0 
+      ? results.reduce((sum, r) => sum + r.score, 0) / results.length 
+      : 0;
+
+    const report: ValidationReport = {
+      id: reportId,
+      timestamp: new Date(),
+      duration,
+      totalTests: results.length,
+      passedTests,
+      failedTests,
+      skippedTests: 0,
+      overallScore,
+      status: overallScore >= 80 ? 'passed' : overallScore >= 60 ? 'warning' : 'failed',
+      results,
+      summary: this.generateSummary(results),
+      recommendations: this.generateRecommendations(results),
+    };
+
+    this.validationHistory.push(report);
+    
+    console.log(`📊 検証完了: ${passedTests}/${results.length} テスト合格 (スコア: ${overallScore.toFixed(2)})`);
+    
+    await this.saveValidationReport(report);
+    
+    return report;
+  }
+
+  /**
+   * サマリーを生成
+   */
+  private generateSummary(results: ValidationTestResult[]): ValidationSummary {
+    const categories = ['functional', 'performance', 'accessibility', 'security', 'ui', 'integration'] as const;
+    const summary = {} as ValidationSummary;
+
+    for (const category of categories) {
+      const categoryResults = results.filter(r => {
+        // テストIDから категорию を判断
+        return r.testId.includes(category) || this.getCategoryFromTestId(r.testId) === category;
+      });
+
+      summary[category] = {
+        passed: categoryResults.filter(r => r.passed).length,
+        total: categoryResults.length,
+        score: categoryResults.length > 0 
+          ? categoryResults.reduce((sum, r) => sum + r.score, 0) / categoryResults.length 
+          : 0
+      };
+    }
+
+    return summary;
+  }
+
+  /**
+   * テストIDからカテゴリを判断
+   */
+  private getCategoryFromTestId(testId: string): string {
+    if (testId.includes('load') || testId.includes('performance') || testId.includes('memory')) {
+      return 'performance';
+    }
+    if (testId.includes('aria') || testId.includes('alt') || testId.includes('accessibility')) {
+      return 'accessibility';
+    }
+    if (testId.includes('security') || testId.includes('xss') || testId.includes('csrf')) {
+      return 'security';
+    }
+    if (testId.includes('ui') || testId.includes('visual') || testId.includes('layout')) {
+      return 'ui';
+    }
+    if (testId.includes('integration') || testId.includes('api')) {
+      return 'integration';
+    }
+    return 'functional';
+  }
+
+  /**
+   * 推奨事項を生成
+   */
+  private generateRecommendations(results: ValidationTestResult[]): string[] {
+    const recommendations: string[] = [];
+    const failedTests = results.filter(r => !r.passed);
+
+    if (failedTests.some(t => t.testId.includes('alt'))) {
+      recommendations.push('画像にalt属性を追加してアクセシビリティを向上させてください');
+    }
+
+    if (failedTests.some(t => t.testId.includes('load-time'))) {
+      recommendations.push('ページの読み込み時間を改善してください（画像最適化、CDN使用など）');
+    }
+
+    if (failedTests.some(t => t.testId.includes('memory'))) {
+      recommendations.push('JavaScriptのメモリ使用量を最適化してください');
+    }
+
+    if (failedTests.some(t => t.testId.includes('aria'))) {
+      recommendations.push('ARIA属性を適切に設定してアクセシビリティを向上させてください');
+    }
+
+    if (failedTests.some(t => t.testId.includes('navigation'))) {
+      recommendations.push('ナビゲーションリンクとボタンの動作を確認してください');
+    }
+
+    if (recommendations.length === 0 && results.length > 0) {
+      const avgScore = results.reduce((sum, r) => sum + r.score, 0) / results.length;
+      if (avgScore < 90) {
+        recommendations.push('全体的なスコアを向上させるため、失敗したテストの詳細を確認してください');
+      }
+    }
+
+    return recommendations;
+  }
+
+  /**
+   * 検証レポートを保存
+   */
+  private async saveValidationReport(report: ValidationReport): Promise<void> {
+    try {
+      const fs = await import('fs/promises');
+      const path = await import('path');
+
+      const reportDir = path.join(process.cwd(), 'validation-reports');
+      await fs.mkdir(reportDir, { recursive: true });
+
+      const timestamp = report.timestamp.toISOString().replace(/[:.]/g, '-');
+      const reportFile = path.join(reportDir, `validation-report-${timestamp}.json`);
+      
+      await fs.writeFile(reportFile, JSON.stringify(report, null, 2));
+
+      // サマリーファイルも作成
+      const summaryFile = path.join(reportDir, `validation-summary-${timestamp}.md`);
+      const summaryContent = this.generateMarkdownSummary(report);
+      await fs.writeFile(summaryFile, summaryContent);
+
+      console.log(`📋 検証レポートを保存: ${reportFile}`);
+
+    } catch (error) {
+      console.error('❌ 検証レポート保存エラー:', error);
+    }
+  }
+
+  /**
+   * Markdownサマリーを生成
+   */
+  private generateMarkdownSummary(report: ValidationReport): string {
+    const { summary, recommendations } = report;
+    
+    return `# 検証レポートサマリー
+
+## 概要
+- **実行日時**: ${report.timestamp.toLocaleString('ja-JP')}
+- **実行時間**: ${(report.duration / 1000).toFixed(2)}秒
+- **総合スコア**: ${report.overallScore.toFixed(2)}/100
+- **ステータス**: ${report.status === 'passed' ? '✅ 合格' : report.status === 'warning' ? '⚠️ 警告' : '❌ 不合格'}
+- **テスト結果**: ${report.passedTests}/${report.totalTests} 合格
+
+## カテゴリ別結果
+
+### 機能テスト
+- 合格: ${summary.functional.passed}/${summary.functional.total}
+- スコア: ${summary.functional.score.toFixed(2)}/100
+
+### パフォーマンステスト
+- 合格: ${summary.performance.passed}/${summary.performance.total}
+- スコア: ${summary.performance.score.toFixed(2)}/100
+
+### アクセシビリティテスト
+- 合格: ${summary.accessibility.passed}/${summary.accessibility.total}
+- スコア: ${summary.accessibility.score.toFixed(2)}/100
+
+### セキュリティテスト
+- 合格: ${summary.security.passed}/${summary.security.total}
+- スコア: ${summary.security.score.toFixed(2)}/100
+
+### UIテスト
+- 合格: ${summary.ui.passed}/${summary.ui.total}
+- スコア: ${summary.ui.score.toFixed(2)}/100
+
+### 統合テスト
+- 合格: ${summary.integration.passed}/${summary.integration.total}
+- スコア: ${summary.integration.score.toFixed(2)}/100
+
+## 推奨事項
+
+${recommendations.map(rec => `- ${rec}`).join('\n')}
+
+## 詳細結果
+
+${report.results.map(result => 
+  `### ${result.testId}\n- **結果**: ${result.passed ? '✅ 合格' : '❌ 不合格'}\n- **スコア**: ${result.score}/100\n- **メッセージ**: ${result.message}\n- **実行時間**: ${result.duration}ms\n`
+).join('\n')}
+`;
+  }
+
+  /**
+   * デフォルト設定を取得
+   */
+  private getDefaultConfig(): ValidationConfig {
+    return {
+      enableScreenshots: true,
+      enableDetailedLogs: true,
+      timeoutPerTest: 30000,
+      failureThreshold: 20,
+      parallelExecution: false,
+      retryFailedTests: false,
+      maxRetries: 2,
+    };
+  }
+
+  /**
+   * 検証履歴を取得
+   */
+  getValidationHistory(): ValidationReport[] {
+    return this.validationHistory;
+  }
+
+  /**
+   * 最新の検証結果を取得
+   */
+  getLatestValidationResult(): ValidationReport | null {
+    return this.validationHistory.length > 0 
+      ? this.validationHistory[this.validationHistory.length - 1] 
+      : null;
+  }
+
+  /**
+   * カスタムテストを追加
+   */
+  addCustomTest(suiteId: string, test: ValidationTest): void {
+    const suite = this.validationSuites.get(suiteId);
+    if (suite) {
+      suite.tests.push(test);
+      console.log(`✅ カスタムテストを追加: ${test.name}`);
     } else {
-      report.summary = '一部のテストで問題が検出されました。改善を推奨します。';
+      console.error(`❌ 検証スイートが見つかりません: ${suiteId}`);
     }
-
-    if (warnings.length > 0) {
-      report.recommendations.push('警告項目を確認し、必要に応じて修正してください');
-    }
-
-    if (report.overallScore < 90) {
-      report.recommendations.push('総合スコアの向上のため、追加の最適化を検討してください');
-    }
-  }
-
-  /**
-   * 検証レポートの取得
-   */
-  getValidationReport(reportId: string): ValidationReport | undefined {
-    return this.activeValidations.get(reportId);
-  }
-
-  /**
-   * 全ての検証レポートを取得
-   */
-  getAllValidationReports(): ValidationReport[] {
-    return Array.from(this.activeValidations.values());
-  }
-
-  /**
-   * リソースのクリーンアップ
-   */
-  dispose(): void {
-    this.activeValidations.clear();
   }
 }
-
-export const validationSystem = new ValidationSystem();
