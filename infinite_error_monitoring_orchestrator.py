@@ -14,9 +14,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
-import aiohttp
 import requests
 from pydantic import BaseModel
+try:
+    import aiohttp
+    AIOHTTP_AVAILABLE = True
+except ImportError:
+    AIOHTTP_AVAILABLE = False
+    print("⚠️ aiohttp not available, using requests for sync operations")
 
 # ログ設定
 logging.basicConfig(
@@ -89,14 +94,19 @@ class InfiniteErrorMonitoringOrchestrator:
 
     async def _init_session(self):
         """HTTP セッションの初期化"""
-        if not self.session:
+        if AIOHTTP_AVAILABLE and not self.session:
             timeout = aiohttp.ClientTimeout(total=30)
             self.session = aiohttp.ClientSession(timeout=timeout)
+        elif not AIOHTTP_AVAILABLE:
+            self.session = requests.Session()
 
     async def _close_session(self):
         """HTTP セッションのクリーンアップ"""
         if self.session:
-            await self.session.close()
+            if AIOHTTP_AVAILABLE:
+                await self.session.close()
+            else:
+                self.session.close()
             self.session = None
 
     def _save_state(self):
@@ -128,12 +138,23 @@ class InfiniteErrorMonitoringOrchestrator:
         """フロントエンドエラーの検知"""
         errors = []
         try:
-            async with self.session.get(target.url) as response:
-                if response.status != 200:
-                    errors.append(f"HTTP {response.status}: {target.url}")
+            if AIOHTTP_AVAILABLE:
+                async with self.session.get(target.url) as response:
+                    if response.status != 200:
+                        errors.append(f"HTTP {response.status}: {target.url}")
+                        
+                    # 簡単なコンテンツチェック
+                    content = await response.text()
+                    if "error" in content.lower() or "exception" in content.lower():
+                        errors.append(f"コンテンツにエラーメッセージを検出: {target.url}")
+            else:
+                # requests を使用した同期処理
+                response = self.session.get(target.url, timeout=30)
+                if response.status_code != 200:
+                    errors.append(f"HTTP {response.status_code}: {target.url}")
                     
                 # 簡単なコンテンツチェック
-                content = await response.text()
+                content = response.text
                 if "error" in content.lower() or "exception" in content.lower():
                     errors.append(f"コンテンツにエラーメッセージを検出: {target.url}")
                     
@@ -149,14 +170,26 @@ class InfiniteErrorMonitoringOrchestrator:
             # ヘルスチェックエンドポイント
             health_url = f"{target.url.rstrip('/')}/health" if target.url.endswith('8000') else target.url
             
-            async with self.session.get(health_url) as response:
-                if response.status not in [200, 404]:  # 404は正常（エンドポイントが無い場合）
-                    errors.append(f"API HTTP {response.status}: {health_url}")
-                
-                # APIレスポンス時間チェック
+            if AIOHTTP_AVAILABLE:
+                async with self.session.get(health_url) as response:
+                    if response.status not in [200, 404]:  # 404は正常（エンドポイントが無い場合）
+                        errors.append(f"API HTTP {response.status}: {health_url}")
+                    
+                    # APIレスポンス時間チェック
+                    start_time = time.time()
+                    await response.read()
+                    response_time = time.time() - start_time
+                    
+                    if response_time > 5.0:  # 5秒以上は異常
+                        errors.append(f"レスポンス時間異常: {response_time:.2f}秒 - {health_url}")
+            else:
+                # requests を使用した同期処理
                 start_time = time.time()
-                await response.read()
+                response = self.session.get(health_url, timeout=30)
                 response_time = time.time() - start_time
+                
+                if response.status_code not in [200, 404]:  # 404は正常（エンドポイントが無い場合）
+                    errors.append(f"API HTTP {response.status_code}: {health_url}")
                 
                 if response_time > 5.0:  # 5秒以上は異常
                     errors.append(f"レスポンス時間異常: {response_time:.2f}秒 - {health_url}")
@@ -174,8 +207,14 @@ class InfiniteErrorMonitoringOrchestrator:
             # ブラウザエラー監視API呼び出し（存在する場合）
             try:
                 repair_url = "http://192.168.3.135:3000/api/browser-error-monitor/repair"
-                async with self.session.post(repair_url, json={"errors": errors}) as response:
-                    if response.status == 200:
+                if AIOHTTP_AVAILABLE:
+                    async with self.session.post(repair_url, json={"errors": errors}) as response:
+                        if response.status == 200:
+                            logger.info(f"フロントエンド自動修復成功: {target.name}")
+                            return True
+                else:
+                    response = self.session.post(repair_url, json={"errors": errors}, timeout=30)
+                    if response.status_code == 200:
                         logger.info(f"フロントエンド自動修復成功: {target.name}")
                         return True
             except:
@@ -198,8 +237,14 @@ class InfiniteErrorMonitoringOrchestrator:
             # バックエンド修復API呼び出し（存在する場合）
             try:
                 repair_url = "http://192.168.3.135:8000/api/v1/error-monitoring/repair"
-                async with self.session.post(repair_url, json={"errors": errors}) as response:
-                    if response.status == 200:
+                if AIOHTTP_AVAILABLE:
+                    async with self.session.post(repair_url, json={"errors": errors}) as response:
+                        if response.status == 200:
+                            logger.info(f"バックエンド自動修復成功: {target.name}")
+                            return True
+                else:
+                    response = self.session.post(repair_url, json={"errors": errors}, timeout=30)
+                    if response.status_code == 200:
                         logger.info(f"バックエンド自動修復成功: {target.name}")
                         return True
             except:
