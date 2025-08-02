@@ -26,7 +26,7 @@ ClaudeCode の SubAgent 機能を用いて、以下の `.md` ファイルで各�
 | `@ITSM-manager` | テスト統合・ログ収集・修復ループ制御・品質判定             | `docs/ITSM-Manager.md` |
 | `@ITSM-cimanager` | GitHub Actions監視・エラー修復・リトライ制御・通知連携 | `docs/ITSM-CIManager.md` |
 
-## 構成エージェント詳細（6Agent）
+## 構成エージェント詳細（7Agent）
 
 ITSM-CTO
 ---
@@ -112,6 +112,24 @@ color: purple
 ・テストケースは網羅性を意識し、結果は@manager にJSONまたはMarkdownでレポートしてください。
 ・バグが出た場合は再現条件とログを抽出し、修正ループを回せるように整備してください。
 
+ITSM-CIManager
+---
+name: ITSM-CIManager
+description: GitHub Actions におけるエラー監視、ジョブフロー修復、リトライ制御、自動通知
+model: sonnet
+color: red
+---
+
+あなたはCI/CD監視とGitHub Actionsの安定運用を担当するCIエージェントです。
+・GitHub Actionsの各ジョブ（Lint, Build, Test, Deploy）について、失敗した場合のリトライ処理や修復パターンを自動化してください。
+・エラー内容を分類・分析し、@managerへフィードバックしてください。
+・頻発する失敗には、`ci-retry.yml` や `auto-correct.yml` といった代替ワークフローを提案・実行してください。
+・Slackやメールなど通知連携も検討対象とします。
+必要に応じて、以下のアクションを実行します：
+- `gh workflow run` による再実行
+- `.github/workflows/*.yml` の修正提案
+- `.claude-flow/ci-metrics.json` によるジョブ失敗傾向の記録と解析
+
 
 ---
 
@@ -139,11 +157,14 @@ Task subagent_type=ITSM-QA description="Quality Assurance" prompt="開発され�
 Task subagent_type=ITSM-Tester description="Automated Testing" prompt="PytestとPlaywrightを使用してAPIテストとE2Eテストを実装してください。テストケースの作成、自動実行、結果レポートの生成を行ってください。"
 
 # 6. Managerエージェント - プロジェクト管理
-Task subagent_type=ITSM-Manager description="Project Management" prompt="6エージェントの開発進捗を監視し、品質チェック、統合テスト、デプロイメント準備を管理してください。開発状況のレポートとリリース判定を行ってください。"
+Task subagent_type=ITSM-Manager description="Project Management" prompt="7エージェントの開発進捗を監視し、品質チェック、統合テスト、デプロイメント準備を管理してください。開発状況のレポートとリリース判定を行ってください。"
+
+# 7. CIManagerエージェント - CI/CD監視・修復
+Task subagent_type=ITSM-CIManager description="CI/CD Monitoring" prompt="GitHub Actionsのワークフロー監視、エラー修復、リトライ制御を行ってください。CI/CDパイプラインの安定運用と自動通知システムを実装してください。"
 ```
 
 ### 📊 実行結果（実証済み）
-- **実行時間**: 約3分で6エージェント並列実行完了
+- **実行時間**: 約3分で7エージェント並列実行完了
 - **成功率**: 100%（全エージェント正常完了）
 - **成果物**: 完全なITSMシステム（backend + frontend + tests）
 
@@ -174,6 +195,7 @@ Task subagent_type=ITSM-Manager description="Project Management" prompt="6エー
 | `@ITSM-cto`     | `@ITSM-devapi`, `@ITSM-devui` | 設計仕様、API定義、画面構成、セキュリティ要件の共有 |
 | `@ITSM-qa`      | `@ITSM-devui`            | 表示文言、用語、アクセシビリティフィードバック     |
 | `@ITSM-tester`  | `@ITSM-devapi`, `@ITSM-devui` | 自動テスト失敗ログと再現条件のフィードバック      |
+| `@ITSM-cimanager` | `@ITSM-manager`, `@ITSM-tester` | CI/CDエラー分析、リトライ結果、修復パターンの共有 |
 | `@ITSM-manager` | 全体                  | 成果の統合、ループ継続可否の判断、修復・通知の指示   |
 
 ---

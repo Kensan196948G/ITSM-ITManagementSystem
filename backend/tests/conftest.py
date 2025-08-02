@@ -8,7 +8,10 @@ import pytest
 import pytest_asyncio
 from typing import AsyncGenerator, Generator
 from fastapi import FastAPI
-from fastapi.testclient import TestClient
+try:
+    from fastapi.testclient import TestClient
+except ImportError:
+    from starlette.testclient import TestClient
 from httpx import AsyncClient
 from sqlalchemy import create_engine, StaticPool
 from sqlalchemy.orm import sessionmaker
@@ -118,11 +121,12 @@ def client(db_session) -> Generator[TestClient, None, None]:
         app.dependency_overrides[get_db] = override_get_db
     
     # Fix TestClient initialization for newer versions
-    test_client = TestClient(app=app)
+    test_client = TestClient(app)
     try:
         yield test_client
     finally:
-        test_client.close()
+        if hasattr(test_client, 'close'):
+            test_client.close()
     
     # Clear overrides
     if hasattr(app, 'dependency_overrides'):
@@ -142,6 +146,7 @@ async def async_client(async_db_session) -> AsyncGenerator[AsyncClient, None]:
     if hasattr(app, 'dependency_overrides') and get_db:
         app.dependency_overrides[get_db] = override_get_db
     
+    # Fix AsyncClient initialization for newer versions
     async with AsyncClient(app=app, base_url="http://test") as client:
         yield client
     

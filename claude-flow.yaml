@@ -11,3 +11,4 @@ swarm:
     - file: .claude/agents/ITSM-DevUI.md
     - file: .claude/agents/ITSM-QA.md
     - file: .claude/agents/ITSM-Tester.md
+    - file: .claude/agents/ITSM-CIManager.md
