@@ -1,18 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import {
   Box,
   Grid,
-  Paper,
   Typography,
   Card,
   CardContent,
   Avatar,
   IconButton,
   Divider,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
   Chip,
   LinearProgress,
   useTheme,
@@ -20,8 +15,18 @@ import {
   Tab,
   Button,
   useMediaQuery,
-  Collapse,
   Stack,
+  Alert,
+  Skeleton,
+  Badge,
+  Tooltip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Fab,
+  alpha,
+  CircularProgress,
 } from '@mui/material'
 import {
   ConfirmationNumber as TicketIcon,
@@ -30,30 +35,32 @@ import {
   Schedule as ScheduleIcon,
   TrendingUp as TrendingUpIcon,
   Refresh as RefreshIcon,
-  MoreVert as MoreVertIcon,
-  PriorityHigh as PriorityHighIcon,
   Assignment as AssignmentIcon,
   Analytics as AnalyticsIcon,
   Dashboard as DashboardIcon,
+  Add as AddIcon,
+  Notifications as NotificationsIcon,
+  Speed as SpeedIcon,
+  Security as SecurityIcon,
+  Storage as StorageIcon,
+  CloudQueue as CloudIcon,
+  MonitorHeart as MonitorIcon,
+  AssessmentOutlined as ReportIcon,
 } from '@mui/icons-material'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Area, AreaChart } from 'recharts'
 import { priorityColors, statusColors } from '../theme/theme'
-import AdvancedAnalytics from '../components/common/AdvancedAnalytics'
-import { useResponsive, ResponsiveContainer as CustomResponsiveContainer, MobileCard } from '../components/common/ResponsiveContainer'
 import ContentArea from '../components/layout/ContentArea'
+import { CustomLineChart, CustomBarChart, CustomPieChart, CustomDonutChart, CustomGaugeChart, CustomAreaChart } from '../components/common/CustomCharts'
+import DataTable, { TableColumn } from '../components/common/DataTable'
 import type { DashboardMetrics, Ticket, ChartDataPoint, TimeSeriesData } from '../types'
 
 const Dashboard: React.FC = () => {
   const theme = useTheme()
-  const { isMobile, isTablet, isXsScreen } = useResponsive()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [currentTab, setCurrentTab] = useState(0)
   const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month' | 'quarter'>('week')
-  const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({
-    metrics: true,
-    sla: true,
-    charts: isMobile ? false : true,
-    tickets: true,
-  })
+  const [refreshing, setRefreshing] = useState(false)
+  const [autoRefresh, setAutoRefresh] = useState(true)
+  const [lastUpdate, setLastUpdate] = useState(new Date())
 
   // Mock data - 実際の実装ではAPIから取得
   const mockMetrics: DashboardMetrics = {
@@ -78,7 +85,7 @@ const Dashboard: React.FC = () => {
     },
     recentTickets: [
       {
-        id: '1',
+        id: 'INC-001',
         title: 'サーバー応答速度低下',
         status: 'open',
         priority: 'critical',
@@ -91,7 +98,7 @@ const Dashboard: React.FC = () => {
         slaDeadline: '2025-08-01T12:30:00Z',
       },
       {
-        id: '2',
+        id: 'INC-002',
         title: 'メール送信エラー',
         status: 'in_progress',
         priority: 'high',
@@ -105,7 +112,7 @@ const Dashboard: React.FC = () => {
         description: 'メール送信時にSMTPエラーが発生',
       },
       {
-        id: '3',
+        id: 'INC-003',
         title: 'プリンター接続不良',
         status: 'resolved',
         priority: 'medium',
@@ -118,99 +125,242 @@ const Dashboard: React.FC = () => {
         updatedAt: '2025-08-01T10:30:00Z',
         description: 'オフィスプリンターに接続できない',
       },
+      {
+        id: 'INC-004',
+        title: 'VPNアクセス不能',
+        status: 'open',
+        priority: 'high',
+        category: 'Network',
+        reporterId: '6',
+        reporterName: '高田四郎',
+        createdAt: '2025-08-01T07:45:00Z',
+        updatedAt: '2025-08-01T10:15:00Z',
+        description: '社外からVPNに接続できない',
+        slaDeadline: '2025-08-01T15:45:00Z',
+      },
+      {
+        id: 'INC-005',
+        title: 'ファイルサーバーエラー',
+        status: 'on_hold',
+        priority: 'medium',
+        category: 'Storage',
+        reporterId: '7',
+        reporterName: '清水五郎',
+        assigneeId: '8',
+        assigneeName: '森田六郎',
+        createdAt: '2025-08-01T06:30:00Z',
+        updatedAt: '2025-08-01T09:00:00Z',
+        description: 'ファイルサーバーにアクセスできない',
+      },
     ],
   }
 
+  // システム全体のメトリクス
+  const systemMetrics = {
+    cpuUsage: 72,
+    memoryUsage: 84,
+    diskUsage: 65,
+    networkUsage: 45,
+    activeServices: 187,
+    totalServices: 203,
+    systemHealth: 'good',
+    securityAlerts: 3,
+  }
+
   const ticketTrendData: TimeSeriesData[] = [
-    { date: '7/25', tickets: 15, resolved: 12 },
-    { date: '7/26', tickets: 22, resolved: 18 },
-    { date: '7/27', tickets: 18, resolved: 20 },
-    { date: '7/28', tickets: 25, resolved: 16 },
-    { date: '7/29', tickets: 19, resolved: 23 },
-    { date: '7/30', tickets: 28, resolved: 21 },
-    { date: '7/31', tickets: 23, resolved: 25 },
+    { date: '7/25', tickets: 15, resolved: 12, pending: 8, critical: 2 },
+    { date: '7/26', tickets: 22, resolved: 18, pending: 12, critical: 1 },
+    { date: '7/27', tickets: 18, resolved: 20, pending: 9, critical: 3 },
+    { date: '7/28', tickets: 25, resolved: 16, pending: 15, critical: 4 },
+    { date: '7/29', tickets: 19, resolved: 23, pending: 11, critical: 2 },
+    { date: '7/30', tickets: 28, resolved: 21, pending: 18, critical: 5 },
+    { date: '7/31', tickets: 23, resolved: 25, pending: 14, critical: 3 },
+  ]
+
+  // SLAデータ
+  const slaData = [
+    { name: 'インシデント対応', target: 95, actual: 94.5, status: 'warning' },
+    { name: 'サービス可用性', target: 99.9, actual: 99.2, status: 'good' },
+    { name: '変更成功率', target: 98, actual: 96.8, status: 'warning' },
+    { name: '問題解決率', target: 90, actual: 92.1, status: 'good' },
+  ]
+
+  // システムパフォーマンスデータ
+  const performanceData = [
+    { time: '00:00', cpu: 45, memory: 62, network: 23, disk: 34 },
+    { time: '04:00', cpu: 38, memory: 58, network: 18, disk: 31 },
+    { time: '08:00', cpu: 72, memory: 84, network: 45, disk: 56 },
+    { time: '12:00', cpu: 89, memory: 91, network: 67, disk: 72 },
+    { time: '16:00', cpu: 76, memory: 88, network: 54, disk: 68 },
+    { time: '20:00', cpu: 65, memory: 75, network: 42, disk: 58 },
   ]
 
   const priorityData: ChartDataPoint[] = [
-    { name: 'Critical', value: mockMetrics.ticketsByPriority.critical, color: priorityColors.critical },
-    { name: 'High', value: mockMetrics.ticketsByPriority.high, color: priorityColors.high },
-    { name: 'Medium', value: mockMetrics.ticketsByPriority.medium, color: priorityColors.medium },
-    { name: 'Low', value: mockMetrics.ticketsByPriority.low, color: priorityColors.low },
+    { name: '致命的', value: mockMetrics.ticketsByPriority.critical, color: priorityColors.critical },
+    { name: '高', value: mockMetrics.ticketsByPriority.high, color: priorityColors.high },
+    { name: '中', value: mockMetrics.ticketsByPriority.medium, color: priorityColors.medium },
+    { name: '低', value: mockMetrics.ticketsByPriority.low, color: priorityColors.low },
   ]
 
   const statusData: ChartDataPoint[] = [
-    { name: 'Open', value: mockMetrics.ticketsByStatus.open, color: statusColors.open },
-    { name: 'In Progress', value: mockMetrics.ticketsByStatus.in_progress, color: statusColors.in_progress },
-    { name: 'Resolved', value: mockMetrics.ticketsByStatus.resolved, color: statusColors.resolved },
-    { name: 'Closed', value: mockMetrics.ticketsByStatus.closed, color: statusColors.closed },
-    { name: 'On Hold', value: mockMetrics.ticketsByStatus.on_hold, color: statusColors.on_hold },
+    { name: '未対応', value: mockMetrics.ticketsByStatus.open, color: statusColors.open },
+    { name: '対応中', value: mockMetrics.ticketsByStatus.in_progress, color: statusColors.in_progress },
+    { name: '解決済み', value: mockMetrics.ticketsByStatus.resolved, color: statusColors.resolved },
+    { name: '完了', value: mockMetrics.ticketsByStatus.closed, color: statusColors.closed },
+    { name: '保留中', value: mockMetrics.ticketsByStatus.on_hold, color: statusColors.on_hold },
   ]
 
-  const MetricCard: React.FC<{
+  // テーブルの列定義
+  const ticketColumns: TableColumn<Ticket>[] = [
+    {
+      id: 'id',
+      label: 'ID',
+      minWidth: 100,
+      render: (value) => (
+        <Typography variant="body2" color="primary" sx={{ fontWeight: 600 }}>
+          {value}
+        </Typography>
+      ),
+    },
+    {
+      id: 'title',
+      label: 'タイトル',
+      minWidth: 200,
+      searchable: true,
+    },
+    {
+      id: 'priority',
+      label: '優先度',
+      minWidth: 100,
+      render: (value) => (
+        <Chip
+          label={value.toUpperCase()}
+          size="small"
+          sx={{
+            bgcolor: `${priorityColors[value as keyof typeof priorityColors]}20`,
+            color: priorityColors[value as keyof typeof priorityColors],
+            fontWeight: 600,
+          }}
+        />
+      ),
+      filterType: 'select',
+      filterOptions: [
+        { value: 'critical', label: '致命的' },
+        { value: 'high', label: '高' },
+        { value: 'medium', label: '中' },
+        { value: 'low', label: '低' },
+      ],
+    },
+    {
+      id: 'status',
+      label: 'ステータス',
+      minWidth: 120,
+      render: (value) => {
+        const statusLabels = {
+          open: '未対応',
+          in_progress: '対応中',
+          resolved: '解決済み',
+          closed: '完了',
+          on_hold: '保留中',
+        }
+        return (
+          <Chip
+            label={statusLabels[value as keyof typeof statusLabels]}
+            size="small"
+            sx={{
+              bgcolor: `${statusColors[value as keyof typeof statusColors]}20`,
+              color: statusColors[value as keyof typeof statusColors],
+              fontWeight: 500,
+            }}
+          />
+        )
+      },
+    },
+    {
+      id: 'reporterName',
+      label: '報告者',
+      minWidth: 120,
+      searchable: true,
+    },
+    {
+      id: 'createdAt',
+      label: '作成日時',
+      minWidth: 150,
+      render: (value) => new Date(value).toLocaleString('ja-JP'),
+    },
+  ]
+
+  // 新しいメトリックカードコンポーネント
+  const EnhancedMetricCard: React.FC<{
     title: string
     value: string | number
     icon: React.ReactElement
     color: string
-    trend?: string
+    trend?: { value: number; label: string; direction: 'up' | 'down' | 'neutral' }
     subtitle?: string
-  }> = ({ title, value, icon, color, trend, subtitle }) => (
+    action?: React.ReactNode
+    loading?: boolean
+  }> = ({ title, value, icon, color, trend, subtitle, action, loading = false }) => (
     <Card sx={{ 
       height: '100%',
-      boxShadow: isMobile ? 1 : 3,
+      transition: 'all 0.3s ease',
+      '&:hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: theme.shadows[8],
+      },
     }}>
-      <CardContent sx={{ 
-        p: isMobile ? 2 : 3,
-        pb: isMobile ? '16px !important' : 3,
-      }}>
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: isMobile ? 'flex-start' : 'center', 
-          justifyContent: 'space-between',
-          flexDirection: isMobile ? 'column' : 'row',
-          gap: isMobile ? 1 : 0,
-        }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography 
-              variant={isMobile ? 'caption' : 'body2'} 
-              color="text.secondary" 
-              gutterBottom
-            >
-              {title}
-            </Typography>
-            <Typography 
-              variant={isMobile ? 'h5' : 'h4'} 
+      <CardContent sx={{ p: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Avatar sx={{ 
+              bgcolor: alpha(color, 0.1), 
+              color, 
+              width: 48, 
+              height: 48,
+            }}>
+              {icon}
+            </Avatar>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                {title}
+              </Typography>
+              {subtitle && (
+                <Typography variant="caption" color="text.secondary">
+                  {subtitle}
+                </Typography>
+              )}
+            </Box>
+          </Box>
+          {action}
+        </Box>
+        
+        {loading ? (
+          <Skeleton variant="text" height={40} />
+        ) : (
+          <Typography variant="h4" sx={{ fontWeight: 700, color, mb: 1 }}>
+            {value}
+          </Typography>
+        )}
+        
+        {trend && !loading && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <TrendingUpIcon 
               sx={{ 
-                fontWeight: 600, 
-                color,
-                fontSize: isMobile ? '1.5rem' : '2.125rem',
+                fontSize: 16, 
+                color: trend.direction === 'up' ? 'success.main' : 
+                       trend.direction === 'down' ? 'error.main' : 'text.secondary',
+                transform: trend.direction === 'down' ? 'rotate(180deg)' : 'none',
+              }} 
+            />
+            <Typography 
+              variant="caption" 
+              sx={{
+                color: trend.direction === 'up' ? 'success.main' : 
+                       trend.direction === 'down' ? 'error.main' : 'text.secondary',
+                fontWeight: 600,
               }}
             >
-              {value}
-            </Typography>
-            {subtitle && (
-              <Typography 
-                variant={isMobile ? 'caption' : 'body2'} 
-                color="text.secondary"
-              >
-                {subtitle}
-              </Typography>
-            )}
-          </Box>
-          <Avatar sx={{ 
-            bgcolor: `${color}20`, 
-            color, 
-            width: isMobile ? 40 : 56, 
-            height: isMobile ? 40 : 56,
-            alignSelf: isMobile ? 'flex-end' : 'center',
-          }}>
-            {icon}
-          </Avatar>
-        </Box>
-        {trend && (
-          <Box sx={{ display: 'flex', alignItems: 'center', mt: isMobile ? 1 : 2 }}>
-            <TrendingUpIcon sx={{ fontSize: 14, color: 'success.main', mr: 0.5 }} />
-            <Typography variant="caption" color="success.main" fontSize={isMobile ? '0.65rem' : '0.75rem'}>
-              {trend}
+              {trend.value > 0 ? '+' : ''}{trend.value}% {trend.label}
             </Typography>
           </Box>
         )}
@@ -218,61 +368,81 @@ const Dashboard: React.FC = () => {
     </Card>
   )
 
-  const getPriorityChip = (priority: string) => {
-    const color = priorityColors[priority as keyof typeof priorityColors]
-    return (
-      <Chip
-        label={priority.toUpperCase()}
-        size="small"
-        sx={{
-          bgcolor: `${color}20`,
-          color: color,
-          fontWeight: 600,
-          fontSize: '0.75rem',
-        }}
-      />
-    )
-  }
-
-  const getStatusChip = (status: string) => {
-    const color = statusColors[status as keyof typeof statusColors]
-    const statusLabels = {
-      open: '未対応',
-      in_progress: '対応中',
-      resolved: '解決済み',
-      closed: '完了',
-      on_hold: '保留中',
+  // データ更新処理
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true)
+    try {
+      // APIコールのシミュレーション
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      setLastUpdate(new Date())
+      
+      if (window.notifications) {
+        window.notifications.success('データを更新しました')
+      }
+    } finally {
+      setRefreshing(false)
     }
-    return (
-      <Chip
-        label={statusLabels[status as keyof typeof statusLabels]}
-        size="small"
-        sx={{
-          bgcolor: `${color}20`,
-          color: color,
-          fontWeight: 500,
-        }}
-      />
-    )
-  }
+  }, [])
 
-  const handleRefresh = () => {
-    // Simulate data refresh
-    if (window.notifications) {
-      window.notifications.success('データを更新しました')
-    }
-  }
+  // 自動更新
+  useEffect(() => {
+    if (!autoRefresh) return
+    
+    const interval = setInterval(() => {
+      handleRefresh()
+    }, 30000) // 30秒ごとに更新
+    
+    return () => clearInterval(interval)
+  }, [autoRefresh, handleRefresh])
+
+  // チケットクリックハンドラ
+  const handleTicketClick = useCallback((ticket: Ticket) => {
+    // チケット詳細ページにナビゲート
+    console.log('チケットをクリック:', ticket)
+  }, [])
+
+  // チャートデータポイントクリックハンドラ
+  const handleChartClick = useCallback((data: any) => {
+    console.log('チャートデータポイントをクリック:', data)
+  }, [])
 
   const pageActions = (
-    <Stack direction="row" spacing={2}>
+    <Stack direction="row" spacing={1} alignItems="center">
+      <FormControl size="small" sx={{ minWidth: 120 }}>
+        <InputLabel>期間</InputLabel>
+        <Select
+          value={timeRange}
+          onChange={(e) => setTimeRange(e.target.value as any)}
+          label="期間"
+        >
+          <MenuItem value="today">今日</MenuItem>
+          <MenuItem value="week">今週</MenuItem>
+          <MenuItem value="month">今月</MenuItem>
+          <MenuItem value="quarter">四半期</MenuItem>
+        </Select>
+      </FormControl>
+      
+      <Tooltip title={autoRefresh ? '自動更新を無効化' : '自動更新を有効化'}>
+        <IconButton 
+          onClick={() => setAutoRefresh(!autoRefresh)}
+          color={autoRefresh ? 'primary' : 'default'}
+        >
+          <Badge badgeContent={autoRefresh ? '自動' : null} color="primary">
+            <RefreshIcon />
+          </Badge>
+        </IconButton>
+      </Tooltip>
+      
       <Button
         variant="outlined"
-        startIcon={<RefreshIcon />}
+        startIcon={refreshing ? <CircularProgress size={16} /> : <RefreshIcon />}
         onClick={handleRefresh}
+        disabled={refreshing}
         size={isMobile ? 'small' : 'medium'}
       >
-        更新
+        {refreshing ? '更新中...' : '更新'}
       </Button>
+      
       <Button
         variant="contained"
         startIcon={<AnalyticsIcon />}
@@ -291,12 +461,29 @@ const Dashboard: React.FC = () => {
       actions={pageActions}
       showBreadcrumbs={false}
     >
+      {/* ラストアップデート情報 */}
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="body2" color="text.secondary">
+          最終更新: {lastUpdate.toLocaleString('ja-JP')}
+        </Typography>
+        {autoRefresh && (
+          <Chip 
+            label="自動更新中" 
+            size="small" 
+            color="primary" 
+            variant="outlined"
+            icon={<RefreshIcon />}
+          />
+        )}
+      </Box>
+
       <Box sx={{ mb: 3 }}>
         {/* タブメニュー */}
         <Tabs
           value={currentTab}
           onChange={(_, newValue) => setCurrentTab(newValue)}
           sx={{ borderBottom: 1, borderColor: 'divider' }}
+          variant={isMobile ? 'fullWidth' : 'standard'}
         >
           <Tab 
             icon={<DashboardIcon />} 
@@ -311,298 +498,290 @@ const Dashboard: React.FC = () => {
         </Tabs>
       </Box>
 
-      {/* Dashboard Navigation Tabs */}
-      <Paper sx={{ 
-        mb: isMobile ? 2 : 3,
-        boxShadow: isMobile ? 1 : 3,
-      }}>
-        <Tabs
-          value={currentTab}
-          onChange={(_, newValue) => setCurrentTab(newValue)}
-          variant="fullWidth"
-          indicatorColor="primary"
-          textColor="primary"
-        >
-          <Tab
-            icon={!isMobile ? <DashboardIcon /> : undefined}
-            label="概要"
-            iconPosition={isMobile ? "top" : "start"}
-            sx={{ 
-              minHeight: isMobile ? 48 : 64,
-              fontSize: isMobile ? '0.875rem' : '0.9375rem',
-            }}
-          />
-          <Tab
-            icon={!isMobile ? <AnalyticsIcon /> : undefined}
-            label="詳細分析"
-            iconPosition={isMobile ? "top" : "start"}
-            sx={{ 
-              minHeight: isMobile ? 48 : 64,
-              fontSize: isMobile ? '0.875rem' : '0.9375rem',
-            }}
-          />
-        </Tabs>
-      </Paper>
-
       {/* Tab Content */}
       {currentTab === 0 ? (
         <Box>
+          {/* アラート・通知エリア */}
+          {systemMetrics.securityAlerts > 0 && (
+            <Alert 
+              severity="warning" 
+              sx={{ mb: 3 }}
+              action={
+                <Button color="inherit" size="small">
+                  詳細
+                </Button>
+              }
+            >
+              {systemMetrics.securityAlerts}件のセキュリティアラートが検出されました
+            </Alert>
+          )}
 
-      {/* メトリクスカード */}
-      <MobileCard 
-        title={isMobile ? "主要指標" : undefined} 
-        collapsible={isMobile} 
-        defaultExpanded={expandedCards.metrics}
-        dense={isMobile}
-      >
-        <Grid container spacing={isMobile ? 2 : 3} sx={{ mb: isMobile ? 2 : 3 }}>
-          <Grid item xs={6} sm={6} md={3}>
-            <MetricCard
-              title="総チケット数"
-              value={mockMetrics.totalTickets.toLocaleString()}
-              icon={<TicketIcon />}
-              color={theme.palette.primary.main}
-              trend={!isMobile ? "+5.2% from last month" : undefined}
-            />
+          {/* メトリクスカード */}
+          <Grid container spacing={3} sx={{ mb: 3 }}>
+            <Grid item xs={12} sm={6} md={3}>
+              <EnhancedMetricCard
+                title="総チケット数"
+                value={mockMetrics.totalTickets.toLocaleString()}
+                icon={<TicketIcon />}
+                color={theme.palette.primary.main}
+                trend={{ value: 5.2, label: "先月比", direction: "up" }}
+                loading={refreshing}
+                action={
+                  <Tooltip title="チケット作成">
+                    <IconButton size="small" color="primary">
+                      <AddIcon />
+                    </IconButton>
+                  </Tooltip>
+                }
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <EnhancedMetricCard
+                title="未対応チケット"
+                value={mockMetrics.openTickets}
+                icon={<WarningIcon />}
+                color={theme.palette.warning.main}
+                subtitle="緊急対応が必要"
+                trend={{ value: -2.1, label: "昨日比", direction: "down" }}
+                loading={refreshing}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <EnhancedMetricCard
+                title="解決済みチケット"
+                value={mockMetrics.resolvedTickets.toLocaleString()}
+                icon={<CheckCircleIcon />}
+                color={theme.palette.success.main}
+                trend={{ value: 12.8, label: "今週", direction: "up" }}
+                loading={refreshing}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <EnhancedMetricCard
+                title="期限超過"
+                value={mockMetrics.overdueTickets}
+                icon={<ScheduleIcon />}
+                color={theme.palette.error.main}
+                subtitle="SLA違反リスク"
+                trend={{ value: 0, label: "変化なし", direction: "neutral" }}
+                loading={refreshing}
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={6} sm={6} md={3}>
-            <MetricCard
-              title="未対応チケット"
-              value={mockMetrics.openTickets}
-              icon={<WarningIcon />}
-              color={theme.palette.warning.main}
-              subtitle={!isMobile ? "緊急対応が必要" : undefined}
-            />
-          </Grid>
-          <Grid item xs={6} sm={6} md={3}>
-            <MetricCard
-              title="解決済みチケット"
-              value={mockMetrics.resolvedTickets.toLocaleString()}
-              icon={<CheckCircleIcon />}
-              color={theme.palette.success.main}
-              trend={!isMobile ? "+12.8% this week" : undefined}
-            />
-          </Grid>
-          <Grid item xs={6} sm={6} md={3}>
-            <MetricCard
-              title="期限超過"
-              value={mockMetrics.overdueTickets}
-              icon={<ScheduleIcon />}
-              color={theme.palette.error.main}
-              subtitle={!isMobile ? "SLA違反リスク" : undefined}
-            />
-          </Grid>
-        </Grid>
-      </MobileCard>
 
-      {/* SLA指標 */}
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
-                SLA遵守率
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h3" sx={{ fontWeight: 600, color: 'success.main' }}>
-                  {mockMetrics.slaComplianceRate}%
-                </Typography>
-                <Box sx={{ ml: 2, flexGrow: 1 }}>
-                  <LinearProgress
-                    variant="determinate"
-                    value={mockMetrics.slaComplianceRate}
-                    sx={{
-                      height: 8,
-                      borderRadius: 4,
-                      bgcolor: 'grey.200',
-                      '& .MuiLinearProgress-bar': {
-                        bgcolor: 'success.main',
-                        borderRadius: 4,
-                      },
-                    }}
-                  />
-                </Box>
-              </Box>
-              <Typography variant="body2" color="text.secondary">
-                目標: 95% | 平均解決時間: {mockMetrics.avgResolutionTime}時間
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
-                チケット推移 (過去7日)
-              </Typography>
-              <ResponsiveContainer width="100%" height={140}>
-                <AreaChart data={ticketTrendData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Area
-                    type="monotone"
-                    dataKey="tickets"
-                    stackId="1"
-                    stroke={theme.palette.primary.main}
-                    fill={theme.palette.primary.light}
-                    fillOpacity={0.6}
-                    name="新規"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="resolved"
-                    stackId="2"
-                    stroke={theme.palette.success.main}
-                    fill={theme.palette.success.light}
-                    fillOpacity={0.6}
-                    name="解決"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
-      {/* チャートセクション */}
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
-                優先度別チケット分布
-              </Typography>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={priorityData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={5}
-                    dataKey="value"
-                    label={({ name, value }) => `${name}: ${value}`}
-                  >
-                    {priorityData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+          {/* システムヘルス・パフォーマンス指標 */}
+          <Grid container spacing={3} sx={{ mb: 3 }}>
+            <Grid item xs={12} md={3}>
+              <CustomGaugeChart
+                title="CPU使用率"
+                value={systemMetrics.cpuUsage}
+                unit="%"
+                height={200}
+                thresholds={[
+                  { value: 80, color: theme.palette.error.main, label: '危険' },
+                  { value: 60, color: theme.palette.warning.main, label: '警告' },
+                  { value: 0, color: theme.palette.success.main, label: '正常' },
+                ]}
+                onRefresh={handleRefresh}
+              />
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <CustomGaugeChart
+                title="メモリ使用率"
+                value={systemMetrics.memoryUsage}
+                unit="%"
+                height={200}
+                thresholds={[
+                  { value: 85, color: theme.palette.error.main, label: '危険' },
+                  { value: 70, color: theme.palette.warning.main, label: '警告' },
+                  { value: 0, color: theme.palette.success.main, label: '正常' },
+                ]}
+                onRefresh={handleRefresh}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Card sx={{ height: '100%' }}>
+                <CardContent sx={{ p: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    SLA遵守状況
+                  </Typography>
+                  <Box sx={{ mt: 2 }}>
+                    {slaData.map((sla, index) => (
+                      <Box key={index} sx={{ mb: 2 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                          <Typography variant="body2">{sla.name}</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            {sla.actual}% / {sla.target}%
+                          </Typography>
+                        </Box>
+                        <LinearProgress
+                          variant="determinate"
+                          value={(sla.actual / sla.target) * 100}
+                          sx={{
+                            height: 8,
+                            borderRadius: 4,
+                            bgcolor: 'grey.200',
+                            '& .MuiLinearProgress-bar': {
+                              bgcolor: sla.status === 'good' ? 'success.main' : 'warning.main',
+                              borderRadius: 4,
+                            },
+                          }}
+                        />
+                      </Box>
                     ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
-                ステータス別チケット分布
-              </Typography>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={statusData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="value" fill="#8884d8" radius={4}>
-                    {statusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
-      {/* 最近のチケット */}
-      <Card>
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6">
-              最近のチケット
-            </Typography>
-            <IconButton size="small">
-              <MoreVertIcon />
-            </IconButton>
-          </Box>
-          <Divider sx={{ mb: 2 }} />
-          <List disablePadding>
-            {mockMetrics.recentTickets.map((ticket, index) => (
-              <React.Fragment key={ticket.id}>
-                <ListItem
-                  sx={{
-                    px: 0,
-                    '&:hover': {
-                      bgcolor: 'action.hover',
-                      borderRadius: 1,
-                      cursor: 'pointer',
-                    },
-                  }}
-                >
-                  <ListItemIcon>
-                    <Avatar
-                      sx={{
-                        width: 40,
-                        height: 40,
-                        bgcolor: `${priorityColors[ticket.priority]}20`,
-                        color: priorityColors[ticket.priority],
-                      }}
-                    >
-                      <AssignmentIcon />
-                    </Avatar>
-                  </ListItemIcon>
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                      <Typography variant="subtitle1" component="div" sx={{ fontWeight: 600 }}>
-                        {ticket.title}
-                      </Typography>
-                      {getPriorityChip(ticket.priority)}
-                      {getStatusChip(ticket.status)}
-                    </Box>
-                    <Typography variant="body2" component="div" color="text.secondary" gutterBottom>
-                      {ticket.description}
-                    </Typography>
-                    <Typography variant="caption" component="div" color="text.secondary">
-                      報告者: {ticket.reporterName} | 
-                      {ticket.assigneeName && ` 担当者: ${ticket.assigneeName} | `}
-                      作成: {new Date(ticket.createdAt).toLocaleString('ja-JP')}
-                    </Typography>
                   </Box>
-                  {ticket.slaDeadline && (
-                    <Box sx={{ textAlign: 'right' }}>
-                      <Chip
-                        icon={<PriorityHighIcon />}
-                        label="SLA期限"
-                        size="small"
-                        color="warning"
-                        variant="outlined"
-                      />
-                      <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
-                        {new Date(ticket.slaDeadline).toLocaleString('ja-JP')}
-                      </Typography>
-                    </Box>
-                  )}
-                </ListItem>
-                {index < mockMetrics.recentTickets.length - 1 && <Divider />}
-              </React.Fragment>
-            ))}
-          </List>
-        </CardContent>
-      </Card>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+
+          {/* チャートセクション */}
+          <Grid container spacing={3} sx={{ mb: 3 }}>
+            <Grid item xs={12} md={4}>
+              <CustomDonutChart
+                title="優先度別チケット分布"
+                data={priorityData}
+                dataKey="value"
+                nameKey="name"
+                height={300}
+                centerLabel="総チケット数"
+                centerValue={Object.values(mockMetrics.ticketsByPriority).reduce((a, b) => a + b, 0)}
+                onDataPointClick={handleChartClick}
+                onRefresh={handleRefresh}
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <CustomBarChart
+                title="ステータス別チケット分布"
+                data={statusData}
+                bars={[{ dataKey: 'value', name: 'チケット数', color: theme.palette.primary.main }]}
+                xAxisKey="name"
+                height={300}
+                onDataPointClick={handleChartClick}
+                onRefresh={handleRefresh}
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <CustomAreaChart
+                title="チケット推移 (過去7日)"
+                data={ticketTrendData}
+                areas={[
+                  { dataKey: 'tickets', name: '新規', color: theme.palette.primary.main },
+                  { dataKey: 'resolved', name: '解決', color: theme.palette.success.main },
+                  { dataKey: 'critical', name: '緊急', color: theme.palette.error.main },
+                ]}
+                xAxisKey="date"
+                height={300}
+                stacked={false}
+                onDataPointClick={handleChartClick}
+                onRefresh={handleRefresh}
+              />
+            </Grid>
+          </Grid>
+
+          {/* システムパフォーマンス推移 */}
+          <Grid container spacing={3} sx={{ mb: 3 }}>
+            <Grid item xs={12}>
+              <CustomLineChart
+                title="システムパフォーマンス推移 (24時間)"
+                subtitle="CPU、メモリ、ネットワーク、ディスクの使用率"
+                data={performanceData}
+                lines={[
+                  { dataKey: 'cpu', name: 'CPU', color: theme.palette.primary.main },
+                  { dataKey: 'memory', name: 'メモリ', color: theme.palette.secondary.main },
+                  { dataKey: 'network', name: 'ネットワーク', color: theme.palette.success.main },
+                  { dataKey: 'disk', name: 'ディスク', color: theme.palette.warning.main },
+                ]}
+                xAxisKey="time"
+                height={350}
+                smooth={true}
+                dots={false}
+                yAxisDomain={[0, 100]}
+                onDataPointClick={handleChartClick}
+                onRefresh={handleRefresh}
+              />
+            </Grid>
+          </Grid>
+
+          {/* 最近のチケット - データテーブル */}
+          <DataTable
+            title="最近のチケット"
+            subtitle="過去24時間に作成・更新されたチケット"
+            data={mockMetrics.recentTickets}
+            columns={ticketColumns}
+            loading={refreshing}
+            searchable={true}
+            filterable={true}
+            exportable={true}
+            selectable={false}
+            dense={false}
+            initialPageSize={10}
+            onRowClick={handleTicketClick}
+            onRefresh={handleRefresh}
+            emptyStateMessage="チケットがありません"
+            actions={
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                size="small"
+                onClick={() => console.log('新規チケット作成')}
+              >
+                新規作成
+              </Button>
+            }
+          />
         </Box>
       ) : (
-        <AdvancedAnalytics
-          metrics={mockMetrics}
-          timeRange={timeRange}
-          onTimeRangeChange={setTimeRange}
-        />
+        <Box>
+          <Typography variant="h5" gutterBottom>
+            詳細分析 ({timeRange})
+          </Typography>
+          <Typography variant="body1" color="text.secondary" gutterBottom>
+            高度な分析機能とレポート機能はここに実装されます。
+          </Typography>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    トレンド分析
+                  </Typography>
+                  <Typography variant="body2">
+                    長期的なパフォーマンストレンドを分析します。
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    予測分析
+                  </Typography>
+                  <Typography variant="body2">
+                    将来のワークロードと課題を予測します。
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </Box>
       )}
+
+      {/* フローティングアクションボタン */}
+      <Fab
+        color="primary"
+        aria-label="新規チケット作成"
+        sx={{
+          position: 'fixed',
+          bottom: 16,
+          right: 16,
+          zIndex: 1000,
+        }}
+        onClick={() => console.log('新規チケット作成')}
+      >
+        <AddIcon />
+      </Fab>
     </ContentArea>
   )
 }
