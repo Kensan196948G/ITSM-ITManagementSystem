@@ -117,8 +117,12 @@ def client(db_session) -> Generator[TestClient, None, None]:
     if hasattr(app, 'dependency_overrides') and get_db:
         app.dependency_overrides[get_db] = override_get_db
     
-    with TestClient(app) as test_client:
+    # Fix TestClient initialization for newer versions
+    test_client = TestClient(app=app)
+    try:
         yield test_client
+    finally:
+        test_client.close()
     
     # Clear overrides
     if hasattr(app, 'dependency_overrides'):
@@ -289,7 +293,12 @@ def mock_notification_service(mocker):
 @pytest.fixture
 def mock_redis(mocker):
     """Mock Redis connection."""
-    return mocker.patch('app.core.cache.redis_client')
+    mock_redis = Mock()
+    mock_redis.ping.return_value = True
+    mock_redis.get.return_value = None
+    mock_redis.set.return_value = True
+    mock_redis.delete.return_value = True
+    return mock_redis
 
 
 # Performance test fixtures

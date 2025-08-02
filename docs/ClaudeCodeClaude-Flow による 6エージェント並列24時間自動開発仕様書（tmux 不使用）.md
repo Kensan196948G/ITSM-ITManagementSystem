@@ -12,7 +12,7 @@ ClaudeCode の SubAgent（Agent機能）と Claude-Flow MCP を活用し、**tmu
 
 ---
 
-## 🧩 構成エージェント一覧（6Agent）
+## 🧩 構成エージェント一覧（7Agent）
 
 ClaudeCode の SubAgent 機能を用いて、以下の `.md` ファイルで各エージェントを定義・分担する：
 
@@ -24,6 +24,7 @@ ClaudeCode の SubAgent 機能を用いて、以下の `.md` ファイルで各�
 | `@ITSM-qa`      | UI整合性・用語統一・アクセシビリティ品質保証             | `docs/ITSM-QA.md`      |
 | `@ITSM-tester`  | Pytest/Playwrightによる自動E2E・負荷・APIテスト | `docs/ITSM-Tester.md`  |
 | `@ITSM-manager` | テスト統合・ログ収集・修復ループ制御・品質判定             | `docs/ITSM-Manager.md` |
+| `@ITSM-cimanager` | GitHub Actions監視・エラー修復・リトライ制御・通知連携 | `docs/ITSM-CIManager.md` |
 
 ## 構成エージェント詳細（6Agent）
 
