@@ -1,0 +1,46 @@
+{
+  "timestamp": "2025-08-02T17:06:53.205690",
+  "master_mode": "emergency",
+  "running": true,
+  "uptime_seconds": 11.671091,
+  "uptime_formatted": "0:00:11",
+  "config": {
+    "github_check_interval": 5,
+    "max_parallel_repairs": 3,
+    "emergency_escalation_time": 300,
+    "success_threshold": 0,
+    "consecutive_success_required": 3,
+    "auto_rerun_enabled": true,
+    "itsm_integration": true,
+    "infinite_loop_monitoring": true
+  },
+  "statistics": {
+    "total_github_failures": 7,
+    "total_repair_attempts": 3,
+    "successful_repairs": 1,
+    "failed_repairs": 2,
+    "itsm_incidents_created": 0,
+    "average_repair_time": 1.857454925775528,
+    "current_success_streak": 1,
+    "max_success_streak": 1
+  },
+  "system_health": {
+    "infinite_loop": {
+      "component": "infinite_loop",
+      "status": "active",
+      "last_check": "2025-08-02T17:05:29.047428",
+      "error_count": 0,
+      "success_count": 546,
+      "uptime_seconds": 11.670949
+    },
+    "api_metrics": {
+      "component": "api_metrics",
+      "status": "healthy",
+      "last_check": "2025-08-02T17:06:53.205667",
+      "error_count": 0,
+      "success_count": 0,
+      "uptime_seconds": 11.671073
+    }
+  },
+  "github_failures_tracked": 7
+}
