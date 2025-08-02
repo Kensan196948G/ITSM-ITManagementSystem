@@ -1,0 +1,73 @@
+{
+  "monitoring": {
+    "targets": [
+      {
+        "url": "http://localhost:3000",
+        "name": "WebUI Main",
+        "priority": "high",
+        "timeout": 30000
+      },
+      {
+        "url": "http://localhost:3000/admin",
+        "name": "WebUI Admin",
+        "priority": "high",
+        "timeout": 30000
+      },
+      {
+        "url": "http://192.168.3.135:3000",
+        "name": "WebUI Remote Main",
+        "priority": "medium",
+        "timeout": 30000
+      },
+      {
+        "url": "http://192.168.3.135:3000/admin",
+        "name": "WebUI Remote Admin",
+        "priority": "medium",
+        "timeout": 30000
+      }
+    ],
+    "intervals": {
+      "errorCheck": 5000,
+      "performanceCheck": 10000,
+      "accessibilityCheck": 30000,
+      "responsiveCheck": 60000
+    },
+    "thresholds": {
+      "maxErrors": 5,
+      "maxWarnings": 10,
+      "maxNetworkErrors": 3,
+      "maxResponseTime": 5000
+    }
+  },
+  "repair": {
+    "autoFix": {
+      "enabled": true,
+      "backupBeforeRepair": true,
+      "maxFixAttempts": 3
+    },
+    "types": {
+      "typescript": true,
+      "reactHooks": true,
+      "accessibility": true,
+      "performance": true,
+      "responsive": true,
+      "materialUI": true
+    }
+  },
+  "reporting": {
+    "formats": ["html", "json"],
+    "includeScreenshots": true,
+    "includeVideos": false,
+    "retentionDays": 7
+  },
+  "notifications": {
+    "critical": {
+      "enabled": true,
+      "methods": ["console", "file"]
+    },
+    "warning": {
+      "enabled": true,
+      "methods": ["console"]
+    }
+  }
+}
