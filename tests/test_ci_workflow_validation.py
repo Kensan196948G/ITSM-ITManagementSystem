@@ -121,18 +121,24 @@ class TestCIWorkflowValidation:
         with open(workflow_files['ci_monitor'], 'r', encoding='utf-8') as f:
             monitor_workflow = yaml.safe_load(f)
         
+        # trigger設定の取得（'on'キーまたはTrue キー）
+        trigger_config = monitor_workflow.get('on', monitor_workflow.get(True, {}))
+        
         # スケジュール実行の設定確認
-        assert 'schedule' in monitor_workflow['on'], "監視ワークフローにスケジュール設定が必要"
-        cron_setting = monitor_workflow['on']['schedule'][0]['cron']
+        assert 'schedule' in trigger_config, "監視ワークフローにスケジュール設定が必要"
+        cron_setting = trigger_config['schedule'][0]['cron']
         assert cron_setting == '*/1 * * * *', f"予期しないcron設定: {cron_setting}"
         
         # ci-retry.yml の検証
         with open(workflow_files['ci_retry'], 'r', encoding='utf-8') as f:
             retry_workflow = yaml.safe_load(f)
         
+        # trigger設定の取得（'on'キーまたはTrue キー）
+        retry_trigger_config = retry_workflow.get('on', retry_workflow.get(True, {}))
+        
         # workflow_call と workflow_dispatch が設定されているか確認
-        assert 'workflow_call' in retry_workflow['on'], "リトライワークフローにworkflow_call設定が必要"
-        assert 'workflow_dispatch' in retry_workflow['on'], "リトライワークフローにworkflow_dispatch設定が必要"
+        assert 'workflow_call' in retry_trigger_config, "リトライワークフローにworkflow_call設定が必要"
+        assert 'workflow_dispatch' in retry_trigger_config, "リトライワークフローにworkflow_dispatch設定が必要"
         
         logger.info("✅ リトライロジック設定: 合格")
     
@@ -183,7 +189,14 @@ class TestCIWorkflowValidation:
         # 最新スキャンが最近のものであることを確認
         last_scan = loop_repair_state.get('last_scan')
         if last_scan:
-            scan_time = datetime.fromisoformat(last_scan.replace('Z', '+00:00'))
+            # タイムゾーン情報を含まない場合はUTCとして扱う
+            if last_scan.endswith('Z'):
+                scan_time = datetime.fromisoformat(last_scan.replace('Z', '+00:00'))
+            elif '+' in last_scan or last_scan.endswith('UTC'):
+                scan_time = datetime.fromisoformat(last_scan.replace('UTC', '+00:00'))
+            else:
+                scan_time = datetime.fromisoformat(last_scan).replace(tzinfo=timezone.utc)
+            
             time_diff = datetime.now(timezone.utc) - scan_time
             assert time_diff.total_seconds() < 300, "最新スキャンが5分以上前です"
         
