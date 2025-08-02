@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Box, Card, CardContent, Typography, Chip, Paper, Grid, LinearProgress, IconButton, Tooltip, Alert, Button, FormControlLabel, Switch, Divider, Stack, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { Error as ErrorIcon, Warning as WarningIcon, Info as InfoIcon, CheckCircle as CheckCircleIcon, Build as BuildIcon, Visibility as VisibilityIcon, Refresh as RefreshIcon, Clear as ClearIcon, Download as DownloadIcon, FilterList as FilterListIcon, Timeline as TimelineIcon } from '@mui/icons-material';
 const RealtimeErrorReport = () => {

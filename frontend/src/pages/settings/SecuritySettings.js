@@ -3,7 +3,7 @@ import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-run
  * セキュリティ設定ページ
  * パスワードポリシー、セッション管理、2要素認証、IPアクセス制限
  */
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Box, Typography, Grid, TextField, Switch, FormControlLabel, Card, CardContent, CardHeader, Accordion, AccordionSummary, AccordionDetails, Alert, IconButton, Button, Dialog, DialogTitle, DialogContent, DialogActions, Chip, List, ListItem, ListItemText, ListItemIcon, Slider, FormGroup, } from '@mui/material';
 import { ExpandMore as ExpandMoreIcon, Lock as PasswordIcon, AccessTime as AccessTimeIcon, Shield as ShieldIcon, Block as BlockIcon, Add as AddIcon, Delete as DeleteIcon, Warning as WarningIcon, VpnKey as VpnKeyIcon, } from '@mui/icons-material';
 const SecuritySettings = ({ settings }) => {

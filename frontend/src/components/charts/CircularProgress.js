@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 const CircularProgress = ({ value, max = 100, size = 120, strokeWidth = 8, label, showPercentage = true, color = '#3B82F6', backgroundColor = '#E5E7EB', animated = true, showTrail = true, gradientColors }) => {
     const [animatedValue, setAnimatedValue] = useState(0);
     useEffect(() => {

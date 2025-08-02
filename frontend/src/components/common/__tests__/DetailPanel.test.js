@@ -1,4 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ThemeProvider } from '@mui/material';
 import { vi } from 'vitest';
@@ -138,7 +139,6 @@ describe('DetailPanel', () => {
             const closeButton = screen.getByLabelText('詳細パネルを閉じる');
             const refreshButton = screen.getByLabelText('情報を更新');
             const editButton = screen.getByLabelText('編集');
-            
             // ボタンが存在することを確認（tabindexはMUIが自動で設定）
             expect(closeButton).toBeInTheDocument();
             expect(refreshButton).toBeInTheDocument();

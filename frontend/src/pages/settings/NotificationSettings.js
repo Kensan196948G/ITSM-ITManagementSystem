@@ -3,7 +3,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
  * 通知設定ページ
  * メール設定、SMS設定、Webhook設定、通知テンプレート
  */
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Box, Paper, Typography, Grid, TextField, Switch, FormControlLabel, Card, CardContent, CardHeader, Button, Dialog, DialogTitle, DialogContent, DialogActions, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Chip, FormControl, InputLabel, Select, MenuItem, Alert, Tabs, Tab, } from '@mui/material';
 import { Email as EmailIcon, Sms as SmsIcon, Link as WebhookIcon, Description as DescriptionIcon, Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, Send as SendIcon, Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon, } from '@mui/icons-material';
 const TabPanel = ({ children, value, index }) => {

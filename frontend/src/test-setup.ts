@@ -1,5 +1,6 @@
 // DOM test setup for jsdom environment
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 
 // Ensure DOM globals are available
 if (typeof window !== 'undefined') {
