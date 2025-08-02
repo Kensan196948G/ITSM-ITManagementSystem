@@ -1,0 +1,482 @@
+{
+  "timestamp": "2025-08-02T13:38:33.677639",
+  "infinite_loop_state": {
+    "loop_count": 94,
+    "total_errors_fixed": 282,
+    "last_scan": "2025-08-02T13:37:39.638312",
+    "repair_history": [
+      {
+        "target": "git_status",
+        "timestamp": "2025-08-02T13:30:20.402143",
+        "loop": 91
+      },
+      {
+        "target": "backend_tests",
+        "timestamp": "2025-08-02T13:33:07.345466",
+        "loop": 92
+      },
+      {
+        "target": "frontend_build",
+        "timestamp": "2025-08-02T13:34:13.025196",
+        "loop": 92
+      },
+      {
+        "target": "git_status",
+        "timestamp": "2025-08-02T13:34:13.492634",
+        "loop": 92
+      },
+      {
+        "target": "backend_tests",
+        "timestamp": "2025-08-02T13:35:23.349442",
+        "loop": 93
+      },
+      {
+        "target": "frontend_build",
+        "timestamp": "2025-08-02T13:35:51.456067",
+        "loop": 93
+      },
+      {
+        "target": "git_status",
+        "timestamp": "2025-08-02T13:35:51.549072",
+        "loop": 93
+      },
+      {
+        "target": "backend_tests",
+        "timestamp": "2025-08-02T13:37:05.461833",
+        "loop": 94
+      },
+      {
+        "target": "frontend_build",
+        "timestamp": "2025-08-02T13:37:37.719651",
+        "loop": 94
+      },
+      {
+        "target": "git_status",
+        "timestamp": "2025-08-02T13:37:39.638127",
+        "loop": 94
+      }
+    ]
+  },
+  "validation_reports": [
+    {
+      "summary": {
+        "totalErrors": 4,
+        "criticalErrors": 0,
+        "repairedErrors": 0,
+        "remainingErrors": 4,
+        "validationCycles": 1,
+        "lastValidation": "2025-08-02T04:15:50.907Z",
+        "overallStatus": "warning"
+      },
+      "results": [
+        {
+          "component": "webui",
+          "url": "http://192.168.3.135:3000",
+          "status": "error",
+          "errors": [
+            {
+              "type": "validation_error",
+              "message": "WebUI検証エラー: Command failed: Command failed: ./frontend/run-comprehensive-webui-monitor.sh --status\nsudo: a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper\nsudo: パスワードが必要です\n",
+              "severity": "high",
+              "autoRepaired": false
+            }
+          ],
+          "timestamp": "2025-08-02T04:15:43.152Z",
+          "repairActions": []
+        },
+        {
+          "component": "admin",
+          "url": "http://192.168.3.135:3000/admin",
+          "status": "error",
+          "errors": [
+            {
+              "type": "admin_validation_error",
+              "message": "管理者ダッシュボード検証エラー: Command failed: Command failed: ./frontend/run-comprehensive-webui-monitor.sh --admin-only\nsudo: a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper\nsudo: パスワードが必要です\n",
+              "severity": "high",
+              "autoRepaired": false
+            }
+          ],
+          "timestamp": "2025-08-02T04:15:48.118Z",
+          "repairActions": []
+        },
+        {
+          "component": "api",
+          "url": "http://192.168.3.135:8000",
+          "status": "error",
+          "errors": [
+            {
+              "type": "api_validation_error",
+              "message": "API検証エラー: Command failed: Command failed: cd backend && source venv/bin/activate && python comprehensive_monitoring.py --once\n/bin/sh: 1: source: not found\n",
+              "severity": "high",
+              "autoRepaired": false
+            }
+          ],
+          "timestamp": "2025-08-02T04:15:50.381Z",
+          "repairActions": []
+        },
+        {
+          "component": "docs",
+          "url": "http://192.168.3.135:8000/docs",
+          "status": "error",
+          "errors": [
+            {
+              "type": "docs_validation_error",
+              "message": "ドキュメント検証エラー: Request failed with status code 404",
+              "severity": "medium",
+              "autoRepaired": false
+            }
+          ],
+          "timestamp": "2025-08-02T04:15:50.388Z",
+          "repairActions": []
+        }
+      ],
+      "metadata": {
+        "generatedAt": "2025-08-02T04:15:50.908Z",
+        "validationCycle": 1,
+        "systemInfo": {
+          "nodeVersion": "v22.17.0",
+          "platform": "linux",
+          "memory": {
+            "rss": 237252608,
+            "heapTotal": 156237824,
+            "heapUsed": 129995704,
+            "external": 8977169,
+            "arrayBuffers": 4956407
+          }
+        }
+      },
+      "file_path": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/validation-reports/validation-report-2025-08-02T04-15-50-908Z.json"
+    },
+    {
+      "summary": {
+        "totalErrors": 4,
+        "criticalErrors": 0,
+        "repairedErrors": 0,
+        "remainingErrors": 4,
+        "validationCycles": 2,
+        "lastValidation": "2025-08-02T04:16:14.680Z",
+        "overallStatus": "warning"
+      },
+      "results": [
+        {
+          "component": "webui",
+          "url": "http://192.168.3.135:3000",
+          "status": "error",
+          "errors": [
+            {
+              "type": "validation_error",
+              "message": "WebUI検証エラー: Command failed: Command failed: ./frontend/run-comprehensive-webui-monitor.sh --status\nsudo: a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper\nsudo: パスワードが必要です\n",
+              "severity": "high",
+              "autoRepaired": false
+            }
+          ],
+          "timestamp": "2025-08-02T04:16:09.659Z",
+          "repairActions": []
+        },
+        {
+          "component": "admin",
+          "url": "http://192.168.3.135:3000/admin",
+          "status": "error",
+          "errors": [
+            {
+              "type": "admin_validation_error",
+              "message": "管理者ダッシュボード検証エラー: Command failed: Command failed: ./frontend/run-comprehensive-webui-monitor.sh --admin-only\nsudo: a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper\nsudo: パスワードが必要です\n",
+              "severity": "high",
+              "autoRepaired": false
+            }
+          ],
+          "timestamp": "2025-08-02T04:16:11.788Z",
+          "repairActions": []
+        },
+        {
+          "component": "api",
+          "url": "http://192.168.3.135:8000",
+          "status": "error",
+          "errors": [
+            {
+              "type": "api_validation_error",
+              "message": "API検証エラー: Command failed: Command failed: cd backend && source venv/bin/activate && python comprehensive_monitoring.py --once\n/bin/sh: 1: source: not found\n",
+              "severity": "high",
+              "autoRepaired": false
+            }
+          ],
+          "timestamp": "2025-08-02T04:16:14.478Z",
+          "repairActions": []
+        },
+        {
+          "component": "docs",
+          "url": "http://192.168.3.135:8000/docs",
+          "status": "error",
+          "errors": [
+            {
+              "type": "docs_validation_error",
+              "message": "ドキュメント検証エラー: Request failed with status code 404",
+              "severity": "medium",
+              "autoRepaired": false
+            }
+          ],
+          "timestamp": "2025-08-02T04:16:14.500Z",
+          "repairActions": []
+        }
+      ],
+      "metadata": {
+        "generatedAt": "2025-08-02T04:16:14.683Z",
+        "validationCycle": 2,
+        "systemInfo": {
+          "nodeVersion": "v22.17.0",
+          "platform": "linux",
+          "memory": {
+            "rss": 245223424,
+            "heapTotal": 156762112,
+            "heapUsed": 127866680,
+            "external": 8977113,
+            "arrayBuffers": 4956351
+          }
+        }
+      },
+      "file_path": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/validation-reports/validation-report-2025-08-02T04-16-14-683Z.json"
+    },
+    {
+      "summary": {
+        "totalErrors": 4,
+        "criticalErrors": 0,
+        "repairedErrors": 0,
+        "remainingErrors": 4,
+        "validationCycles": 3,
+        "lastValidation": "2025-08-02T04:16:56.081Z",
+        "overallStatus": "warning"
+      },
+      "results": [
+        {
+          "component": "webui",
+          "url": "http://192.168.3.135:3000",
+          "status": "error",
+          "errors": [
+            {
+              "type": "validation_error",
+              "message": "WebUI検証エラー: Command failed: Command failed: ./frontend/run-comprehensive-webui-monitor.sh --status\nsudo: a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper\nsudo: パスワードが必要です\n",
+              "severity": "high",
+              "autoRepaired": false
+            }
+          ],
+          "timestamp": "2025-08-02T04:16:44.704Z",
+          "repairActions": []
+        },
+        {
+          "component": "admin",
+          "url": "http://192.168.3.135:3000/admin",
+          "status": "error",
+          "errors": [
+            {
+              "type": "admin_validation_error",
+              "message": "管理者ダッシュボード検証エラー: Command failed: Command failed: ./frontend/run-comprehensive-webui-monitor.sh --admin-only\nsudo: a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper\nsudo: パスワードが必要です\n",
+              "severity": "high",
+              "autoRepaired": false
+            }
+          ],
+          "timestamp": "2025-08-02T04:16:50.991Z",
+          "repairActions": []
+        },
+        {
+          "component": "api",
+          "url": "http://192.168.3.135:8000",
+          "status": "error",
+          "errors": [
+            {
+              "type": "api_validation_error",
+              "message": "API検証エラー: Command failed: Command failed: cd backend && source venv/bin/activate && python comprehensive_monitoring.py --once\n/bin/sh: 1: source: not found\n",
+              "severity": "high",
+              "autoRepaired": false
+            }
+          ],
+          "timestamp": "2025-08-02T04:16:56.028Z",
+          "repairActions": []
+        },
+        {
+          "component": "docs",
+          "url": "http://192.168.3.135:8000/docs",
+          "status": "error",
+          "errors": [
+            {
+              "type": "docs_validation_error",
+              "message": "ドキュメント検証エラー: Request failed with status code 404",
+              "severity": "medium",
+              "autoRepaired": false
+            }
+          ],
+          "timestamp": "2025-08-02T04:16:56.039Z",
+          "repairActions": []
+        }
+      ],
+      "metadata": {
+        "generatedAt": "2025-08-02T04:16:56.081Z",
+        "validationCycle": 3,
+        "systemInfo": {
+          "nodeVersion": "v22.17.0",
+          "platform": "linux",
+          "memory": {
+            "rss": 219222016,
+            "heapTotal": 128188416,
+            "heapUsed": 124883672,
+            "external": 8952566,
+            "arrayBuffers": 4931764
+          }
+        }
+      },
+      "file_path": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/validation-reports/validation-report-2025-08-02T04-16-56-081Z.json"
+    },
+    {
+      "summary": {
+        "totalErrors": 4,
+        "criticalErrors": 0,
+        "repairedErrors": 0,
+        "remainingErrors": 4,
+        "validationCycles": 4,
+        "lastValidation": "2025-08-02T04:17:36.020Z",
+        "overallStatus": "warning"
+      },
+      "results": [
+        {
+          "component": "webui",
+          "url": "http://192.168.3.135:3000",
+          "status": "error",
+          "errors": [
+            {
+              "type": "validation_error",
+              "message": "WebUI検証エラー: Command failed: Command failed: ./frontend/run-comprehensive-webui-monitor.sh --status\nsudo: a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper\nsudo: パスワードが必要です\n",
+              "severity": "high",
+              "autoRepaired": false
+            }
+          ],
+          "timestamp": "2025-08-02T04:17:26.125Z",
+          "repairActions": []
+        },
+        {
+          "component": "admin",
+          "url": "http://192.168.3.135:3000/admin",
+          "status": "error",
+          "errors": [
+            {
+              "type": "admin_validation_error",
+              "message": "管理者ダッシュボード検証エラー: Command failed: Command failed: ./frontend/run-comprehensive-webui-monitor.sh --admin-only\nsudo: a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper\nsudo: パスワードが必要です\n",
+              "severity": "high",
+              "autoRepaired": false
+            }
+          ],
+          "timestamp": "2025-08-02T04:17:30.996Z",
+          "repairActions": []
+        },
+        {
+          "component": "api",
+          "url": "http://192.168.3.135:8000",
+          "status": "error",
+          "errors": [
+            {
+              "type": "api_validation_error",
+              "message": "API検証エラー: Command failed: Command failed: cd backend && source venv/bin/activate && python comprehensive_monitoring.py --once\n/bin/sh: 1: source: not found\n",
+              "severity": "high",
+              "autoRepaired": false
+            }
+          ],
+          "timestamp": "2025-08-02T04:17:35.950Z",
+          "repairActions": []
+        },
+        {
+          "component": "docs",
+          "url": "http://192.168.3.135:8000/docs",
+          "status": "error",
+          "errors": [
+            {
+              "type": "docs_validation_error",
+              "message": "ドキュメント検証エラー: Request failed with status code 404",
+              "severity": "medium",
+              "autoRepaired": false
+            }
+          ],
+          "timestamp": "2025-08-02T04:17:35.976Z",
+          "repairActions": []
+        }
+      ],
+      "metadata": {
+        "generatedAt": "2025-08-02T04:17:36.020Z",
+        "validationCycle": 4,
+        "systemInfo": {
+          "nodeVersion": "v22.17.0",
+          "platform": "linux",
+          "memory": {
+            "rss": 219877376,
+            "heapTotal": 129236992,
+            "heapUsed": 124796048,
+            "external": 8961615,
+            "arrayBuffers": 4940813
+          }
+        }
+      },
+      "file_path": "/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/validation-reports/validation-report-2025-08-02T04-17-36-020Z.json"
+    }
+  ],
+  "url_health": {
+    "webui": {
+      "url": "http://192.168.3.135:3000",
+      "status_code": 200,
+      "response_time": 0.0047833919525146484,
+      "is_healthy": true,
+      "timestamp": "2025-08-02T13:38:33.773884"
+    },
+    "api": {
+      "url": "http://192.168.3.135:8000",
+      "status_code": 404,
+      "response_time": 0.00926971435546875,
+      "is_healthy": false,
+      "timestamp": "2025-08-02T13:38:33.783174"
+    },
+    "admin": {
+      "url": "http://192.168.3.135:3000/admin",
+      "status_code": 200,
+      "response_time": 0.007016897201538086,
+      "is_healthy": true,
+      "timestamp": "2025-08-02T13:38:33.790212"
+    },
+    "docs": {
+      "url": "http://192.168.3.135:8000/docs",
+      "status_code": 404,
+      "response_time": 0.007869482040405273,
+      "is_healthy": false,
+      "timestamp": "2025-08-02T13:38:33.798102"
+    }
+  },
+  "system_performance": {
+    "cpu_percent": 45.5,
+    "memory_percent": 56.74892907689263,
+    "disk_percent": 12.0,
+    "timestamp": "2025-08-02T13:38:34.026975"
+  },
+  "error_trends": {
+    "trend": "increasing",
+    "total_errors": 16,
+    "error_types": {
+      "validation_error": 4,
+      "admin_validation_error": 4,
+      "api_validation_error": 4,
+      "docs_validation_error": 4
+    },
+    "recent_errors": [
+      4,
+      4,
+      4,
+      4
+    ],
+    "timestamps": [
+      "2025-08-02T04:15:50.908Z",
+      "2025-08-02T04:16:14.683Z",
+      "2025-08-02T04:16:56.081Z",
+      "2025-08-02T04:17:36.020Z"
+    ]
+  },
+  "repair_effectiveness": {
+    "effectiveness": 96.58,
+    "total_repairs": 282,
+    "repair_rate": 3.0,
+    "loop_count": 94
+  }
+}
