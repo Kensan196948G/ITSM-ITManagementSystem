@@ -7,7 +7,7 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 from pydantic import BaseModel
 
-from app.services.api_error_monitor import api_monitor, ErrorSeverity, ErrorCategory
+from app.services.api_error_monitor import api_monitor, ErrorSeverity, ErrorCategory, SecurityAlert, PerformanceMetric, DatabaseHealthResult
 
 router = APIRouter(prefix="/error-monitor", tags=["error-monitor"])
 

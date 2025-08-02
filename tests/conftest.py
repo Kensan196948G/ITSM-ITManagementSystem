@@ -11,6 +11,14 @@ import json
 from unittest.mock import Mock, patch
 from faker import Faker
 
+# Set environment variables BEFORE importing any backend modules
+os.environ.setdefault("DATABASE_URL", "sqlite:///./test_itsm.db")
+os.environ.setdefault("ASYNC_DATABASE_URL", "sqlite+aiosqlite:///./test_itsm.db")
+os.environ.setdefault("SECRET_KEY", "test-secret-key-for-testing-purposes-only")
+os.environ.setdefault("ENCRYPTION_KEY", "test-encryption-key-32-chars-long")
+os.environ.setdefault("ENVIRONMENT", "testing")
+os.environ.setdefault("LOG_LEVEL", "INFO")
+
 # Add backend to Python path
 backend_path = Path(__file__).parent.parent / "backend"
 sys.path.insert(0, str(backend_path))
