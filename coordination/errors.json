@@ -1,10 +1,25 @@
 {
-  "backend_errors": [],
-  "api_errors": [],
-  "database_errors": [],
-  "validation_errors": [],
-  "cors_errors": [],
-  "authentication_errors": [],
-  "last_check": "2025-08-02T14:02:31.096006",
-  "error_count": 0
+  "summary": {
+    "sessionStart": "2025-08-02T05:03:07.620803+00:00",
+    "monitoringDuration": 30,
+    "totalErrors": 0,
+    "errorTypes": {},
+    "severityCounts": {
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    },
+    "sourceCounts": {
+      "frontend": 0,
+      "backend": 0
+    },
+    "agentAssignments": {
+      "ITSM-DevUI": 0,
+      "ITSM-DevAPI": 0
+    },
+    "consoleMessages": 18,
+    "networkErrors": 0
+  },
+  "errors": [],
+  "lastUpdate": "2025-08-02T05:03:07.620826+00:00"
 }
