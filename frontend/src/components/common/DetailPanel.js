@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Box, Drawer, IconButton, Typography, Fade, useTheme, useMediaQuery, Backdrop, } from '@mui/material';
 import { Close as CloseIcon, Refresh as RefreshIcon, Edit as EditIcon, FullscreenExit as CollapseIcon, Fullscreen as ExpandIcon, } from '@mui/icons-material';
 import { ErrorBoundary } from './ErrorBoundary';

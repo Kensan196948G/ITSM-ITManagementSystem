@@ -3,7 +3,7 @@ import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-run
  * カスタムチャートコンポーネント
  * Recharts を使用した高度なチャート機能を提供
  */
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Box, Card, CardContent, CardHeader, Typography, IconButton, Menu, MenuItem, Chip, useTheme, alpha, Paper, Stack, } from '@mui/material';
 import { MoreVert as MoreVertIcon, GetApp as ExportIcon, Refresh as RefreshIcon, } from '@mui/icons-material';
 import { ResponsiveContainer, LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, RadialBarChart, RadialBar, ComposedChart, } from 'recharts';

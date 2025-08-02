@@ -3,7 +3,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
  * インシデント一覧ページ
  * ITIL準拠のインシデント管理機能を提供
  */
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Button, Card, CardContent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Chip, IconButton, Menu, MenuItem, TextField, InputAdornment, FormControl, InputLabel, Select, Stack, } from '@mui/material';
 import { Add as AddIcon, Search as SearchIcon, MoreVert as MoreVertIcon, ErrorOutline, PauseCircleOutline, CheckCircleOutline, TrendingUp, Assignment, } from '@mui/icons-material';

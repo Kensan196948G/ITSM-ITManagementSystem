@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Grid, Typography, Card, CardContent, CardActions, Button, IconButton, Chip, Dialog, DialogTitle, DialogContent, DialogActions, Switch, FormControlLabel, useTheme, useMediaQuery, Stack, Collapse, List, ListItem, ListItemText, ListItemIcon, ListItemSecondaryAction, Avatar, alpha, Tooltip, } from '@mui/material';
 import { PlayArrow as PlayIcon, Stop as StopIcon, Refresh as RefreshIcon, Edit as EditIcon, Add as AddIcon, Schedule as ScheduleIcon, ExpandMore as ExpandMoreIcon, ExpandLess as ExpandLessIcon, CheckCircle as SuccessIcon, Error as ErrorIcon, Pause as PauseIcon, Build as BuildIcon, CloudQueue as CloudIcon, Code as CodeIcon, AutoFixHigh as AutoFixIcon, Visibility as ViewIcon, History as HistoryIcon, MonitorHeart as MonitorIcon, } from '@mui/icons-material';
 import ContentArea from '../layout/ContentArea';

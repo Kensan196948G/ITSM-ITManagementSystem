@@ -1,4 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import React from 'react';
 const StatusIndicator = ({ status, label, size = 'md', showLabel = true }) => {
     const getStatusColor = (status) => {
         switch (status) {

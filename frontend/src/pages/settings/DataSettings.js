@@ -1,4 +1,9 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+/**
+ * データ管理設定ページ
+ * データベース設定、バックアップ設定、データ保持ポリシー、データエクスポート
+ */
+import React from 'react';
 import { Box, Typography, Card, CardContent, CardHeader, Grid, Alert, } from '@mui/material';
 import { Storage as StorageIcon } from '@mui/icons-material';
 const DataSettings = ({ settings }) => {
