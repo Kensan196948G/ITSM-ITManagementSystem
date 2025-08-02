@@ -255,10 +255,15 @@ class RealtimeRepairController:
         """現在の状態を保存"""
         state_file = self.base_path / "realtime_repair_state.json"
         
+        # datetimeオブジェクトを文字列に変換
+        state_copy = self.state.copy()
+        if state_copy["start_time"]:
+            state_copy["start_time"] = state_copy["start_time"].isoformat()
+        
         current_state = {
             "timestamp": datetime.now().isoformat(),
             "config": self.config,
-            "state": self.state,
+            "state": state_copy,
             "uptime": (datetime.now() - self.state["start_time"]).total_seconds() if self.state["start_time"] else 0
         }
         
