@@ -1,6 +1,6 @@
 {
   "monitoring": true,
-  "repair_cycles": 1,
+  "repair_cycles": 0,
   "consecutive_clean_cycles": 0,
   "last_check": null,
   "active_repairs": {
@@ -148,15 +148,15 @@
       "started": "2025-08-02T10:07:18.689056",
       "status": "failed",
       "error": "'>=' not supported between instances of 'SecurityLevel' and 'SecurityLevel'"
-    },
-    "16688973430": {
-      "started": "2025-08-02T11:40:55.168285",
-      "status": "failed",
-      "result": {
-        "success": false,
-        "branch_name": null,
-        "pr_url": null,
-        "changes_applied": null,
-        "error_message": "Claude Flow failed: [2025-08-02T02:41:02.999Z] INFO [claude-flow-mcp] (session-cf-1754102462991-s4im) Claude-Flow MCP server starting in stdio mode\n{\n  arch: 'x64',\n  mode: 'mcp-stdio',\n  nodeVersion: 'v22.17.0',\n  pid: 746609,\n  platform: 'linux',\n  protocol: 'stdio',\n  sessionId: 'session-cf-1754102462991-s4im',\n  version: '2.0.0-alpha.59'\n}\n[2025-08-02T02:41:03.038Z] INFO [claude-flow-mcp] (session-cf-1754102462991-s4im) \ud83d\udd0c Connection closed: session-cf-1754102462991-s4im\n[2025-08-02T02:41:03.039Z] INFO [claude-flow-mcp] (session-cf-1754102462991-s4im) MCP: stdin closed, shutting down...\nWarning: Detected unsettled top-level await at file:///home/kensan/.npm/_npx/7cfa166e65244432/node_modules/claude-flow/src/cli/simple-cli.js:3429\n  await main();\n  ^\n\n\n\n",
-        "confidence_score": 0.0,
-        "security_impact": 
+    }
+  },
+  "repair_history": [],
+  "metrics": {
+    "total_repairs": 0,
+    "successful_repairs": 0,
+    "failed_repairs": 0,
+    "manual_approvals": 0,
+    "auto_approvals": 0
+  },
+  "last_updated": "2025-08-02T10:20:03.077073"
+}
