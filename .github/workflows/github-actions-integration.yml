@@ -20,6 +20,12 @@ jobs:
   monitor-workflows:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
+      issues: write
+      pull-requests: read
+      metadata: read
     if: |
       (
         github.event.workflow_run.conclusion == 'failure' && 
@@ -167,7 +173,7 @@ jobs:
 
     - name: Store monitoring data as artifact
       if: success()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: github-actions-monitor-report
         path: |
