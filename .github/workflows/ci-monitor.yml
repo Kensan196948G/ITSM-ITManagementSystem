@@ -117,43 +117,32 @@ jobs:
           }
           
           # Simplified single check
-          echo "--- Monitor Check at $(date) ---"
-            echo "--- Monitor Check #$i at $(date) ---"
+          if check_ci_status; then
+            echo "✅ Status: OK - No CI failures detected"
+          else
+            echo "⚠️ Status: FAILURE DETECTED"
             
-            if check_ci_status; then
-              echo "Status: OK"
-            else
-              echo "Status: FAILURE DETECTED"
+            # Check if we need to trigger auto-repair
+            local consecutive=$(jq -r '.consecutive_failures' .claude-flow/monitor-state.json)
+            echo "Consecutive failures: $consecutive"
+            
+            if [ "$consecutive" -ge "$MAX_CONSECUTIVE_FAILURES" ]; then
+              echo "🚨 THRESHOLD EXCEEDED - Triggering auto-repair sequence"
               
-              # Check if we need to trigger auto-repair
-              local consecutive=$(jq -r '.consecutive_failures' .claude-flow/monitor-state.json)
-              echo "Consecutive failures: $consecutive"
-              
-              if [ "$consecutive" -ge "$MAX_CONSECUTIVE_FAILURES" ]; then
-                echo "🚨 THRESHOLD EXCEEDED - Triggering auto-repair sequence"
-                
-                # Trigger ci-retry workflow
-                if gh workflow run ci-retry.yml --ref main; then
-                  echo "Successfully triggered ci-retry workflow"
-                else
-                  echo "Failed to trigger ci-retry workflow"
-                fi
-                
-                # Update repairs triggered counter
-                jq '.repairs_triggered += 1' .claude-flow/monitor-state.json > .claude-flow/monitor-state-tmp.json
-                mv .claude-flow/monitor-state-tmp.json .claude-flow/monitor-state.json
-                
-                echo "Auto-repair triggered successfully"
-                break  # Exit monitoring loop after triggering repair
+              # Trigger ci-retry workflow
+              if gh workflow run ci-retry.yml --ref main; then
+                echo "Successfully triggered ci-retry workflow"
+              else
+                echo "Failed to trigger ci-retry workflow"
               fi
+              
+              # Update repairs triggered counter
+              jq '.repairs_triggered += 1' .claude-flow/monitor-state.json > .claude-flow/monitor-state-tmp.json
+              mv .claude-flow/monitor-state-tmp.json .claude-flow/monitor-state.json
+              
+              echo "Auto-repair triggered successfully"
             fi
-            
-            # Wait for next check (except on last iteration)
-            if [ "$i" -lt 3 ]; then
-              echo "Waiting 10 seconds for next check..."
-              sleep 10
-            fi
-          done
+          fi
 
       - name: Update Infinite Loop Integration
         run: |
