@@ -1,9 +1,10 @@
 """
-APIエラー検知・修復自動化システム
+包括的APIエラー検知・修復・セキュリティ監視システム
 """
 
 import asyncio
 import aiohttp
+import aiofiles
 import logging
 import time
 import json
@@ -12,7 +13,10 @@ import re
 import sqlite3
 import subprocess
 import os
-from typing import Dict, List, Optional, Any, Tuple
+import hashlib
+import psutil
+import ssl
+from typing import Dict, List, Optional, Any, Tuple, Union
 from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta
 from enum import Enum
@@ -38,6 +42,12 @@ class ErrorCategory(Enum):
     SERVER = "server"
     ORM = "orm"
     RESPONSE = "response"
+    DOCUMENTATION = "documentation"
+    SSL_TLS = "ssl_tls"
+    DOS_ATTACK = "dos_attack"
+    INJECTION = "injection"
+    XSS = "xss"
+    CSRF = "csrf"
 
 @dataclass
 class ApiError:
@@ -67,8 +77,43 @@ class HealthCheckResult:
     is_healthy: bool
     error_message: Optional[str] = None
 
+@dataclass
+class SecurityAlert:
+    """セキュリティアラート"""
+    timestamp: datetime
+    alert_type: str
+    severity: ErrorSeverity
+    source_ip: str
+    target_endpoint: str
+    description: str
+    blocked: bool = False
+    mitigation_applied: str = ""
+
+@dataclass
+class PerformanceMetric:
+    """パフォーマンスメトリック"""
+    timestamp: datetime
+    endpoint: str
+    response_time: float
+    cpu_usage: float
+    memory_usage: float
+    request_count: int
+    error_count: int
+    slow_query_count: int
+
+@dataclass
+class DatabaseHealthResult:
+    """データベースヘルス結果"""
+    timestamp: datetime
+    is_healthy: bool
+    connection_count: int
+    query_performance: Dict[str, float]
+    integrity_status: str
+    size_mb: float
+    backup_status: str
+
 class ApiErrorMonitor:
-    """APIエラー監視・修復システム"""
+    """包括的APIエラー監視・修復・セキュリティ監視システム"""
     
     def __init__(self, base_url: str = "http://192.168.3.135:8000"):
         self.base_url = base_url
@@ -81,7 +126,22 @@ class ApiErrorMonitor:
         
         self.errors: List[ApiError] = []
         self.health_history: List[HealthCheckResult] = []
+        self.security_alerts: List[SecurityAlert] = []
+        self.performance_metrics: List[PerformanceMetric] = []
+        self.database_health_history: List[DatabaseHealthResult] = []
         self.monitoring = False
+        
+        # ブラックリストIP管理
+        self.blocked_ips: set = set()
+        self.suspicious_ips: Dict[str, int] = {}
+        
+        # パフォーマンス閾値
+        self.performance_thresholds = {
+            "max_response_time": 5.0,  # 秒
+            "max_cpu_usage": 80.0,     # %
+            "max_memory_usage": 85.0,  # %
+            "max_error_rate": 5.0      # %
+        }
         
         # エラーパターンの定義
         self.error_patterns = {
@@ -117,31 +177,92 @@ class ApiErrorMonitor:
                 r"streaming.*response.*body",
                 r"response.*object.*has.*no.*attribute",
                 r"serialization.*error"
+            ],
+            "security": [
+                r"sql.*injection",
+                r"xss.*attack",
+                r"csrf.*token",
+                r"security.*violation",
+                r"malicious.*request"
+            ],
+            "performance": [
+                r"timeout",
+                r"slow.*query",
+                r"high.*cpu",
+                r"memory.*limit",
+                r"connection.*pool.*exhausted"
+            ]
+        }
+        
+        # セキュリティ攻撃パターン
+        self.security_patterns = {
+            "sql_injection": [
+                r"union.*select",
+                r"drop.*table",
+                r"insert.*into",
+                r"delete.*from",
+                r"'.*or.*'1'='1"
+            ],
+            "xss_attack": [
+                r"<script.*>",
+                r"javascript:",
+                r"onclick=",
+                r"onerror=",
+                r"alert\("
+            ],
+            "path_traversal": [
+                r"\.\./",
+                r"\.\.\\",
+                r"etc/passwd",
+                r"windows/system32"
+            ],
+            "dos_attack": [
+                r"excessive.*requests",
+                r"rate.*limit.*exceeded",
+                r"resource.*exhaustion"
             ]
         }
         
     async def start_monitoring(self, interval: int = 30):
-        """継続監視を開始"""
-        logger.info(f"🔍 APIエラー監視を開始します（間隔: {interval}秒）")
+        """包括的監視を開始"""
+        logger.info(f"🔍 包括的APIエラー監視を開始します（間隔: {interval}秒）")
         self.monitoring = True
         
         while self.monitoring:
             try:
-                # ヘルスチェック実行
+                # 1. APIヘルスチェック実行
                 await self.perform_health_check()
                 
-                # ログ解析
+                # 2. ログ解析とエラー検知
                 await self.analyze_logs()
                 
-                # エラー修復
+                # 3. セキュリティ監視
+                await self.security_scan()
+                
+                # 4. データベースヘルスチェック
+                await self.database_health_check()
+                
+                # 5. パフォーマンス監視
+                await self.performance_monitoring()
+                
+                # 6. API ドキュメント監視
+                await self.documentation_check()
+                
+                # 7. SSL/TLS チェック
+                await self.ssl_certificate_check()
+                
+                # 8. エラー修復
                 await self.attempt_error_fixes()
                 
-                # メトリクス更新
-                await self.update_metrics()
+                # 9. セキュリティ対策実行
+                await self.apply_security_mitigations()
                 
-                # レポート生成
-                if len(self.errors) > 0:
-                    await self.generate_error_report()
+                # 10. メトリクス更新
+                await self.update_comprehensive_metrics()
+                
+                # 11. 包括的レポート生成
+                if len(self.errors) > 0 or len(self.security_alerts) > 0:
+                    await self.generate_comprehensive_report()
                 
                 await asyncio.sleep(interval)
                 
