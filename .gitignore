@@ -64,4 +64,6 @@ config/secrets.json
 coverage/
 .nyc_output/
 .coverage
-htmlcov/
+htmlcov/test_env/
+*.pyc
+__pycache__/
