@@ -120,8 +120,14 @@ def client(db_session) -> Generator[TestClient, None, None]:
     if hasattr(app, 'dependency_overrides') and get_db:
         app.dependency_overrides[get_db] = override_get_db
     
-    # Fix TestClient initialization for newer versions
-    test_client = TestClient(app)
+    # Create TestClient with correct syntax for different versions
+    try:
+        # Try new syntax first
+        test_client = TestClient(app=app)
+    except TypeError:
+        # Fall back to older syntax
+        test_client = TestClient(app)
+    
     try:
         yield test_client
     finally:
