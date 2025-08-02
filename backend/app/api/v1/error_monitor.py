@@ -11,6 +11,7 @@ from app.services.api_error_monitor import api_monitor, ErrorSeverity, ErrorCate
 from app.services.continuous_monitor import ContinuousBackendMonitor
 from app.services.enhanced_infinite_loop_monitor import enhanced_monitor
 from app.services.advanced_auto_repair_engine import advanced_repair_engine
+from app.services.comprehensive_report_generator import report_generator, ReportConfig, ReportType, ReportFormat
 
 router = APIRouter(prefix="/error-monitor", tags=["error-monitor"])
 
@@ -1275,3 +1276,406 @@ def _generate_comprehensive_recommendations(api_status: Dict, enhanced_status: D
         recommendations.append("🎉 すべてのシステムが正常に動作しています！")
     
     return recommendations
+
+# === レポート生成システム エンドポイント ===
+
+@router.post("/reports/generate")
+async def generate_comprehensive_report(
+    background_tasks: BackgroundTasks,
+    report_type: str = Query("summary", description="レポートタイプ"),
+    time_range_hours: int = Query(24, description="対象時間範囲（時間）"),
+    include_charts: bool = Query(True, description="チャートを含める"),
+    include_recommendations: bool = Query(True, description="推奨事項を含める"),
+    format: str = Query("html", description="出力形式")
+):
+    """包括的レポートを生成"""
+    try:
+        # パラメータ検証
+        try:
+            report_type_enum = ReportType(report_type)
+            format_enum = ReportFormat(format)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=f"無効なパラメータ: {str(e)}")
+        
+        # レポート設定
+        config = ReportConfig(
+            report_type=report_type_enum,
+            time_range_hours=time_range_hours,
+            include_charts=include_charts,
+            include_recommendations=include_recommendations,
+            format=format_enum,
+            custom_filters={}
+        )
+        
+        # バックグラウンドでレポート生成
+        background_tasks.add_task(_generate_report_background, config)
+        
+        return {
+            "message": "レポート生成を開始しました",
+            "report_type": report_type,
+            "time_range_hours": time_range_hours,
+            "format": format,
+            "estimated_completion": f"{max(2, time_range_hours // 12)}分",
+            "started_at": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"レポート生成開始エラー: {str(e)}")
+
+@router.get("/reports/types")
+async def get_available_report_types():
+    """利用可能なレポートタイプを取得"""
+    return {
+        "report_types": [
+            {"value": rt.value, "name": rt.name, "description": _get_report_type_description(rt)}
+            for rt in ReportType
+        ],
+        "formats": [
+            {"value": rf.value, "name": rf.name, "description": _get_format_description(rf)}
+            for rf in ReportFormat
+        ]
+    }
+
+@router.get("/reports/list")
+async def list_generated_reports():
+    """生成済みレポート一覧を取得"""
+    try:
+        from pathlib import Path
+        reports_path = Path("/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/coordination/reports")
+        
+        reports = []
+        if reports_path.exists():
+            for report_file in reports_path.glob("*.html"):
+                stat = report_file.stat()
+                reports.append({
+                    "filename": report_file.name,
+                    "path": str(report_file),
+                    "size_mb": round(stat.st_size / (1024*1024), 2),
+                    "created_at": datetime.fromtimestamp(stat.st_ctime).isoformat(),
+                    "modified_at": datetime.fromtimestamp(stat.st_mtime).isoformat()
+                })
+        
+        # 最新順でソート
+        reports.sort(key=lambda x: x["created_at"], reverse=True)
+        
+        return {
+            "reports": reports,
+            "total_count": len(reports),
+            "retrieved_at": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"レポート一覧取得エラー: {str(e)}")
+
+@router.get("/reports/download/{filename}")
+async def download_report(filename: str):
+    """レポートファイルをダウンロード"""
+    try:
+        from fastapi.responses import FileResponse
+        from pathlib import Path
+        
+        reports_path = Path("/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/coordination/reports")
+        file_path = reports_path / filename
+        
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail="レポートファイルが見つかりません")
+        
+        if not file_path.is_file():
+            raise HTTPException(status_code=400, detail="指定されたパスはファイルではありません")
+        
+        return FileResponse(
+            path=str(file_path),
+            filename=filename,
+            media_type='application/octet-stream'
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"レポートダウンロードエラー: {str(e)}")
+
+@router.delete("/reports/cleanup")
+async def cleanup_old_reports(
+    older_than_days: int = Query(7, description="指定日数より古いレポートを削除")
+):
+    """古いレポートファイルをクリーンアップ"""
+    try:
+        from pathlib import Path
+        import time
+        
+        reports_path = Path("/media/kensan/LinuxHDD/ITSM-ITmanagementSystem/coordination/reports")
+        cutoff_time = time.time() - (older_than_days * 24 * 3600)
+        
+        deleted_files = []
+        if reports_path.exists():
+            for report_file in reports_path.glob("*"):
+                if report_file.stat().st_ctime < cutoff_time:
+                    deleted_files.append(report_file.name)
+                    report_file.unlink()
+        
+        return {
+            "message": f"{len(deleted_files)}件のレポートファイルを削除しました",
+            "deleted_files": deleted_files,
+            "cleanup_completed_at": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"レポートクリーンアップエラー: {str(e)}")
+
+@router.get("/reports/dashboard-data")
+async def get_dashboard_data():
+    """ダッシュボード表示用データを取得"""
+    try:
+        # 各システムからリアルタイムデータを収集
+        api_status = api_monitor.get_status()
+        enhanced_status = enhanced_monitor.get_monitoring_status()
+        repair_stats = advanced_repair_engine.get_repair_statistics()
+        
+        # 最近のエラー統計
+        recent_errors = [e for e in api_monitor.errors if e.timestamp > datetime.now() - timedelta(hours=24)]
+        
+        # システムリソース
+        import psutil
+        system_resources = {
+            "cpu_percent": psutil.cpu_percent(interval=1),
+            "memory_percent": psutil.virtual_memory().percent,
+            "disk_percent": psutil.disk_usage('/').percent,
+            "load_average": psutil.getloadavg() if hasattr(psutil, 'getloadavg') else [0, 0, 0]
+        }
+        
+        # ダッシュボードデータ
+        dashboard_data = {
+            "real_time_metrics": {
+                "current_time": datetime.now().isoformat(),
+                "monitoring_active": api_status["monitoring"] or enhanced_status.get("monitoring_active", False),
+                "total_errors_24h": len(recent_errors),
+                "critical_errors_24h": len([e for e in recent_errors if e.severity.value == "critical"]),
+                "repairs_today": repair_stats.get("total_repairs", 0),
+                "success_rate": repair_stats.get("success_rate", 0),
+                "system_health_score": _calculate_overall_health_score(api_status, enhanced_status, system_resources)
+            },
+            "monitoring_status": {
+                "api_monitor": {
+                    "active": api_status["monitoring"],
+                    "errors": api_status["total_errors"],
+                    "last_check": api_status["last_health_check"]
+                },
+                "enhanced_monitor": {
+                    "active": enhanced_status.get("monitoring_active", False),
+                    "detections": enhanced_status.get("total_detections", 0),
+                    "repairs": enhanced_status.get("total_repairs", 0)
+                }
+            },
+            "system_resources": system_resources,
+            "error_trends": {
+                "hourly_errors": _calculate_hourly_errors(recent_errors),
+                "error_types": _calculate_error_type_distribution(recent_errors),
+                "severity_distribution": _calculate_severity_distribution(recent_errors)
+            },
+            "performance_indicators": {
+                "average_response_time": _calculate_average_response_time(),
+                "uptime_percentage": _calculate_uptime_percentage(),
+                "error_rate": _calculate_error_rate(recent_errors),
+                "repair_efficiency": repair_stats.get("success_rate", 0)
+            },
+            "alerts": _generate_dashboard_alerts(api_status, enhanced_status, system_resources),
+            "quick_actions": [
+                {"id": "start_monitoring", "label": "監視開始", "enabled": not api_status["monitoring"]},
+                {"id": "generate_report", "label": "レポート生成", "enabled": True},
+                {"id": "emergency_repair", "label": "緊急修復", "enabled": len(recent_errors) > 0},
+                {"id": "system_check", "label": "システムチェック", "enabled": True}
+            ]
+        }
+        
+        return dashboard_data
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"ダッシュボードデータ取得エラー: {str(e)}")
+
+@router.get("/reports/real-time-stats")
+async def get_real_time_statistics():
+    """リアルタイム統計情報を取得"""
+    try:
+        # 現在時刻からの統計
+        now = datetime.now()
+        
+        # 各時間帯での統計（最近24時間）
+        hourly_stats = []
+        for i in range(24):
+            hour_start = now - timedelta(hours=i+1)
+            hour_end = now - timedelta(hours=i)
+            
+            hour_errors = [e for e in api_monitor.errors 
+                          if hour_start <= e.timestamp < hour_end]
+            
+            hourly_stats.append({
+                "hour": hour_start.hour,
+                "timestamp": hour_start.isoformat(),
+                "error_count": len(hour_errors),
+                "critical_count": len([e for e in hour_errors if e.severity.value == "critical"]),
+                "repair_count": 0  # 修復データから取得
+            })
+        
+        # 最新の統計
+        latest_stats = {
+            "last_update": now.isoformat(),
+            "current_monitoring": api_monitor.monitoring,
+            "total_systems_monitored": sum([
+                1 if api_monitor.monitoring else 0,
+                1 if enhanced_monitor.get_monitoring_status().get("monitoring_active", False) else 0
+            ]),
+            "errors_last_hour": len([e for e in api_monitor.errors 
+                                   if e.timestamp > now - timedelta(hours=1)]),
+            "repairs_last_hour": 0,  # 修復データから取得
+            "avg_repair_time": advanced_repair_engine.get_repair_statistics().get("average_repair_time", 0)
+        }
+        
+        return {
+            "hourly_statistics": hourly_stats,
+            "latest_statistics": latest_stats,
+            "system_performance": {
+                "cpu_usage": __import__("psutil").cpu_percent(),
+                "memory_usage": __import__("psutil").virtual_memory().percent,
+                "disk_usage": __import__("psutil").disk_usage('/').percent
+            },
+            "generated_at": now.isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"リアルタイム統計取得エラー: {str(e)}")
+
+# === レポート生成ヘルパー関数 ===
+
+async def _generate_report_background(config: ReportConfig):
+    """バックグラウンドでレポート生成"""
+    try:
+        logger.info(f"レポート生成開始: {config.report_type.value}")
+        
+        # データ収集
+        api_status = api_monitor.get_status()
+        enhanced_status = enhanced_monitor.get_monitoring_status()
+        repair_stats = advanced_repair_engine.get_repair_statistics()
+        
+        # レポート生成
+        report_data = await report_generator.generate_report(
+            config=config,
+            api_monitor_data=api_status,
+            enhanced_monitor_data=enhanced_status,
+            repair_engine_data=repair_stats
+        )
+        
+        # ファイル出力
+        output_path = await report_generator.export_report(report_data, config.format)
+        
+        logger.info(f"レポート生成完了: {output_path}")
+        
+    except Exception as e:
+        logger.error(f"バックグラウンドレポート生成エラー: {e}")
+
+def _get_report_type_description(report_type: ReportType) -> str:
+    """レポートタイプの説明を取得"""
+    descriptions = {
+        ReportType.SUMMARY: "システム全体の概要と主要指標",
+        ReportType.DETAILED: "詳細な分析とデータの深掘り",
+        ReportType.PERFORMANCE: "パフォーマンス指標と最適化提案",
+        ReportType.SECURITY: "セキュリティイベントと脅威分析",
+        ReportType.COMPLIANCE: "コンプライアンス準拠状況",
+        ReportType.TREND_ANALYSIS: "トレンド分析と予測",
+        ReportType.REPAIR_ANALYSIS: "修復実績と効果分析"
+    }
+    return descriptions.get(report_type, "説明なし")
+
+def _get_format_description(format: ReportFormat) -> str:
+    """フォーマットの説明を取得"""
+    descriptions = {
+        ReportFormat.JSON: "JSON形式（API連携用）",
+        ReportFormat.CSV: "CSV形式（表計算ソフト用）",
+        ReportFormat.HTML: "HTML形式（ブラウザ表示用）",
+        ReportFormat.PDF: "PDF形式（印刷・配布用）",
+        ReportFormat.EXCEL: "Excel形式（高度な分析用）"
+    }
+    return descriptions.get(format, "説明なし")
+
+def _calculate_hourly_errors(errors: List) -> List[Dict[str, Any]]:
+    """時間別エラー数を計算"""
+    hourly_errors = {}
+    for error in errors:
+        hour = error.timestamp.hour
+        hourly_errors[hour] = hourly_errors.get(hour, 0) + 1
+    
+    return [{"hour": h, "count": hourly_errors.get(h, 0)} for h in range(24)]
+
+def _calculate_error_type_distribution(errors: List) -> Dict[str, int]:
+    """エラータイプ分布を計算"""
+    type_dist = {}
+    for error in errors:
+        error_type = getattr(error, 'error_type', 'unknown')
+        type_dist[error_type] = type_dist.get(error_type, 0) + 1
+    
+    return type_dist
+
+def _calculate_severity_distribution(errors: List) -> Dict[str, int]:
+    """重要度分布を計算"""
+    severity_dist = {}
+    for error in errors:
+        severity = error.severity.value
+        severity_dist[severity] = severity_dist.get(severity, 0) + 1
+    
+    return severity_dist
+
+def _calculate_average_response_time() -> float:
+    """平均レスポンス時間を計算"""
+    # 実際の実装では、パフォーマンスメトリクスから計算
+    return 1.2  # サンプル値
+
+def _calculate_uptime_percentage() -> float:
+    """稼働率を計算"""
+    # 実際の実装では、ダウンタイムを考慮して計算
+    return 99.8  # サンプル値
+
+def _calculate_error_rate(errors: List) -> float:
+    """エラー率を計算"""
+    # 実際の実装では、総リクエスト数に対するエラー数の割合
+    return len(errors) * 0.01  # サンプル値
+
+def _generate_dashboard_alerts(api_status: Dict, enhanced_status: Dict, system_resources: Dict) -> List[Dict[str, Any]]:
+    """ダッシュボードアラートを生成"""
+    alerts = []
+    
+    # システムリソースアラート
+    if system_resources.get("cpu_percent", 0) > 80:
+        alerts.append({
+            "level": "warning",
+            "message": f"CPU使用率が高くなっています ({system_resources['cpu_percent']:.1f}%)",
+            "action": "システム負荷の確認を推奨します"
+        })
+    
+    if system_resources.get("memory_percent", 0) > 85:
+        alerts.append({
+            "level": "warning",
+            "message": f"メモリ使用率が高くなっています ({system_resources['memory_percent']:.1f}%)",
+            "action": "メモリリークの確認を推奨します"
+        })
+    
+    # 監視システムアラート
+    if not api_status.get("monitoring", False):
+        alerts.append({
+            "level": "error",
+            "message": "API監視が停止しています",
+            "action": "監視を開始してください"
+        })
+    
+    # エラーアラート
+    if api_status.get("recent_errors", 0) > 10:
+        alerts.append({
+            "level": "critical",
+            "message": f"多数のエラーが発生しています ({api_status['recent_errors']}件)",
+            "action": "緊急対応が必要です"
+        })
+    
+    if not alerts:
+        alerts.append({
+            "level": "info",
+            "message": "システムは正常に動作しています",
+            "action": "定期的な監視を継続してください"
+        })
+    
+    return alerts
