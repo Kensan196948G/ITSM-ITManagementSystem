@@ -221,3 +221,103 @@ export interface AuthContextType {
   refreshToken: () => Promise<void>
   clearError: () => void
 }
+
+// Detail Panel interfaces
+export interface DetailPanelItem {
+  id: string
+  type: 'ticket' | 'user' | 'dashboard' | 'incident' | 'problem'
+  title: string
+  subtitle?: string
+  data: any
+  metadata?: Record<string, any>
+}
+
+export interface DetailPanelState {
+  isOpen: boolean
+  item: DetailPanelItem | null
+  position: 'right' | 'bottom'
+  width: number
+  height: number
+}
+
+export interface DetailPanelProps {
+  isOpen: boolean
+  item: DetailPanelItem | null
+  onClose: () => void
+  position?: 'right' | 'bottom'
+  width?: number | string
+  maxWidth?: number | string
+  minWidth?: number | string
+}
+
+export interface DetailPanelContentProps {
+  item: DetailPanelItem
+  onEdit?: (item: DetailPanelItem) => void
+  onDelete?: (id: string) => void
+  onRefresh?: (id: string) => void
+}
+
+// Extended interfaces for detail display
+export interface TicketDetail extends Ticket {
+  history?: TicketHistoryEntry[]
+  relatedTickets?: Ticket[]
+  workLogs?: WorkLog[]
+  customFields?: CustomField[]
+}
+
+export interface UserDetail extends User {
+  assignedTickets?: Ticket[]
+  statistics?: UserStatistics
+  auditLog?: AuditLogEntry[]
+}
+
+export interface TicketHistoryEntry {
+  id: string
+  timestamp: string
+  action: string
+  field?: string
+  oldValue?: string
+  newValue?: string
+  userId: string
+  userName: string
+  comment?: string
+}
+
+export interface WorkLog {
+  id: string
+  timestamp: string
+  description: string
+  timeSpent: number
+  userId: string
+  userName: string
+  isInternal: boolean
+}
+
+export interface CustomField {
+  name: string
+  label: string
+  type: 'text' | 'number' | 'date' | 'select' | 'multiselect' | 'boolean'
+  value: any
+  options?: string[]
+  required?: boolean
+}
+
+export interface UserStatistics {
+  totalTicketsAssigned: number
+  totalTicketsResolved: number
+  averageResolutionTime: number
+  slaComplianceRate: number
+  currentWorkload: number
+  performanceRating: number
+}
+
+export interface AuditLogEntry {
+  id: string
+  timestamp: string
+  action: string
+  entityType: string
+  entityId: string
+  details: string
+  ipAddress?: string
+  userAgent?: string
+}

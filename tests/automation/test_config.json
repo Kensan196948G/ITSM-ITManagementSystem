@@ -1,0 +1,6 @@
+{
+  "test_mode": true,
+  "github_repo": "Kensan196948G/ITSM-ITManagementSystem",
+  "max_test_duration": 300,
+  "test_timeout": 60
+}

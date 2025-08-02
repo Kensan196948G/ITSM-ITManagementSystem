@@ -40,10 +40,12 @@ import {
 } from '@mui/icons-material'
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid'
 import { priorityColors, statusColors } from '../../theme/theme'
-import type { Ticket, TicketFilters, Priority, TicketStatus } from '../../types'
+import type { Ticket, TicketFilters, Priority, TicketStatus, DetailPanelItem } from '../../types'
+import { useDetailPanelContext } from '../../components/layout/Layout'
 
 const TicketList: React.FC = () => {
   const navigate = useNavigate()
+  const { openDetailPanel } = useDetailPanelContext()
   const [viewMode, setViewMode] = useState<'table' | 'card'>('table')
   const [searchQuery, setSearchQuery] = useState('')
   const [filterAnchor, setFilterAnchor] = useState<null | HTMLElement>(null)
@@ -144,6 +146,82 @@ const TicketList: React.FC = () => {
     return true
   })
 
+  // 詳細パネルを開く関数
+  const handleOpenDetailPanel = (ticket: Ticket, event?: React.MouseEvent) => {
+    if (event) {
+      event.stopPropagation()
+    }
+    
+    const detailItem: DetailPanelItem = {
+      id: ticket.id,
+      type: 'ticket',
+      title: ticket.title,
+      subtitle: `#${ticket.id} • ${ticket.category} • ${ticket.reporterName}`,
+      data: {
+        ...ticket,
+        // 拡張情報（実際のAPIから取得される）
+        history: [
+          {
+            id: '1',
+            timestamp: ticket.updatedAt,
+            action: 'チケット更新',
+            field: 'status',
+            oldValue: 'open',
+            newValue: ticket.status,
+            userId: ticket.assigneeId || '',
+            userName: ticket.assigneeName || 'システム',
+            comment: 'ステータスを更新しました',
+          },
+        ],
+        comments: [
+          {
+            id: '1',
+            content: 'このチケットを調査中です。',
+            authorId: ticket.assigneeId || '',
+            authorName: ticket.assigneeName || 'システム',
+            isInternal: false,
+            createdAt: ticket.updatedAt,
+            updatedAt: ticket.updatedAt,
+          },
+        ],
+        attachments: [],
+        workLogs: [
+          {
+            id: '1',
+            timestamp: ticket.updatedAt,
+            description: '初期調査を実施',
+            timeSpent: 30, // 分単位
+            userId: ticket.assigneeId || '',
+            userName: ticket.assigneeName || 'システム',
+            isInternal: false,
+          },
+        ],
+        customFields: [
+          {
+            name: 'impact',
+            label: '影響範囲',
+            type: 'select',
+            value: ticket.priority === 'critical' ? '全社' : '部分的',
+            options: ['全社', '部分的', '個人'],
+          },
+          {
+            name: 'urgency',
+            label: '緊急度',
+            type: 'select',
+            value: ticket.priority,
+            options: ['low', 'medium', 'high', 'critical'],
+          },
+        ],
+      },
+      metadata: {
+        lastViewed: new Date().toISOString(),
+        source: 'ticket-list',
+      },
+    }
+
+    openDetailPanel(detailItem, 'right')
+  }
+
   const getPriorityChip = (priority: Priority) => {
     const color = priorityColors[priority]
     const labels = {
@@ -221,7 +299,7 @@ const TicketList: React.FC = () => {
               cursor: 'pointer',
               '&:hover': { color: 'primary.main' },
             }}
-            onClick={() => navigate(`/tickets/${params.row.id}`)}
+            onClick={(e) => handleOpenDetailPanel(params.row, e)}
           >
             {params.value}
           </Typography>
@@ -301,7 +379,7 @@ const TicketList: React.FC = () => {
           transition: 'all 0.2s ease-in-out',
         },
       }}
-      onClick={() => navigate(`/tickets/${ticket.id}`)}
+      onClick={(e) => handleOpenDetailPanel(ticket, e)}
     >
       <CardContent sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
@@ -493,7 +571,7 @@ const TicketList: React.FC = () => {
             onPaginationModelChange={(model) => setPageSize(model.pageSize)}
             checkboxSelection
             disableRowSelectionOnClick
-            onRowClick={(params) => navigate(`/tickets/${params.id}`)}
+            onRowClick={(params, event) => handleOpenDetailPanel(params.row, event as React.MouseEvent)}
             sx={{
               '& .MuiDataGrid-row:hover': {
                 cursor: 'pointer',

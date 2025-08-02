@@ -1,0 +1,45 @@
+{
+  "report_metadata": {
+    "generated_at": "2025-08-02T08:48:24.777727",
+    "duration_seconds": 125.3,
+    "test_environment": "integration"
+  },
+  "executive_summary": {
+    "overall_status": "PASS",
+    "total_tests": 20,
+    "passed_tests": 18,
+    "failed_tests": 1,
+    "error_tests": 0,
+    "success_rate": 0.9
+  },
+  "quality_gates": {
+    "overall_status": "PASS",
+    "checks": [
+      {
+        "gate": "Success Rate",
+        "threshold": ">= 80%",
+        "actual": "90%",
+        "status": "PASS"
+      },
+      {
+        "gate": "Duration",
+        "threshold": "<= 15 min",
+        "actual": "2.1 min",
+        "status": "PASS"
+      }
+    ]
+  },
+  "test_suites": {
+    "github_actions": {
+      "test_suite": "GitHub Actions Test Suite",
+      "status": "PASS",
+      "total_tests": 8,
+      "passed": 8,
+      "failed": 0,
+      "success_rate": 1.0
+    }
+  },
+  "recommendations": [
+    "システムは正常に動作しています。"
+  ]
+}

@@ -10,7 +10,8 @@ from app.db.base import get_db
 from app.services.user_service import UserService
 from app.schemas.user import (
     UserCreate, UserUpdate, UserResponse, UserListResponse,
-    UserRoleUpdate, UserPermissionResponse
+    UserRoleUpdate, UserPermissionResponse, UserDetailResponse,
+    UserActivityResponse, AssignedTicketInfo
 )
 from app.schemas.common import SuccessResponse, APIError
 from app.api.v1.auth import get_current_user_id, require_permission
@@ -339,3 +340,193 @@ async def list_departments(
     """部署一覧を取得する"""
     service = UserService(db)
     return service.get_departments()
+
+
+@router.get(
+    "/{user_id}/detail",
+    response_model=UserDetailResponse,
+    summary="ユーザー詳細情報取得（詳細パネル用）",
+    description="詳細パネル表示のための統合されたユーザー詳細情報を取得します",
+    responses={
+        200: {"description": "ユーザー詳細情報を正常に取得しました"},
+        404: {"model": APIError, "description": "指定されたユーザーが見つかりません"},
+        500: {"model": APIError, "description": "サーバーエラーが発生しました"}
+    }
+)
+async def get_user_detail(
+    user_id: UUID,
+    include_tickets: bool = Query(True, description="担当チケットを含むか"),
+    include_performance: bool = Query(True, description="パフォーマンス統計を含むか"),
+    include_activities: bool = Query(True, description="最近の活動を含むか"),
+    include_team_info: bool = Query(True, description="チーム情報を含むか"),
+    ticket_limit: int = Query(10, ge=1, le=50, description="取得するチケット数"),
+    activity_limit: int = Query(10, ge=1, le=50, description="取得する活動数"),
+    db: Session = Depends(get_db),
+    current_user_id: UUID = Depends(get_current_user_id),
+    _: None = Depends(require_permission("users", "read"))
+) -> UserDetailResponse:
+    """詳細パネル用のユーザー詳細情報を取得する"""
+    service = UserService(db)
+    return service.get_user_detail(
+        user_id=user_id,
+        current_user_id=current_user_id,
+        include_tickets=include_tickets,
+        include_performance=include_performance,
+        include_activities=include_activities,
+        include_team_info=include_team_info,
+        ticket_limit=ticket_limit,
+        activity_limit=activity_limit
+    )
+
+
+@router.get(
+    "/{user_id}/assigned-tickets",
+    response_model=List[AssignedTicketInfo],
+    summary="ユーザー担当チケット一覧取得",
+    description="指定されたユーザーが担当するチケット一覧を取得します",
+    responses={
+        200: {"description": "担当チケット一覧を正常に取得しました"},
+        404: {"model": APIError, "description": "指定されたユーザーが見つかりません"},
+        500: {"model": APIError, "description": "サーバーエラーが発生しました"}
+    }
+)
+async def get_user_assigned_tickets(
+    user_id: UUID,
+    status_filter: Optional[List[str]] = Query(None, description="ステータスフィルター"),
+    priority_filter: Optional[List[str]] = Query(None, description="優先度フィルター"),
+    limit: int = Query(20, ge=1, le=100, description="取得件数"),
+    offset: int = Query(0, ge=0, description="オフセット"),
+    include_overdue_only: bool = Query(False, description="期限超過のみ取得"),
+    db: Session = Depends(get_db),
+    current_user_id: UUID = Depends(get_current_user_id),
+    _: None = Depends(require_permission("users", "read"))
+) -> List[AssignedTicketInfo]:
+    """ユーザーの担当チケット一覧を取得する"""
+    service = UserService(db)
+    return service.get_user_assigned_tickets(
+        user_id=user_id,
+        current_user_id=current_user_id,
+        status_filter=status_filter,
+        priority_filter=priority_filter,
+        limit=limit,
+        offset=offset,
+        include_overdue_only=include_overdue_only
+    )
+
+
+@router.get(
+    "/{user_id}/activities",
+    response_model=UserActivityResponse,
+    summary="ユーザー活動履歴取得",
+    description="指定されたユーザーの活動履歴を取得します",
+    responses={
+        200: {"description": "活動履歴を正常に取得しました"},
+        404: {"model": APIError, "description": "指定されたユーザーが見つかりません"},
+        500: {"model": APIError, "description": "サーバーエラーが発生しました"}
+    }
+)
+async def get_user_activities(
+    user_id: UUID,
+    activity_types: Optional[List[str]] = Query(None, description="活動タイプフィルター"),
+    date_from: Optional[datetime] = Query(None, description="開始日時"),
+    date_to: Optional[datetime] = Query(None, description="終了日時"),
+    limit: int = Query(50, ge=1, le=200, description="取得件数"),
+    offset: int = Query(0, ge=0, description="オフセット"),
+    db: Session = Depends(get_db),
+    current_user_id: UUID = Depends(get_current_user_id),
+    _: None = Depends(require_permission("users", "read"))
+) -> UserActivityResponse:
+    """ユーザーの活動履歴を取得する"""
+    service = UserService(db)
+    return service.get_user_activities(
+        user_id=user_id,
+        current_user_id=current_user_id,
+        activity_types=activity_types,
+        date_from=date_from,
+        date_to=date_to,
+        limit=limit,
+        offset=offset
+    )
+
+
+@router.get(
+    "/{user_id}/team-members",
+    response_model=List[Dict[str, Any]],
+    summary="チームメンバー取得",
+    description="指定されたユーザーと同じチームのメンバー一覧を取得します",
+    responses={
+        200: {"description": "チームメンバー一覧を正常に取得しました"},
+        404: {"model": APIError, "description": "指定されたユーザーが見つかりません"},
+        500: {"model": APIError, "description": "サーバーエラーが発生しました"}
+    }
+)
+async def get_team_members(
+    user_id: UUID,
+    include_performance: bool = Query(False, description="パフォーマンス統計を含むか"),
+    db: Session = Depends(get_db),
+    current_user_id: UUID = Depends(get_current_user_id),
+    _: None = Depends(require_permission("users", "read"))
+) -> List[Dict[str, Any]]:
+    """ユーザーのチームメンバーを取得する"""
+    service = UserService(db)
+    return service.get_team_members(
+        user_id=user_id,
+        current_user_id=current_user_id,
+        include_performance=include_performance
+    )
+
+
+@router.get(
+    "/{user_id}/subordinates",
+    response_model=List[Dict[str, Any]],
+    summary="部下一覧取得",
+    description="指定されたユーザーの部下一覧を取得します",
+    responses={
+        200: {"description": "部下一覧を正常に取得しました"},
+        404: {"model": APIError, "description": "指定されたユーザーが見つかりません"},
+        500: {"model": APIError, "description": "サーバーエラーが発生しました"}
+    }
+)
+async def get_subordinates(
+    user_id: UUID,
+    include_performance: bool = Query(False, description="パフォーマンス統計を含むか"),
+    recursive: bool = Query(False, description="階層的に部下を取得するか"),
+    db: Session = Depends(get_db),
+    current_user_id: UUID = Depends(get_current_user_id),
+    _: None = Depends(require_permission("users", "read"))
+) -> List[Dict[str, Any]]:
+    """ユーザーの部下一覧を取得する"""
+    service = UserService(db)
+    return service.get_subordinates(
+        user_id=user_id,
+        current_user_id=current_user_id,
+        include_performance=include_performance,
+        recursive=recursive
+    )
+
+
+@router.get(
+    "/{user_id}/workload",
+    response_model=Dict[str, Any],
+    summary="ユーザーワークロード取得",
+    description="指定されたユーザーの現在のワークロード情報を取得します",
+    responses={
+        200: {"description": "ワークロード情報を正常に取得しました"},
+        404: {"model": APIError, "description": "指定されたユーザーが見つかりません"},
+        500: {"model": APIError, "description": "サーバーエラーが発生しました"}
+    }
+)
+async def get_user_workload(
+    user_id: UUID,
+    include_predictions: bool = Query(False, description="予測情報を含むか"),
+    db: Session = Depends(get_db),
+    current_user_id: UUID = Depends(get_current_user_id),
+    _: None = Depends(require_permission("users", "read"))
+) -> Dict[str, Any]:
+    """ユーザーのワークロード情報を取得する"""
+    service = UserService(db)
+    return service.get_user_workload(
+        user_id=user_id,
+        current_user_id=current_user_id,
+        include_predictions=include_predictions
+    )

@@ -1,0 +1,48 @@
+{
+  "name": "itsm-backend",
+  "version": "1.0.0",
+  "description": "ITSM Backend API with FastAPI and Python tests",
+  "main": "main.py",
+  "scripts": {
+    "test": "python3 -m pytest tests/ -v --tb=short --cov=app --cov-report=html --cov-report=json",
+    "test:api": "pytest tests/api/ -v",
+    "test:unit": "pytest tests/unit/ -v",
+    "test:basic": "pytest tests/test_basic.py -v",
+    "test:coverage": "pytest tests/ --cov=app --cov-report=html --cov-report=json --cov-report=term-missing",
+    "test:watch": "pytest-watch tests/",
+    "lint": "flake8 app tests",
+    "format": "black app tests",
+    "install": "pip install -r requirements.txt",
+    "install:dev": "pip install -r requirements.txt pytest pytest-cov pytest-watch black flake8",
+    "start": "python run.py",
+    "dev": "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+  },
+  "dependencies": {
+    "fastapi": "^0.104.1",
+    "uvicorn": "^0.24.0",
+    "sqlalchemy": "^2.0.23",
+    "pydantic": "^2.5.0",
+    "python-multipart": "^0.0.6",
+    "python-jose": "^3.3.0",
+    "passlib": "^1.7.4",
+    "bcrypt": "^4.1.2"
+  },
+  "devDependencies": {
+    "pytest": "^7.4.3",
+    "pytest-cov": "^4.1.0",
+    "pytest-watch": "^4.2.0",
+    "black": "^23.11.0",
+    "flake8": "^6.1.0",
+    "httpx": "^0.25.2"
+  },
+  "keywords": ["itsm", "fastapi", "python", "api", "backend"],
+  "author": "ITSM Team",
+  "license": "MIT",
+  "engines": {
+    "python": ">=3.8"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kensan196948G/ITSM-ITManagementSystem"
+  }
+}

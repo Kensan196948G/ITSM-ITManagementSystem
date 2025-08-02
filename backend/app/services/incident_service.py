@@ -12,7 +12,9 @@ from fastapi import HTTPException, status
 from app.models.incident import Incident, IncidentHistory, IncidentWorkNote, IncidentStatus
 from app.schemas.incident import (
     IncidentCreate, IncidentUpdate, IncidentResponse, 
-    IncidentWorkNoteCreate, IncidentWorkNoteResponse, IncidentHistoryResponse
+    IncidentWorkNoteCreate, IncidentWorkNoteResponse, IncidentHistoryResponse,
+    IncidentDetailResponse, IncidentTimelineResponse, IncidentTimelineEntry,
+    IncidentFieldUpdate, IncidentBulkUpdate, IncidentCustomFieldsUpdate
 )
 from app.schemas.common import PaginationMeta, PaginationLinks
 
@@ -687,3 +689,488 @@ class IncidentService:
             updated_at=incident.updated_at,
             sla=sla_info
         )
+
+    # ===== 詳細パネル用の拡張メソッド =====
+
+    def get_incident_detail(
+        self,
+        incident_id: UUID,
+        current_user_id: UUID,
+        include_work_notes: bool = True,
+        include_histories: bool = True,
+        include_attachments: bool = True,
+        include_related: bool = True,
+        include_stats: bool = True
+    ) -> IncidentDetailResponse:
+        """詳細パネル用のインシデント詳細情報を取得する"""
+        try:
+            # 基本インシデント情報を取得
+            incident = self._get_incident_by_id(incident_id, current_user_id)
+            base_response = self._build_incident_response(incident)
+            
+            # 詳細情報を構築
+            detail_data = {
+                **base_response.model_dump(),
+                "work_notes": [],
+                "histories": [],
+                "attachments": [],
+                "related_incidents": [],
+                "stats": {},
+                "custom_fields": {},
+                "metadata": {
+                    "last_viewed": datetime.utcnow().isoformat(),
+                    "viewer_id": str(current_user_id)
+                }
+            }
+            
+            # 条件に応じて詳細情報を取得
+            if include_work_notes:
+                detail_data["work_notes"] = self.get_work_notes(incident_id, current_user_id, True)
+            
+            if include_histories:
+                detail_data["histories"] = self.get_incident_history(incident_id, current_user_id)
+            
+            if include_attachments:
+                detail_data["attachments"] = self.get_incident_attachments(incident_id, current_user_id)
+            
+            if include_related:
+                detail_data["related_incidents"] = self.get_related_incidents(incident_id, current_user_id)
+            
+            if include_stats:
+                detail_data["stats"] = self.get_incident_statistics(incident_id, current_user_id)
+            
+            return IncidentDetailResponse(**detail_data)
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error getting incident detail {incident_id}: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="インシデント詳細情報の取得中にエラーが発生しました"
+            )
+
+    def get_incident_timeline(
+        self,
+        incident_id: UUID,
+        current_user_id: UUID,
+        limit: int = 50,
+        offset: int = 0,
+        event_types: Optional[List[str]] = None
+    ) -> IncidentTimelineResponse:
+        """インシデントのタイムラインを取得する"""
+        try:
+            # インシデントの存在確認
+            incident = self._get_incident_by_id(incident_id, current_user_id)
+            
+            timeline_entries = []
+            
+            # 履歴からタイムラインエントリを生成
+            histories = self.db.query(IncidentHistory).filter(
+                IncidentHistory.incident_id == incident_id
+            ).order_by(desc(IncidentHistory.changed_at)).all()
+            
+            for history in histories:
+                timeline_entries.append(IncidentTimelineEntry(
+                    id=history.id,
+                    type="status_change" if history.field_name == "status" else "field_update",
+                    title=f"{history.field_name} updated",
+                    description=f"Changed from '{history.old_value}' to '{history.new_value}'",
+                    user={"id": history.changed_by, "display_name": "User", "email": "user@example.com"},
+                    timestamp=history.changed_at,
+                    details={
+                        "field_name": history.field_name,
+                        "old_value": history.old_value,
+                        "new_value": history.new_value
+                    }
+                ))
+            
+            # 作業ノートからタイムラインエントリを生成
+            work_notes = self.db.query(IncidentWorkNote).filter(
+                IncidentWorkNote.incident_id == incident_id
+            ).order_by(desc(IncidentWorkNote.created_at)).all()
+            
+            for note in work_notes:
+                timeline_entries.append(IncidentTimelineEntry(
+                    id=note.id,
+                    type="work_note",
+                    title="Work note added",
+                    description=note.content[:100] + "..." if len(note.content) > 100 else note.content,
+                    user={"id": note.created_by, "display_name": "User", "email": "user@example.com"},
+                    timestamp=note.created_at,
+                    details={
+                        "note_type": note.note_type,
+                        "is_public": note.is_public == "Y"
+                    }
+                ))
+            
+            # タイムスタンプでソート
+            timeline_entries.sort(key=lambda x: x.timestamp, reverse=True)
+            
+            # ページネーション適用
+            total_count = len(timeline_entries)
+            timeline_entries = timeline_entries[offset:offset + limit]
+            
+            return IncidentTimelineResponse(
+                incident_id=incident_id,
+                timeline=timeline_entries,
+                total_count=total_count
+            )
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error getting incident timeline {incident_id}: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="インシデントタイムラインの取得中にエラーが発生しました"
+            )
+
+    def get_incident_attachments(self, incident_id: UUID, current_user_id: UUID) -> List[Dict[str, Any]]:
+        """インシデントの添付ファイル一覧を取得する"""
+        try:
+            # インシデントの存在確認
+            incident = self._get_incident_by_id(incident_id, current_user_id)
+            
+            # 添付ファイルを取得（モデルが存在する場合）
+            # 現在は空のリストを返す
+            return []
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error getting incident attachments {incident_id}: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="添付ファイル一覧の取得中にエラーが発生しました"
+            )
+
+    def get_related_incidents(
+        self,
+        incident_id: UUID,
+        current_user_id: UUID,
+        relation_type: Optional[str] = None,
+        limit: int = 10
+    ) -> List[Dict[str, Any]]:
+        """関連インシデントを取得する"""
+        try:
+            # インシデントの存在確認
+            incident = self._get_incident_by_id(incident_id, current_user_id)
+            
+            # 関連インシデントのロジック（例：同じカテゴリ、同じ報告者など）
+            related_query = self.db.query(Incident).filter(
+                and_(
+                    Incident.id != incident_id,
+                    Incident.deleted_at.is_(None),
+                    or_(
+                        Incident.category_id == incident.category_id,
+                        Incident.reporter_id == incident.reporter_id,
+                        Incident.assignee_id == incident.assignee_id
+                    )
+                )
+            ).limit(limit)
+            
+            related_incidents = related_query.all()
+            
+            result = []
+            for related in related_incidents:
+                result.append({
+                    "id": related.id,
+                    "incident_number": related.incident_number,
+                    "title": related.title,
+                    "status": related.status,
+                    "priority": related.priority,
+                    "created_at": related.created_at,
+                    "relation_type": "same_category" if related.category_id == incident.category_id else "same_reporter"
+                })
+            
+            return result
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error getting related incidents {incident_id}: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="関連インシデントの取得中にエラーが発生しました"
+            )
+
+    def get_incident_statistics(self, incident_id: UUID, current_user_id: UUID) -> Dict[str, Any]:
+        """インシデントの統計情報を取得する"""
+        try:
+            # インシデントの存在確認
+            incident = self._get_incident_by_id(incident_id, current_user_id)
+            
+            # 基本統計を計算
+            stats = {
+                "age_hours": (datetime.utcnow() - incident.created_at).total_seconds() / 3600,
+                "work_notes_count": self.db.query(func.count(IncidentWorkNote.id)).filter(
+                    IncidentWorkNote.incident_id == incident_id
+                ).scalar() or 0,
+                "history_count": self.db.query(func.count(IncidentHistory.id)).filter(
+                    IncidentHistory.incident_id == incident_id
+                ).scalar() or 0,
+                "attachments_count": 0,  # 添付ファイルテーブルが実装されたら更新
+                "sla_status": self._calculate_sla_status(incident),
+                "time_to_resolution": None
+            }
+            
+            # 解決時間を計算（解決済みの場合）
+            if incident.resolved_at:
+                stats["time_to_resolution"] = (
+                    incident.resolved_at - incident.created_at
+                ).total_seconds() / 3600
+            
+            return stats
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error getting incident statistics {incident_id}: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="統計情報の取得中にエラーが発生しました"
+            )
+
+    def update_incident_field(
+        self,
+        incident_id: UUID,
+        field_update: IncidentFieldUpdate,
+        current_user_id: UUID
+    ) -> IncidentResponse:
+        """インシデントの単一フィールドを更新する"""
+        try:
+            # インシデントを取得
+            incident = self._get_incident_by_id(incident_id, current_user_id)
+            
+            # 更新前の値を保存
+            old_value = getattr(incident, field_update.field_name, None)
+            
+            # フィールドを更新
+            if hasattr(incident, field_update.field_name):
+                setattr(incident, field_update.field_name, field_update.field_value)
+                incident.updated_by = current_user_id
+                incident.updated_at = datetime.utcnow()
+                
+                # 履歴を記録
+                self._record_history(
+                    incident_id, 
+                    field_update.field_name, 
+                    old_value, 
+                    field_update.field_value, 
+                    current_user_id
+                )
+                
+                # コメントがある場合は作業ノートとして追加
+                if field_update.comment:
+                    comment_note = IncidentWorkNote(
+                        incident_id=incident_id,
+                        content=f"Field update: {field_update.field_name} - {field_update.comment}",
+                        note_type="field_update",
+                        is_public="Y",
+                        created_by=current_user_id
+                    )
+                    self.db.add(comment_note)
+                
+                self.db.commit()
+                self.db.refresh(incident)
+                
+                logger.info(f"Field {field_update.field_name} updated for incident {incident_id}")
+                
+                return self._build_incident_response(incident)
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"フィールド '{field_update.field_name}' は更新できません"
+                )
+                
+        except HTTPException:
+            raise
+        except Exception as e:
+            self.db.rollback()
+            logger.error(f"Error updating incident field {incident_id}: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="フィールド更新中にエラーが発生しました"
+            )
+
+    def update_incident_custom_fields(
+        self,
+        incident_id: UUID,
+        custom_fields_update: IncidentCustomFieldsUpdate,
+        current_user_id: UUID
+    ) -> IncidentResponse:
+        """インシデントのカスタムフィールドを更新する"""
+        try:
+            # インシデントを取得
+            incident = self._get_incident_by_id(incident_id, current_user_id)
+            
+            # カスタムフィールドの更新（実装は具体的なカスタムフィールドテーブル構造に依存）
+            # ここではプレースホルダー実装
+            
+            incident.updated_by = current_user_id
+            incident.updated_at = datetime.utcnow()
+            
+            self.db.commit()
+            self.db.refresh(incident)
+            
+            logger.info(f"Custom fields updated for incident {incident_id}")
+            
+            return self._build_incident_response(incident)
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            self.db.rollback()
+            logger.error(f"Error updating custom fields {incident_id}: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="カスタムフィールド更新中にエラーが発生しました"
+            )
+
+    def bulk_update_incidents(
+        self,
+        bulk_update: IncidentBulkUpdate,
+        current_user_id: UUID
+    ) -> Dict[str, Any]:
+        """インシデントを一括更新する"""
+        try:
+            updated_count = 0
+            failed_updates = []
+            
+            for incident_id in bulk_update.incident_ids:
+                try:
+                    # インシデントを取得
+                    incident = self._get_incident_by_id(incident_id, current_user_id)
+                    
+                    # 更新内容を適用
+                    for field, value in bulk_update.updates.items():
+                        if hasattr(incident, field):
+                            old_value = getattr(incident, field)
+                            setattr(incident, field, value)
+                            
+                            # 履歴を記録
+                            self._record_history(incident_id, field, old_value, value, current_user_id)
+                    
+                    incident.updated_by = current_user_id
+                    incident.updated_at = datetime.utcnow()
+                    
+                    # コメントがある場合は作業ノートとして追加
+                    if bulk_update.comment:
+                        comment_note = IncidentWorkNote(
+                            incident_id=incident_id,
+                            content=f"Bulk update: {bulk_update.comment}",
+                            note_type="bulk_update",
+                            is_public="Y",
+                            created_by=current_user_id
+                        )
+                        self.db.add(comment_note)
+                    
+                    updated_count += 1
+                    
+                except Exception as e:
+                    logger.error(f"Failed to update incident {incident_id}: {str(e)}")
+                    failed_updates.append({
+                        "incident_id": str(incident_id),
+                        "error": str(e)
+                    })
+            
+            self.db.commit()
+            
+            logger.info(f"Bulk update completed: {updated_count} incidents updated")
+            
+            return {
+                "updated_count": updated_count,
+                "failed_count": len(failed_updates),
+                "failed_updates": failed_updates,
+                "total_requested": len(bulk_update.incident_ids)
+            }
+            
+        except Exception as e:
+            self.db.rollback()
+            logger.error(f"Error in bulk update: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="一括更新中にエラーが発生しました"
+            )
+
+    def execute_quick_action(
+        self,
+        incident_id: UUID,
+        action: str,
+        parameters: Dict[str, Any],
+        current_user_id: UUID
+    ) -> Dict[str, Any]:
+        """クイックアクションを実行する"""
+        try:
+            # インシデントを取得
+            incident = self._get_incident_by_id(incident_id, current_user_id)
+            
+            result = {"action": action, "success": True, "message": ""}
+            
+            # アクション別処理
+            if action == "assign_to_me":
+                incident.assignee_id = current_user_id
+                result["message"] = "インシデントが自分に割り当てられました"
+                
+            elif action == "escalate":
+                # エスカレーション処理
+                if incident.priority == "low":
+                    incident.priority = "medium"
+                elif incident.priority == "medium":
+                    incident.priority = "high"
+                elif incident.priority == "high":
+                    incident.priority = "critical"
+                result["message"] = f"優先度が {incident.priority} にエスカレートされました"
+                
+            elif action == "start_work":
+                incident.status = IncidentStatus.IN_PROGRESS
+                if not incident.responded_at:
+                    incident.responded_at = datetime.utcnow()
+                result["message"] = "作業を開始しました"
+                
+            elif action == "resolve":
+                incident.status = IncidentStatus.RESOLVED
+                incident.resolved_at = datetime.utcnow()
+                if parameters.get("resolution"):
+                    incident.resolution = parameters["resolution"]
+                result["message"] = "インシデントが解決されました"
+                
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"不明なアクション: {action}"
+                )
+            
+            incident.updated_by = current_user_id
+            incident.updated_at = datetime.utcnow()
+            
+            # 履歴を記録
+            self._record_history(incident_id, "quick_action", None, action, current_user_id)
+            
+            self.db.commit()
+            
+            logger.info(f"Quick action '{action}' executed for incident {incident_id}")
+            
+            return result
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            self.db.rollback()
+            logger.error(f"Error executing quick action {action} for incident {incident_id}: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="クイックアクション実行中にエラーが発生しました"
+            )
+
+    def _calculate_sla_status(self, incident: Incident) -> str:
+        """SLAステータスを計算する"""
+        now = datetime.utcnow()
+        
+        if incident.resolution_due_at and now > incident.resolution_due_at:
+            return "violated"
+        elif incident.resolution_due_at and now > incident.resolution_due_at - timedelta(hours=2):
+            return "at_risk"
+        else:
+            return "compliant"

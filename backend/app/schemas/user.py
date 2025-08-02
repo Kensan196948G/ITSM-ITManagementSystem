@@ -213,3 +213,89 @@ class NotificationSettings(BaseModel):
     incident_resolved: bool = Field(True, description="インシデント解決通知")
     sla_violations: bool = Field(True, description="SLA違反通知")
     system_maintenance: bool = Field(True, description="システムメンテナンス通知")
+
+
+class UserTicketSummary(BaseModel):
+    """ユーザーチケットサマリースキーマ"""
+    total_assigned: int = Field(0, description="総担当チケット数")
+    open_tickets: int = Field(0, description="未解決チケット数")
+    in_progress_tickets: int = Field(0, description="進行中チケット数")
+    resolved_today: int = Field(0, description="今日解決したチケット数")
+    overdue_tickets: int = Field(0, description="期限超過チケット数")
+
+
+class UserPerformanceMetrics(BaseModel):
+    """ユーザーパフォーマンス指標スキーマ"""
+    avg_resolution_time: Optional[float] = Field(None, description="平均解決時間（時間）")
+    sla_compliance_rate: Optional[float] = Field(None, description="SLA遵守率（%）")
+    tickets_resolved_last_30_days: int = Field(0, description="過去30日の解決チケット数")
+    customer_satisfaction_score: Optional[float] = Field(None, description="顧客満足度スコア")
+    first_contact_resolution_rate: Optional[float] = Field(None, description="初回解決率（%）")
+
+
+class AssignedTicketInfo(BaseModel):
+    """担当チケット情報スキーマ"""
+    id: UUID
+    incident_number: str
+    title: str
+    status: str
+    priority: str
+    created_at: datetime
+    due_date: Optional[datetime]
+    is_overdue: bool = False
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserDetailResponse(UserResponse):
+    """ユーザー詳細レスポンススキーマ（詳細パネル用）"""
+    # 基本情報は UserResponse から継承
+    
+    # 詳細統計情報
+    ticket_summary: UserTicketSummary = Field(default_factory=UserTicketSummary)
+    performance_metrics: UserPerformanceMetrics = Field(default_factory=UserPerformanceMetrics)
+    
+    # 担当チケット一覧
+    assigned_tickets: List[AssignedTicketInfo] = Field(default_factory=list)
+    
+    # 最近の活動
+    recent_activities: List[dict] = Field(default_factory=list)
+    
+    # チーム・部署情報
+    team_info: Optional[dict] = Field(None, description="チーム情報")
+    department_info: Optional[dict] = Field(None, description="部署情報")
+    
+    # 上司・部下情報
+    manager_info: Optional[dict] = Field(None, description="上司情報")
+    subordinates: List[dict] = Field(default_factory=list, description="部下一覧")
+    
+    # 設定・権限情報
+    preferences: dict = Field(default_factory=dict, description="ユーザー設定")
+    notification_settings: NotificationSettings = Field(default_factory=NotificationSettings)
+    
+    # カスタムフィールド
+    custom_fields: dict = Field(default_factory=dict)
+    
+    # メタデータ
+    metadata: dict = Field(default_factory=dict)
+
+
+class UserActivityLog(BaseModel):
+    """ユーザー活動ログスキーマ"""
+    id: UUID
+    user_id: UUID
+    activity_type: str  # 'login', 'ticket_created', 'ticket_updated', 'ticket_resolved'
+    description: str
+    resource_type: Optional[str] = None  # 'incident', 'problem', 'change'
+    resource_id: Optional[UUID] = None
+    timestamp: datetime
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+
+
+class UserActivityResponse(BaseModel):
+    """ユーザー活動レスポンススキーマ"""
+    user_id: UUID
+    activities: List[UserActivityLog]
+    total_count: int
+    date_range: dict

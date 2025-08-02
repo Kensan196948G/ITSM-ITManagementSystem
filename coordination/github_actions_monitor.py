@@ -196,11 +196,27 @@ class GitHubActionsMonitor:
             return []
 
     async def get_workflow_logs(self, run_id: str) -> str:
-        """ワークフローログを取得"""
+        """ワークフローログを取得（UTF-8エンコーディング対応）"""
         try:
             cmd = ["gh", "api", f"repos/{self.repo_owner}/{self.repo_name}/actions/runs/{run_id}/logs"]
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-            return result.stdout
+            result = subprocess.run(cmd, capture_output=True, timeout=30)
+            
+            if result.returncode == 0:
+                # バイナリデータを安全にデコード
+                try:
+                    return result.stdout.decode('utf-8')
+                except UnicodeDecodeError:
+                    try:
+                        return result.stdout.decode('utf-8', errors='ignore')
+                    except Exception:
+                        return result.stdout.decode('latin-1', errors='ignore')
+            else:
+                self.logger.warning(f"Failed to get logs for run {run_id}, status: {result.returncode}")
+                return ""
+                
+        except subprocess.TimeoutExpired:
+            self.logger.warning(f"Timeout getting logs for run {run_id}")
+            return ""
         except Exception as e:
             self.logger.error(f"Failed to get logs for run {run_id}: {e}")
             return ""

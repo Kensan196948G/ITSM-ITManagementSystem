@@ -17,9 +17,9 @@ from typing import Dict, List, Optional, Any
 import traceback
 
 # ローカルモジュールのインポート
-from github_actions_monitor import GitHubActionsMonitor
-from error_pattern_analyzer import ErrorPatternAnalyzer
-from auto_repair_engine import AutoRepairEngine
+from coordination.github_actions_monitor import GitHubActionsMonitor
+from coordination.error_pattern_analyzer import ErrorPatternAnalyzer
+from coordination.auto_repair_engine import AutoRepairEngine
 
 class RealtimeRepairController:
     def __init__(self):
@@ -263,7 +263,7 @@ class RealtimeRepairController:
         }
         
         with open(state_file, 'w') as f:
-            json.dump(current_state, f, indent=2)
+            json.dump(current_state, f, indent=2, default=str)
 
     async def generate_status_report(self) -> Dict[str, Any]:
         """ステータスレポートを生成"""
@@ -430,7 +430,7 @@ The system will continue monitoring for new issues.
 ⏱️ Total runtime: {str(timedelta(seconds=int((datetime.now() - self.state['start_time']).total_seconds())))}
 
 Error breakdown:
-{json.dumps(error_summary, indent=2)}
+{json.dumps(error_summary, indent=2, default=str)}
 
 Manual intervention may be required.
         """
@@ -462,14 +462,14 @@ async def main():
     try:
         # 初期状態レポート
         initial_report = await controller.generate_status_report()
-        print(f"📊 Initial Status: {json.dumps(initial_report, indent=2)}")
+        print(f"📊 Initial Status: {json.dumps(initial_report, indent=2, default=str)}")
         
         # メイン制御ループ開始
         await controller.start()
         
         # 最終状態レポート
         final_report = await controller.generate_status_report()
-        print(f"📊 Final Status: {json.dumps(final_report, indent=2)}")
+        print(f"📊 Final Status: {json.dumps(final_report, indent=2, default=str)}")
         
     except KeyboardInterrupt:
         print("\n🛑 System stopped by user")
