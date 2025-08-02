@@ -1,0 +1,9 @@
+{
+  "monitor_start": "2025-08-02T20:05:52.000000",
+  "consecutive_failures": 0,
+  "last_check": "2025-08-02T20:05:52.000000",
+  "total_checks": 0,
+  "failures_detected": 0,
+  "repairs_triggered": 0,
+  "active": true
+}

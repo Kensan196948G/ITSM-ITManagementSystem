@@ -76,14 +76,14 @@ jobs:
             # Get recent workflow runs (last 10)
             local runs=$(gh run list --limit 10 --json status,conclusion,workflowName,createdAt,url)
             
-            # Check for failed runs in the last 10 minutes
-            local recent_failures=$(echo "$runs" | jq -r '.[] | select(.conclusion == "failure" and (.createdAt | fromdateiso8601) > (now - 600)) | .workflowName' | wc -l)
+            # Check for failed runs (excluding self)
+            local recent_failures=$(echo "$runs" | jq -r '.[] | select(.conclusion == "failure" and .workflowName != "ITSM CI/CD Monitor - Auto-Repair Detection") | .workflowName' | wc -l)
             
             if [ "$recent_failures" -gt 0 ]; then
               echo "⚠️ Detected $recent_failures recent CI failures"
               
               # Get failure details
-              local failure_details=$(echo "$runs" | jq -r '.[] | select(.conclusion == "failure") | "Workflow: \(.workflowName), URL: \(.url)"')
+              local failure_details=$(echo "$runs" | jq -r '.[] | select(.conclusion == "failure" and .workflowName != "ITSM CI/CD Monitor - Auto-Repair Detection") | "Workflow: \(.workflowName), URL: \(.url)"')
               
               echo "Failure details:"
               echo "$failure_details"
