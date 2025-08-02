@@ -1,4 +1,9 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+/**
+ * システム監視設定ページ
+ * ログ設定、パフォーマンス監視、アラート設定、システムヘルス
+ */
+import React from 'react';
 import { Box, Typography, Card, CardContent, CardHeader, Grid, Alert, } from '@mui/material';
 import { MonitorHeart as MonitorIcon } from '@mui/icons-material';
 const MonitoringSettings = ({ settings }) => {

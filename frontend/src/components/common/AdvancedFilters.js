@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, FormControl, InputLabel, Select, MenuItem, TextField, Chip, Box, Typography, OutlinedInput, FormControlLabel, Checkbox, IconButton, Tooltip, Tabs, Tab, List, ListItem, ListItemText, ListItemSecondaryAction, } from '@mui/material';
 import { Close as CloseIcon, Refresh as RefreshIcon, FilterAlt as FilterIcon, Delete as DeleteIcon, Bookmark as BookmarkIcon, } from '@mui/icons-material';
 const AdvancedFilters = ({ open, onClose, onApply, filterType, initialFilters = {}, savedFilters = [], onSaveFilter, onLoadFilter, onDeleteFilter, }) => {

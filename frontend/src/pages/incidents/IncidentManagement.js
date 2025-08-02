@@ -3,7 +3,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
  * インシデント管理ページ
  * 包括的なインシデント管理機能を提供
  */
-import { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Box, Grid, Typography, Card, CardContent, Avatar, IconButton, Chip, useTheme, Tabs, Tab, Button, useMediaQuery, Stack, Alert, Tooltip, FormControl, InputLabel, Select, MenuItem, Fab, alpha, CircularProgress, Paper, } from '@mui/material';
 import { BugReport as IncidentIcon, Warning as WarningIcon, CheckCircle as CheckCircleIcon, Schedule as ScheduleIcon, TrendingUp as TrendingUpIcon, Refresh as RefreshIcon, Add as AddIcon, Assignment as AssignmentIcon, PlayArrow as StartIcon, Done as CompleteIcon, Person as PersonIcon, AccessTime as TimeIcon, ViewList as ListViewIcon, ViewModule as CardViewIcon, Escalator as EscalateIcon, } from '@mui/icons-material';
 import { priorityColors, statusColors } from '../../theme/theme';

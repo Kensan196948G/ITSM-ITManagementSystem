@@ -1,4 +1,9 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+/**
+ * SLA設定ページ
+ * 優先度別SLA、営業時間設定、エスカレーション設定、SLA例外管理
+ */
+import React from 'react';
 import { Box, Typography, Card, CardContent, CardHeader, Grid, Alert, } from '@mui/material';
 import { Timer as TimerIcon } from '@mui/icons-material';
 const SLASettings = ({ settings }) => {

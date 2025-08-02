@@ -1,4 +1,9 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+/**
+ * ワークフロー設定ページ
+ * インシデント、問題管理、変更管理、承認フローワークフロー
+ */
+import React from 'react';
 import { Box, Typography, Card, CardContent, CardHeader, Grid, Alert, } from '@mui/material';
 import { Timeline as WorkFlowIcon } from '@mui/icons-material';
 const WorkflowSettings = ({ settings }) => {

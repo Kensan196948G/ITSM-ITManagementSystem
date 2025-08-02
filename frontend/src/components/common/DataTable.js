@@ -3,7 +3,7 @@ import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-run
  * 高度なデータテーブルコンポーネント
  * ソート、フィルタリング、検索、ページネーション、エクスポート機能を提供
  */
-import { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Box, Card, CardContent, CardHeader, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, TableSortLabel, TextField, IconButton, Menu, MenuItem, FormControl, InputLabel, Select, Typography, Checkbox, useTheme, Stack, } from '@mui/material';
 import { MoreVert as MoreVertIcon, Search as SearchIcon, GetApp as ExportIcon, Refresh as RefreshIcon, } from '@mui/icons-material';
 function DataTable({ data, columns, title, subtitle, loading = false, searchable = true, filterable = true, exportable = true, selectable = false, dense = false, stickyHeader = false, initialPageSize = 10, rowsPerPageOptions = [5, 10, 25, 50], emptyStateMessage = 'データがありません', actions, rowActions, onRowClick, onRowSelect, onRefresh, onExport, className, }) {

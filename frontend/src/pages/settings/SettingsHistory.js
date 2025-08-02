@@ -3,7 +3,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
  * 設定変更履歴コンポーネント
  * 設定変更の履歴を表示・管理
  */
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Chip, TextField, FormControl, InputLabel, Select, MenuItem, Button, Alert, CircularProgress, } from '@mui/material';
 import { History as HistoryIcon, Person as PersonIcon, Schedule as ScheduleIcon, } from '@mui/icons-material';
 import { useSystemSettings } from '../../hooks/useSystemSettings';
