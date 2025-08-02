@@ -867,6 +867,129 @@ export const itsmMenuStructure: MenuSection[] = [
     ],
   },
 
+  // CI/CD・自動修復管理
+  {
+    id: 'cicd-automation',
+    title: 'CI/CD・自動修復管理',
+    items: [
+      {
+        id: 'cicd-dashboard',
+        path: '/cicd/dashboard',
+        label: 'CI/CD自動修復ダッシュボード',
+        icon: { name: 'AutoFixHigh' },
+        description: '無限ループ修復システムの監視ダッシュボード',
+        quickAccess: true,
+        badge: { text: 'LIVE', color: 'success' },
+      },
+      {
+        id: 'workflow-manager',
+        path: '/cicd/workflows',
+        label: 'ワークフロー管理',
+        icon: { name: 'Build' },
+        description: 'CI/CDワークフローの作成・管理',
+        children: [
+          {
+            id: 'workflow-list',
+            path: '/cicd/workflows/list',
+            label: 'ワークフロー一覧',
+            icon: { name: 'ViewList' },
+          },
+          {
+            id: 'workflow-create',
+            path: '/cicd/workflows/create',
+            label: '新規作成',
+            icon: { name: 'Add' },
+          },
+          {
+            id: 'workflow-templates',
+            path: '/cicd/workflows/templates',
+            label: 'テンプレート',
+            icon: { name: 'LibraryBooks' },
+          },
+        ],
+      },
+      {
+        id: 'repair-monitor',
+        path: '/cicd/repair-monitor',
+        label: '修復監視システム',
+        icon: { name: 'MonitorHeart' },
+        description: 'リアルタイム修復状況の監視',
+        badge: { count: 3, color: 'warning' },
+      },
+      {
+        id: 'system-health',
+        path: '/cicd/system-health',
+        label: 'システムヘルス',
+        icon: { name: 'Speed' },
+        description: 'システム全体の健康状態監視',
+      },
+      {
+        id: 'cicd-logs',
+        path: '/cicd/logs',
+        label: 'CI/CDログ',
+        icon: { name: 'Description' },
+        description: 'ワークフロー実行ログの表示・分析',
+        children: [
+          {
+            id: 'logs-realtime',
+            path: '/cicd/logs/realtime',
+            label: 'リアルタイムログ',
+            icon: { name: 'Timeline' },
+          },
+          {
+            id: 'logs-history',
+            path: '/cicd/logs/history',
+            label: 'ログ履歴',
+            icon: { name: 'History' },
+          },
+          {
+            id: 'logs-search',
+            path: '/cicd/logs/search',
+            label: 'ログ検索',
+            icon: { name: 'Search' },
+          },
+        ],
+      },
+      {
+        id: 'github-integration',
+        path: '/cicd/github',
+        label: 'GitHub連携',
+        icon: { name: 'GitHub' },
+        description: 'GitHub Actionsとの連携管理',
+        permission: { roles: ['admin', 'developer'] },
+      },
+      {
+        id: 'cicd-settings',
+        path: '/cicd/settings',
+        label: 'CI/CD設定',
+        icon: { name: 'Settings' },
+        description: '自動修復システムの設定管理',
+        permission: { roles: ['admin'] },
+        children: [
+          {
+            id: 'repair-config',
+            path: '/cicd/settings/repair',
+            label: '修復設定',
+            icon: { name: 'Tune' },
+          },
+          {
+            id: 'notification-config',
+            path: '/cicd/settings/notifications',
+            label: '通知設定',
+            icon: { name: 'Notifications' },
+          },
+          {
+            id: 'webhook-config',
+            path: '/cicd/settings/webhooks',
+            label: 'Webhook設定',
+            icon: { name: 'Link' },
+          },
+        ],
+        dividerAfter: true,
+      },
+    ],
+  },
+
   // ナレッジ管理
   {
     id: 'knowledge-management',
