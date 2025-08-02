@@ -77,7 +77,7 @@ jobs:
             local runs=$(gh run list --limit 10 --json status,conclusion,workflowName,createdAt,url)
             
             # Check for failed runs in the last 10 minutes
-            local recent_failures=$(echo "$runs" | jq -r '.[] | select(.conclusion == "failure" and (.createdAt | fromdateiso8601) > (now - 600)) | .workflowName' | wc -l)
+            local recent_failures=$(echo "$runs" | jq -r '.[] | select(.conclusion == "failure") | select(.createdAt) | .workflowName' | wc -l)
             
             if [ "$recent_failures" -gt 0 ]; then
               echo "⚠️ Detected $recent_failures recent CI failures"
@@ -154,8 +154,8 @@ jobs:
       - name: Update Infinite Loop Integration
         run: |
           # Read current infinite loop state
-          local current_loop=$(jq -r '.loop_count // 256' $INFINITE_LOOP_STATE)
-          local total_errors=$(jq -r '.total_errors_fixed // 768' $INFINITE_LOOP_STATE)
+          current_loop=$(jq -r '.loop_count // 256' $INFINITE_LOOP_STATE)
+          total_errors=$(jq -r '.total_errors_fixed // 768' $INFINITE_LOOP_STATE)
           
           echo "Current infinite loop: #$current_loop (${total_errors} total errors fixed)"
           
@@ -174,11 +174,11 @@ jobs:
 
       - name: Generate Monitor Report
         run: |
-          local monitor_state=$(cat .claude-flow/monitor-state.json)
-          local consecutive_failures=$(echo "$monitor_state" | jq -r '.consecutive_failures')
-          local total_checks=$(echo "$monitor_state" | jq -r '.total_checks')
-          local failures_detected=$(echo "$monitor_state" | jq -r '.failures_detected')
-          local repairs_triggered=$(echo "$monitor_state" | jq -r '.repairs_triggered')
+          monitor_state=$(cat .claude-flow/monitor-state.json)
+          consecutive_failures=$(echo "$monitor_state" | jq -r '.consecutive_failures')
+          total_checks=$(echo "$monitor_state" | jq -r '.total_checks')
+          failures_detected=$(echo "$monitor_state" | jq -r '.failures_detected')
+          repairs_triggered=$(echo "$monitor_state" | jq -r '.repairs_triggered')
           
           echo "## 🔍 CI Monitor Report - $(date)"
           echo ""
@@ -219,8 +219,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          local status="monitoring"
-          local consecutive_failures=$(jq -r '.consecutive_failures' .claude-flow/monitor-state.json)
+          status="monitoring"
+          consecutive_failures=$(jq -r '.consecutive_failures' .claude-flow/monitor-state.json)
           
           if [ "$consecutive_failures" -ge "$MAX_CONSECUTIVE_FAILURES" ]; then
             status="repair_triggered"
@@ -230,8 +230,8 @@ jobs:
           fi
           
           # Create or update monitoring issue
-          local issue_title="🔍 CI Monitor Status - $(date +%Y-%m-%d)"
-          local existing_issue=$(gh issue list --label "ci-monitor" --state open --limit 1 --json number --jq '.[0].number // empty')
+          issue_title="🔍 CI Monitor Status - $(date +%Y-%m-%d)"
+          existing_issue=$(gh issue list --label "ci-monitor" --state open --limit 1 --json number --jq '.[0].number // empty')
           
           if [ -n "$existing_issue" ]; then
             echo "Updating existing monitor issue #$existing_issue"
