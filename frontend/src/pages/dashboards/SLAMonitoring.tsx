@@ -23,10 +23,14 @@ import {
   NetworkCheck as NetworkIcon, Apps as AppsIcon, Hardware as HardwareIcon
 } from '@mui/icons-material'
 import { SLAData, Ticket, CategorySLAStats, EscalationEvent } from '../../types/dashboard'
-import MetricCard from '../../components/dashboard/MetricCard'
-import ChartCard from '../../components/dashboard/ChartCard'
 import DataTable, { TableColumn } from '../../components/common/DataTable'
 import { gradients, animations, chartColors } from '../../theme/theme'
+
+// CircularProgress component placeholder
+const CircularProgress: React.FC<any> = () => <div>Chart placeholder</div>
+
+// HeatmapChart component placeholder  
+const HeatmapChart: React.FC<any> = () => <div>Heatmap placeholder</div>
 
 const SLAMonitoring: React.FC = React.memo(() => {
   const [data, setData] = useState<SLAData | null>(null)
@@ -171,13 +175,7 @@ const SLAMonitoring: React.FC = React.memo(() => {
     return heatmapDataArray
   }, [])
 
-  const COLORS = ['#10b981', '#f59e0b', '#ef4444', '#6b7280']
-  const PRIORITY_COLORS = {
-    critical: '#dc2626',
-    high: '#f59e0b',
-    medium: '#3b82f6',
-    low: '#10b981'
-  }
+  // Removed unused constants - using theme colors instead
 
   const getPriorityLabel = (priority: string) => {
     const labels: { [key: string]: string } = {
@@ -378,6 +376,13 @@ const SLAMonitoring: React.FC = React.memo(() => {
     violated: stats.violated,
     complianceRate: ((stats.onTime / stats.total) * 100).toFixed(1)
   }))
+
+  const PRIORITY_COLORS = {
+    critical: '#dc2626',
+    high: '#f59e0b',
+    medium: '#3b82f6',
+    low: '#10b981'
+  }
 
   return (
     <Box sx={{ p: 3 }}>
@@ -1017,59 +1022,226 @@ const SLAMonitoring: React.FC = React.memo(() => {
           </RichChartCard>
         </Grid>
 
-        {/* SLA遵守率 - 円形プログレス */}
-        <ChartCard title="⭐ 全体SLA遵守状況" subtitle="グラデーション付き円形プログレス">
-          <div className="flex flex-col items-center space-y-6">
-            <CircularProgress
-              value={data.complianceRate}
-              max={100}
-              size={200}
-              strokeWidth={12}
-              label="SLA遵守率"
-              showPercentage={true}
-              animated={true}
-              showTrail={true}
-              gradientColors={{
-                start: data.complianceRate >= 95 ? '#10B981' : data.complianceRate >= 90 ? '#F59E0B' : '#EF4444',
-                end: data.complianceRate >= 95 ? '#059669' : data.complianceRate >= 90 ? '#D97706' : '#DC2626'
-              }}
-            />
-            
-            {/* 詳細統計 */}
-            <div className="grid grid-cols-2 gap-6 w-full">
-              <div className="text-center p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-                <div className="text-2xl font-bold text-green-600">
-                  {Math.round((data.complianceRate / 100) * 
-                    Object.values(data.priorityBreakdown).reduce((sum, p) => sum + p.total, 0))}
-                </div>
-                <div className="text-sm text-green-700">遵守チケット</div>
-              </div>
-              <div className="text-center p-4 bg-gradient-to-r from-red-50 to-rose-50 rounded-lg border border-red-200">
-                <div className="text-2xl font-bold text-red-600">{data.violationCount}</div>
-                <div className="text-sm text-red-700">違反チケット</div>
-              </div>
-            </div>
-          </div>
-        </ChartCard>
-      </div>
+        {/* 全体SLA遵守状況 */}
+        <Grid item xs={12} md={6}>
+          <RichChartCard 
+            title="全体SLA遵守状況" 
+            subtitle="グラデーション付き円形プログレス"
+            icon={<SpeedIcon />}
+            actions={
+              <Stack direction="row" spacing={1}>
+                <IconButton size="small">
+                  <AnalyticsIcon />
+                </IconButton>
+                <IconButton size="small">
+                  <ShareIcon />
+                </IconButton>
+              </Stack>
+            }
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+              <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                <MuiCircularProgress
+                  variant="determinate"
+                  value={data.complianceRate}
+                  size={180}
+                  thickness={8}
+                  sx={{
+                    color: data.complianceRate >= 95 ? 'success.main' : 
+                           data.complianceRate >= 90 ? 'warning.main' : 'error.main',
+                    '& .MuiCircularProgress-circle': {
+                      strokeLinecap: 'round'
+                    }
+                  }}
+                />
+                <Box sx={{
+                  top: 0,
+                  left: 0,
+                  bottom: 0,
+                  right: 0,
+                  position: 'absolute',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexDirection: 'column'
+                }}>
+                  <Typography variant="h3" sx={{ fontWeight: 800, color: 'primary.main' }}>
+                    {data.complianceRate}%
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    SLA遵守率
+                  </Typography>
+                </Box>
+              </Box>
+              
+              <Grid container spacing={3} sx={{ width: '100%' }}>
+                <Grid item xs={6}>
+                  <Paper sx={{ 
+                    p: 2, 
+                    textAlign: 'center',
+                    background: 'linear-gradient(135deg, #10B98120 0%, #059669 08 100%)',
+                    border: '1px solid #10B98130'
+                  }}>
+                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'success.main' }}>
+                      {Math.round((data.complianceRate / 100) * 
+                        Object.values(data.priorityBreakdown).reduce((sum, p) => sum + p.total, 0))}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      遵守チケット
+                    </Typography>
+                  </Paper>
+                </Grid>
+                <Grid item xs={6}>
+                  <Paper sx={{ 
+                    p: 2, 
+                    textAlign: 'center',
+                    background: 'linear-gradient(135deg, #EF444420 0%, #DC2626 08 100%)',
+                    border: '1px solid #EF444430'
+                  }}>
+                    <Typography variant="h5" sx={{ fontWeight: 700, color: 'error.main' }}>
+                      {data.violationCount}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      違反チケット
+                    </Typography>
+                  </Paper>
+                </Grid>
+              </Grid>
+            </Box>
+          </RichChartCard>
+        </Grid>
+      </Grid>
 
-      {/* 日次SLA状況 - カレンダーヒートマップ */}
-      <ChartCard title="📅 日次SLA遵守状況" subtitle="過去30日間のSLA遵守率ヒートマップ">
-        <HeatmapChart
-          data={slaHeatmapData}
-          width={600}
-          height={250}
-          cellSize={35}
-          colorScale={{
-            low: '#FEE2E2',
-            medium: '#FCD34D',
-            high: '#34D399'
-          }}
-          showLabels={false}
-          showTooltip={true}
-        />
-      </ChartCard>
-    </div>
+      {/* 日次SLA状況 - ヒートマップ */}
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <RichChartCard 
+            title="日次SLA遵守状況" 
+            subtitle="過去30日間のSLA遵守率ヒートマップ - 色が濃いほど遵守率が高い"
+            icon={<DashboardIcon />}
+            actions={
+              <Stack direction="row" spacing={1}>
+                <Button size="small" variant="outlined" startIcon={<FilterIcon />}>
+                  期間選択
+                </Button>
+                <IconButton size="small">
+                  <DownloadIcon />
+                </IconButton>
+              </Stack>
+            }
+          >
+            <Box sx={{ p: 2 }}>
+              <Grid container spacing={1} sx={{ mb: 2 }}>
+                <Grid item>
+                  <Typography variant="body2" color="text.secondary">
+                    月
+                  </Typography>
+                </Grid>
+                <Grid item>
+                  <Typography variant="body2" color="text.secondary">
+                    火
+                  </Typography>
+                </Grid>
+                <Grid item>
+                  <Typography variant="body2" color="text.secondary">
+                    水
+                  </Typography>
+                </Grid>
+                <Grid item>
+                  <Typography variant="body2" color="text.secondary">
+                    木
+                  </Typography>
+                </Grid>
+                <Grid item>
+                  <Typography variant="body2" color="text.secondary">
+                    金
+                  </Typography>
+                </Grid>
+                <Grid item>
+                  <Typography variant="body2" color="text.secondary">
+                    土
+                  </Typography>
+                </Grid>
+                <Grid item>
+                  <Typography variant="body2" color="text.secondary">
+                    日
+                  </Typography>
+                </Grid>
+              </Grid>
+              
+              <Grid container spacing={0.5}>
+                {slaHeatmapData.map((cell, index) => {
+                  const getHeatColor = (value: number) => {
+                    if (value >= 95) return '#10B981'
+                    if (value >= 90) return '#F59E0B'
+                    if (value >= 80) return '#EF4444'
+                    return '#6B7280'
+                  }
+                  
+                  return (
+                    <Grid item key={index}>
+                      <MuiTooltip title={cell.label}>
+                        <Paper
+                          sx={{
+                            width: 40,
+                            height: 40,
+                            bgcolor: getHeatColor(cell.value),
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                              transform: 'scale(1.1)',
+                              boxShadow: 2
+                            }
+                          }}
+                        >
+                          <Box sx={{
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            <Typography 
+                              variant="caption" 
+                              sx={{ 
+                                color: 'white', 
+                                fontWeight: 600,
+                                fontSize: '10px'
+                              }}
+                            >
+                              {cell.value}
+                            </Typography>
+                          </Box>
+                        </Paper>
+                      </MuiTooltip>
+                    </Grid>
+                  )
+                })}
+              </Grid>
+              
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 3, gap: 2 }}>
+                <Typography variant="caption" color="text.secondary">
+                  低
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 0.5 }}>
+                  {['#6B7280', '#EF4444', '#F59E0B', '#10B981'].map((color, index) => (
+                    <Box key={index} sx={{
+                      width: 12,
+                      height: 12,
+                      bgcolor: color,
+                      borderRadius: 0.5
+                    }} />
+                  ))}
+                </Box>
+                <Typography variant="caption" color="text.secondary">
+                  高
+                </Typography>
+              </Box>
+            </Box>
+          </RichChartCard>
+        </Grid>
+      </Grid>
+    </Box>
   )
 })
 
