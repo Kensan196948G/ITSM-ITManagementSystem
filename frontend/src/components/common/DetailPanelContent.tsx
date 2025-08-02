@@ -32,7 +32,7 @@ import {
   Timeline as TimelineIcon,
   TrendingUp as TrendingUpIcon,
   Schedule as ScheduleIcon,
-  Priority as PriorityIcon,
+  PriorityHigh as PriorityHighIcon,
   Category as CategoryIcon,
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
@@ -45,7 +45,7 @@ import {
   DetailPanelItem, 
   TicketDetail, 
   UserDetail,
-  Priority,
+  PriorityHigh,
   TicketStatus 
 } from '../../types'
 import { priorityColors, statusColors } from '../../theme/theme'
@@ -82,7 +82,7 @@ const formatDate = (dateString: string): string => {
   }
 }
 
-const getPriorityColor = (priority: Priority): string => {
+const getPriorityHighColor = (priority: PriorityHigh): string => {
   return priorityColors[priority] || priorityColors.medium
 }
 
@@ -178,7 +178,7 @@ export const DetailPanelContent: React.FC<DetailPanelContentProps> = ({
                   />
                   <Chip
                     label={ticket.priority}
-                    sx={{ backgroundColor: getPriorityColor(ticket.priority), color: 'white' }}
+                    sx={{ backgroundColor: getPriorityHighColor(ticket.priority), color: 'white' }}
                     size="small"
                   />
                   <Chip label={ticket.category} variant="outlined" size="small" />
@@ -400,7 +400,7 @@ export const DetailPanelContent: React.FC<DetailPanelContentProps> = ({
                               label={relatedTicket.priority}
                               size="small"
                               sx={{ 
-                                backgroundColor: getPriorityColor(relatedTicket.priority), 
+                                backgroundColor: getPriorityHighColor(relatedTicket.priority), 
                                 color: 'white',
                                 fontSize: '0.7rem'
                               }}
@@ -520,7 +520,7 @@ export const DetailPanelContent: React.FC<DetailPanelContentProps> = ({
                           label={ticket.priority}
                           size="small"
                           sx={{ 
-                            backgroundColor: getPriorityColor(ticket.priority), 
+                            backgroundColor: getPriorityHighColor(ticket.priority), 
                             color: 'white',
                             fontSize: '0.7rem'
                           }}

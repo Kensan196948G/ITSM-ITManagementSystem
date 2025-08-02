@@ -1,0 +1,72 @@
+{
+  "timestamp": "2025-08-02T18:32:47.557210",
+  "frontend_repair": {
+    "status": "completed",
+    "errors_fixed": 9,
+    "repair_log": [
+      {
+        "timestamp": "2025-08-02T18:32:47.440001",
+        "action": "修復",
+        "target": "RepairMonitor.tsx",
+        "status": "完了",
+        "details": "CheckCircleインポート追加"
+      },
+      {
+        "timestamp": "2025-08-02T18:32:47.454493",
+        "action": "修復",
+        "target": "DetailPanelContent.tsx",
+        "status": "完了",
+        "details": "Priority -> PriorityHigh修正"
+      },
+      {
+        "timestamp": "2025-08-02T18:32:47.455039",
+        "action": "作成",
+        "target": "ModalDialog.tsx",
+        "status": "完了",
+        "details": "ModalDialogコンポーネント作成"
+      },
+      {
+        "timestamp": "2025-08-02T18:32:47.455281",
+        "action": "作成",
+        "target": "FormBuilder.tsx",
+        "status": "完了",
+        "details": "FormBuilderコンポーネント作成"
+      },
+      {
+        "timestamp": "2025-08-02T18:32:47.456642",
+        "action": "修復",
+        "target": "src/components/cicd/CICDDashboard.tsx",
+        "status": "完了",
+        "details": "GaugeChart dataプロパティ追加"
+      },
+      {
+        "timestamp": "2025-08-02T18:32:47.457210",
+        "action": "修復",
+        "target": "src/components/cicd/RepairMonitor.tsx",
+        "status": "完了",
+        "details": "GaugeChart dataプロパティ追加"
+      },
+      {
+        "timestamp": "2025-08-02T18:32:47.482362",
+        "action": "修復",
+        "target": "src/components/cicd/SystemHealthChart.tsx",
+        "status": "完了",
+        "details": "GaugeChart dataプロパティ追加"
+      },
+      {
+        "timestamp": "2025-08-02T18:32:47.556205",
+        "action": "修復",
+        "target": "package.json",
+        "status": "完了",
+        "details": "@types/jest追加"
+      },
+      {
+        "timestamp": "2025-08-02T18:32:47.556956",
+        "action": "修復",
+        "target": "DetailPanel.tsx",
+        "status": "完了",
+        "details": "Drawer direction型修正"
+      }
+    ]
+  }
+}
