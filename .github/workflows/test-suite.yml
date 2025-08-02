@@ -93,6 +93,12 @@ jobs:
 
     - name: Setup test database
       id: db-setup
+      env:
+        DATABASE_URL: sqlite:///test.db
+        ASYNC_DATABASE_URL: sqlite+aiosqlite:///test.db
+        SECRET_KEY: ${{ secrets.SECRET_KEY || 'test-secret-key-for-github-actions-testing' }}
+        ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY || 'test-encryption-key-32-chars-12345' }}
+        ITSM_TEST_MODE: true
       run: |
         cd backend
         python init_sqlite_db.py
@@ -139,6 +145,12 @@ jobs:
         echo "ITSM_TEST_MODE=true" >> backend/.env.test
 
     - name: Run unit tests
+      env:
+        DATABASE_URL: sqlite:///test.db
+        ASYNC_DATABASE_URL: sqlite+aiosqlite:///test.db
+        SECRET_KEY: ${{ secrets.SECRET_KEY || 'test-secret-key-for-github-actions-testing' }}
+        ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY || 'test-encryption-key-32-chars-12345' }}
+        ITSM_TEST_MODE: true
       run: |
         mkdir -p tests/reports
         cd backend
@@ -195,11 +207,23 @@ jobs:
         echo "ITSM_TEST_MODE=true" >> backend/.env.test
 
     - name: Initialize test database
+      env:
+        DATABASE_URL: sqlite:///test.db
+        ASYNC_DATABASE_URL: sqlite+aiosqlite:///test.db
+        SECRET_KEY: ${{ secrets.SECRET_KEY || 'test-secret-key-for-github-actions-testing' }}
+        ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY || 'test-encryption-key-32-chars-12345' }}
+        ITSM_TEST_MODE: true
       run: |
         cd backend
         python init_sqlite_db.py
 
     - name: Start backend server for API tests
+      env:
+        DATABASE_URL: sqlite:///test.db
+        ASYNC_DATABASE_URL: sqlite+aiosqlite:///test.db
+        SECRET_KEY: ${{ secrets.SECRET_KEY || 'test-secret-key-for-github-actions-testing' }}
+        ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY || 'test-encryption-key-32-chars-12345' }}
+        ITSM_TEST_MODE: true
       run: |
         cd backend
         python start_server.py &
@@ -293,11 +317,23 @@ jobs:
         echo "ITSM_TEST_MODE=true" >> backend/.env.test
 
     - name: Initialize test database
+      env:
+        DATABASE_URL: sqlite:///test.db
+        ASYNC_DATABASE_URL: sqlite+aiosqlite:///test.db
+        SECRET_KEY: ${{ secrets.SECRET_KEY || 'test-secret-key-for-github-actions-testing' }}
+        ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY || 'test-encryption-key-32-chars-12345' }}
+        ITSM_TEST_MODE: true
       run: |
         cd backend
         python init_sqlite_db.py
 
     - name: Start backend server
+      env:
+        DATABASE_URL: sqlite:///test.db
+        ASYNC_DATABASE_URL: sqlite+aiosqlite:///test.db
+        SECRET_KEY: ${{ secrets.SECRET_KEY || 'test-secret-key-for-github-actions-testing' }}
+        ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY || 'test-encryption-key-32-chars-12345' }}
+        ITSM_TEST_MODE: true
       run: |
         cd backend
         python start_server.py &
@@ -390,11 +426,23 @@ jobs:
         echo "ITSM_TEST_MODE=true" >> .env
 
     - name: Initialize test database
+      env:
+        DATABASE_URL: sqlite:///test.db
+        ASYNC_DATABASE_URL: sqlite+aiosqlite:///test.db
+        SECRET_KEY: ${{ secrets.SECRET_KEY || 'test-secret-key-for-github-actions-testing' }}
+        ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY || 'test-encryption-key-32-chars-12345' }}
+        ITSM_TEST_MODE: true
       run: |
         cd backend
         python init_sqlite_db.py
 
     - name: Start backend server for load tests
+      env:
+        DATABASE_URL: sqlite:///test.db
+        ASYNC_DATABASE_URL: sqlite+aiosqlite:///test.db
+        SECRET_KEY: ${{ secrets.SECRET_KEY || 'test-secret-key-for-github-actions-testing' }}
+        ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY || 'test-encryption-key-32-chars-12345' }}
+        ITSM_TEST_MODE: true
       run: |
         cd backend
         python start_server.py &
