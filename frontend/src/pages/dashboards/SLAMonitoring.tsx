@@ -210,29 +210,163 @@ const SLAMonitoring: React.FC = React.memo(() => {
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {
-      case 'up': return '↗️'
-      case 'down': return '↘️'
-      default: return '➡️'
+      case 'up': return <TrendingUpIcon sx={{ fontSize: 16, color: 'success.main' }} />
+      case 'down': return <TrendingDownIcon sx={{ fontSize: 16, color: 'error.main' }} />
+      default: return <TimelineIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
     }
   }
 
+  // Icon-rich metric card component
+  const IconRichMetricCard: React.FC<{
+    title: string
+    value: string | number
+    icon: React.ReactElement
+    subtitle?: string
+    trend?: { direction: 'up' | 'down' | 'stable', percentage: number, period: string }
+    status?: 'good' | 'warning' | 'critical'
+    gradient?: string
+  }> = ({ title, value, icon, subtitle, trend, status = 'good', gradient }) => {
+    const statusColors = {
+      good: { primary: '#10B981', secondary: '#059669' },
+      warning: { primary: '#F59E0B', secondary: '#D97706' },
+      critical: { primary: '#EF4444', secondary: '#DC2626' }
+    }
+    
+    const colors = statusColors[status]
+    const bgGradient = gradient || `linear-gradient(135deg, ${colors.primary}15 0%, ${colors.secondary}08 100%)`
+    
+    return (
+      <Card 
+        sx={{ 
+          height: '100%',
+          background: bgGradient,
+          border: `1px solid ${colors.primary}30`,
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            transform: 'translateY(-4px)',
+            boxShadow: `0 8px 25px ${colors.primary}25`,
+            border: `1px solid ${colors.primary}50`
+          }
+        }}
+      >
+        <CardContent sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+            <Avatar sx={{ 
+              bgcolor: colors.primary, 
+              width: 56, 
+              height: 56,
+              boxShadow: `0 4px 12px ${colors.primary}40`
+            }}>
+              {icon}
+            </Avatar>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: colors.primary, mb: 0.5 }}>
+                {title}
+              </Typography>
+              {subtitle && (
+                <Typography variant="caption" color="text.secondary">
+                  {subtitle}
+                </Typography>
+              )}
+            </Box>
+          </Box>
+          
+          <Typography variant="h3" sx={{ 
+            fontWeight: 800, 
+            color: colors.primary,
+            mb: 1,
+            textShadow: `0 2px 4px ${colors.primary}20`
+          }}>
+            {value}
+          </Typography>
+          
+          {trend && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {getTrendIcon(trend.direction)}
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  fontWeight: 600,
+                  color: trend.direction === 'up' ? 'success.main' : 
+                         trend.direction === 'down' ? 'error.main' : 'text.secondary'
+                }}
+              >
+                {trend.percentage > 0 ? '+' : ''}{trend.percentage}% {trend.period}
+              </Typography>
+            </Box>
+          )}
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Rich chart card component
+  const RichChartCard: React.FC<{
+    title: string
+    subtitle?: string
+    icon?: React.ReactElement
+    children: React.ReactNode
+    className?: string
+    actions?: React.ReactNode
+  }> = ({ title, subtitle, icon, children, className, actions }) => (
+    <Card 
+      sx={{ 
+        height: '100%',
+        background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.8) 100%)',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255,255,255,0.2)',
+        transition: 'all 0.3s ease',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: 6
+        }
+      }}
+      className={className}
+    >
+      <CardContent sx={{ p: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {icon && (
+              <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>
+                {icon}
+              </Avatar>
+            )}
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                {title}
+              </Typography>
+              {subtitle && (
+                <Typography variant="body2" color="text.secondary">
+                  {subtitle}
+                </Typography>
+              )}
+            </Box>
+          </Box>
+          {actions}
+        </Box>
+        {children}
+      </CardContent>
+    </Card>
+  )
+
   if (loading || !data) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-300 rounded w-1/3 mb-6"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded"></div>
-            ))}
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-64 bg-gray-200 rounded"></div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <Box sx={{ p: 3 }}>
+        <Grid container spacing={3}>
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Grid item xs={12} sm={6} md={3} key={i}>
+              <Card>
+                <CardContent>
+                  <Skeleton variant="circular" width={56} height={56} sx={{ mb: 2 }} />
+                  <Skeleton variant="text" height={24} sx={{ mb: 1 }} />
+                  <Skeleton variant="text" height={40} sx={{ mb: 1 }} />
+                  <Skeleton variant="text" width="60%" />
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
     )
   }
 
@@ -246,81 +380,126 @@ const SLAMonitoring: React.FC = React.memo(() => {
   }))
 
   return (
-    <div className="p-6 space-y-6">
-      {/* ヘッダー */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">SLA監視ダッシュボード</h1>
-          <p className="text-gray-600 mt-2">サービスレベル目標の遵守状況とリスク分析</p>
-        </div>
-        <div className="flex items-center space-x-4 mt-4 sm:mt-0">
-          <select
-            value={selectedPriority}
-            onChange={(e) => setSelectedPriority(e.target.value as any)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">全優先度</option>
-            <option value="critical">緊急</option>
-            <option value="high">高</option>
-            <option value="medium">中</option>
-            <option value="low">低</option>
-          </select>
-          <input
-            type="number"
-            value={alertThreshold}
-            onChange={(e) => setAlertThreshold(parseInt(e.target.value))}
-            min="1"
-            max="24"
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm w-20 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="時間"
-          />
-          <span className="text-sm text-gray-600">時間前アラート</span>
-        </div>
-      </div>
+    <Box sx={{ p: 3 }}>
+      {/* Header with gradient background */}
+      <Box sx={{ 
+        mb: 4, 
+        p: 3, 
+        borderRadius: 2,
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white'
+      }}>
+        <Grid container spacing={2} alignItems="center" justifyContent="space-between">
+          <Grid item xs={12} md={6}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+              <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 48, height: 48 }}>
+                <TargetIcon sx={{ fontSize: 28 }} />
+              </Avatar>
+              <Box>
+                <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.5 }}>
+                  SLA監視ダッシュボード
+                </Typography>
+                <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                  サービスレベル目標の遵守状況とリスク分析
+                </Typography>
+              </Box>
+            </Box>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Stack direction="row" spacing={2} justifyContent="flex-end" flexWrap="wrap">
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel sx={{ color: 'white' }}>優先度</InputLabel>
+                <Select
+                  value={selectedPriority}
+                  onChange={(e) => setSelectedPriority(e.target.value as any)}
+                  label="優先度"
+                  sx={{ 
+                    color: 'white',
+                    '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' },
+                    '& .MuiSvgIcon-root': { color: 'white' }
+                  }}
+                >
+                  <MenuItem value="all">全優先度</MenuItem>
+                  <MenuItem value="critical">緊急</MenuItem>
+                  <MenuItem value="high">高</MenuItem>
+                  <MenuItem value="medium">中</MenuItem>
+                  <MenuItem value="low">低</MenuItem>
+                </Select>
+              </FormControl>
+              <Button
+                variant="outlined"
+                startIcon={<SettingsIcon />}
+                sx={{ 
+                  color: 'white', 
+                  borderColor: 'rgba(255,255,255,0.3)',
+                  '&:hover': { borderColor: 'white', bgcolor: 'rgba(255,255,255,0.1)' }
+                }}
+              >
+                設定
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<RefreshIcon />}
+                sx={{ 
+                  bgcolor: 'rgba(255,255,255,0.2)', 
+                  color: 'white',
+                  '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' }
+                }}
+              >
+                更新
+              </Button>
+            </Stack>
+          </Grid>
+        </Grid>
+      </Box>
 
       {/* KPI メトリクス */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <MetricCard
-          metric={{
-            title: 'SLA遵守率',
-            value: data.complianceRate,
-            unit: '%',
-            trend: { direction: 'up', percentage: 2.1, period: '前月比' },
-            status: data.complianceRate >= 95 ? 'good' : data.complianceRate >= 90 ? 'warning' : 'critical',
-            icon: '🎯'
-          }}
-        />
-        <MetricCard
-          metric={{
-            title: 'SLA違反件数',
-            value: data.violationCount,
-            unit: '件',
-            trend: { direction: 'down', percentage: 15.3, period: '前月比' },
-            status: data.violationCount <= 20 ? 'good' : data.violationCount <= 40 ? 'warning' : 'critical',
-            icon: '⚠️'
-          }}
-        />
-        <MetricCard
-          metric={{
-            title: 'リスクチケット',
-            value: data.riskTickets.length,
-            unit: '件',
-            trend: { direction: 'stable', percentage: 0, period: '前日比' },
-            status: data.riskTickets.length <= 5 ? 'good' : data.riskTickets.length <= 10 ? 'warning' : 'critical',
-            icon: '🚨'
-          }}
-        />
-        <MetricCard
-          metric={{
-            title: 'エスカレーション',
-            value: data.escalationHistory.filter(e => e.status === 'pending').length,
-            unit: '件',
-            trend: { direction: 'down', percentage: 8.7, period: '前週比' },
-            status: 'good',
-            icon: '⬆️'
-          }}
-        />
-      </div>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <IconRichMetricCard
+            title="SLA遵守率"
+            value={`${data.complianceRate}%`}
+            icon={<TargetIcon />}
+            subtitle="全体的な遵守状況"
+            trend={{ direction: 'up', percentage: 2.1, period: '前月比' }}
+            status={data.complianceRate >= 95 ? 'good' : data.complianceRate >= 90 ? 'warning' : 'critical'}
+            gradient={gradients.primary}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <IconRichMetricCard
+            title="SLA違反件数"
+            value={`${data.violationCount}件`}
+            icon={<WarningIcon />}
+            subtitle="期限超過チケット"
+            trend={{ direction: 'down', percentage: 15.3, period: '前月比' }}
+            status={data.violationCount <= 20 ? 'good' : data.violationCount <= 40 ? 'warning' : 'critical'}
+            gradient={gradients.warning}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <IconRichMetricCard
+            title="リスクチケット"
+            value={`${data.riskTickets.length}件`}
+            icon={<ErrorIcon />}
+            subtitle="緊急対応要"
+            trend={{ direction: 'stable', percentage: 0, period: '前日比' }}
+            status={data.riskTickets.length <= 5 ? 'good' : data.riskTickets.length <= 10 ? 'warning' : 'critical'}
+            gradient={gradients.critical}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <IconRichMetricCard
+            title="エスカレーション"
+            value={`${data.escalationHistory.filter(e => e.status === 'pending').length}件`}
+            icon={<TrendingUpIcon />}
+            subtitle="保留中の案件"
+            trend={{ direction: 'down', percentage: 8.7, period: '前週比' }}
+            status="good"
+            gradient={gradients.success}
+          />
+        </Grid>
+      </Grid>
 
       {/* チャートセクション */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
