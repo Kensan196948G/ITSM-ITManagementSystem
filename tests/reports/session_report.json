@@ -1,11 +1,11 @@
 {
-  "start_time": "2025-08-02 11:44:08.044028",
+  "start_time": "2025-08-02 10:43:05.756549",
   "test_results": [
     {
       "test_name": "test_oauth_token_request_success",
       "outcome": true,
-      "duration": 0.004783684998983517,
-      "timestamp": "2025-08-02T11:44:08.936385",
+      "duration": 0.004342508997069672,
+      "timestamp": "2025-08-02T10:43:06.406973",
       "markers": [
         "auth",
         "api"
@@ -14,8 +14,8 @@
     {
       "test_name": "test_oauth_token_request_invalid_client",
       "outcome": true,
-      "duration": 0.001482102001318708,
-      "timestamp": "2025-08-02T11:44:08.940204",
+      "duration": 0.0011298929894110188,
+      "timestamp": "2025-08-02T10:43:06.410130",
       "markers": [
         "auth",
         "api"
@@ -24,8 +24,8 @@
     {
       "test_name": "test_oauth_token_request_invalid_grant",
       "outcome": true,
-      "duration": 0.0010414169955765828,
-      "timestamp": "2025-08-02T11:44:08.943357",
+      "duration": 0.0009264530090149492,
+      "timestamp": "2025-08-02T10:43:06.412711",
       "markers": [
         "auth",
         "api"
@@ -34,8 +34,8 @@
     {
       "test_name": "test_refresh_token_success",
       "outcome": true,
-      "duration": 0.0014533339999616146,
-      "timestamp": "2025-08-02T11:44:08.946524",
+      "duration": 0.0010170460009248927,
+      "timestamp": "2025-08-02T10:43:06.415310",
       "markers": [
         "auth",
         "api"
@@ -44,8 +44,8 @@
     {
       "test_name": "test_api_request_with_valid_token",
       "outcome": true,
-      "duration": 0.001001028998871334,
-      "timestamp": "2025-08-02T11:44:08.949711",
+      "duration": 0.0009138219902524725,
+      "timestamp": "2025-08-02T10:43:06.417906",
       "markers": [
         "auth",
         "api"
@@ -54,8 +54,8 @@
     {
       "test_name": "test_api_request_with_invalid_token",
       "outcome": true,
-      "duration": 0.0021509289945242926,
-      "timestamp": "2025-08-02T11:44:08.953514",
+      "duration": 0.0020541340054478496,
+      "timestamp": "2025-08-02T10:43:06.421519",
       "markers": [
         "auth",
         "api"
@@ -64,8 +64,8 @@
     {
       "test_name": "test_api_request_without_token",
       "outcome": true,
-      "duration": 0.0009538710000924766,
-      "timestamp": "2025-08-02T11:44:08.956223",
+      "duration": 0.0009754740021890029,
+      "timestamp": "2025-08-02T10:43:06.424129",
       "markers": [
         "auth",
         "api"
@@ -74,8 +74,8 @@
     {
       "test_name": "test_token_expiration_handling",
       "outcome": true,
-      "duration": 0.0009201590000884607,
-      "timestamp": "2025-08-02T11:44:08.958740",
+      "duration": 0.0008944939909270033,
+      "timestamp": "2025-08-02T10:43:06.426632",
       "markers": [
         "auth",
         "api"
@@ -84,8 +84,8 @@
     {
       "test_name": "test_login_validation_comprehensive",
       "outcome": true,
-      "duration": 0.003378800000064075,
-      "timestamp": "2025-08-02T11:44:08.963672",
+      "duration": 0.0033567729988135397,
+      "timestamp": "2025-08-02T10:43:06.431547",
       "markers": [
         "auth",
         "api"
@@ -94,8 +94,8 @@
     {
       "test_name": "test_session_management",
       "outcome": true,
-      "duration": 0.00109642899769824,
-      "timestamp": "2025-08-02T11:44:08.966443",
+      "duration": 0.0010125900007551536,
+      "timestamp": "2025-08-02T10:43:06.434156",
       "markers": [
         "auth",
         "api"
@@ -104,8 +104,8 @@
     {
       "test_name": "test_multi_factor_authentication",
       "outcome": true,
-      "duration": 0.0016017730085877702,
-      "timestamp": "2025-08-02T11:44:08.969689",
+      "duration": 0.0015952679968904704,
+      "timestamp": "2025-08-02T10:43:06.437320",
       "markers": [
         "auth",
         "api"
@@ -114,8 +114,8 @@
     {
       "test_name": "test_concurrent_auth_requests",
       "outcome": true,
-      "duration": 0.0030903290025889874,
-      "timestamp": "2025-08-02T11:44:08.974365",
+      "duration": 0.0030919480050215498,
+      "timestamp": "2025-08-02T10:43:06.442046",
       "markers": [
         "slow",
         "auth",
@@ -125,8 +125,8 @@
     {
       "test_name": "test_rate_limiting_with_authentication",
       "outcome": true,
-      "duration": 0.0007196789956651628,
-      "timestamp": "2025-08-02T11:44:08.976830",
+      "duration": 0.0006720309902448207,
+      "timestamp": "2025-08-02T10:43:06.444451",
       "markers": [
         "slow",
         "auth",
@@ -136,8 +136,8 @@
     {
       "test_name": "test_incident_full_lifecycle",
       "outcome": true,
-      "duration": 0.003636113993707113,
-      "timestamp": "2025-08-02T11:44:08.984646",
+      "duration": 0.0033220999903278425,
+      "timestamp": "2025-08-02T10:43:06.451507",
       "markers": [
         "incidents",
         "comprehensive",
@@ -147,8 +147,8 @@
     {
       "test_name": "test_problem_management_api",
       "outcome": true,
-      "duration": 0.001242208993062377,
-      "timestamp": "2025-08-02T11:44:08.988766",
+      "duration": 0.0010319050052203238,
+      "timestamp": "2025-08-02T10:43:06.454895",
       "markers": [
         "problems",
         "comprehensive",
@@ -158,8 +158,8 @@
     {
       "test_name": "test_change_management_api",
       "outcome": true,
-      "duration": 0.0011129969934700057,
-      "timestamp": "2025-08-02T11:44:08.993143",
+      "duration": 0.0009526530047878623,
+      "timestamp": "2025-08-02T10:43:06.458781",
       "markers": [
         "changes",
         "comprehensive",
@@ -169,8 +169,8 @@
     {
       "test_name": "test_cmdb_api_endpoints",
       "outcome": true,
-      "duration": 0.0011245159985264763,
-      "timestamp": "2025-08-02T11:44:08.996475",
+      "duration": 0.0010434239957248792,
+      "timestamp": "2025-08-02T10:43:06.461829",
       "markers": [
         "cmdb",
         "comprehensive",
@@ -180,8 +180,8 @@
     {
       "test_name": "test_authentication_endpoints",
       "outcome": true,
-      "duration": 0.001002058997983113,
-      "timestamp": "2025-08-02T11:44:08.999554",
+      "duration": 0.0009069389925571159,
+      "timestamp": "2025-08-02T10:43:06.464400",
       "markers": [
         "auth",
         "comprehensive",
@@ -191,8 +191,8 @@
     {
       "test_name": "test_reporting_api_endpoints",
       "outcome": true,
-      "duration": 0.0010373830009484664,
-      "timestamp": "2025-08-02T11:44:09.002305",
+      "duration": 0.0010015059961006045,
+      "timestamp": "2025-08-02T10:43:06.467043",
       "markers": [
         "reports",
         "comprehensive",
@@ -202,8 +202,8 @@
     {
       "test_name": "test_notification_api_endpoints",
       "outcome": true,
-      "duration": 0.0009626639948692173,
-      "timestamp": "2025-08-02T11:44:09.004935",
+      "duration": 0.000930602996959351,
+      "timestamp": "2025-08-02T10:43:06.469594",
       "markers": [
         "notifications",
         "comprehensive",
@@ -213,8 +213,8 @@
     {
       "test_name": "test_user_management_api",
       "outcome": true,
-      "duration": 0.001117942010750994,
-      "timestamp": "2025-08-02T11:44:09.007711",
+      "duration": 0.0010213899950031191,
+      "timestamp": "2025-08-02T10:43:06.472235",
       "markers": [
         "users",
         "comprehensive",
@@ -224,8 +224,8 @@
     {
       "test_name": "test_category_management_api",
       "outcome": true,
-      "duration": 0.0013277510006446391,
-      "timestamp": "2025-08-02T11:44:09.010743",
+      "duration": 0.0008881820103852078,
+      "timestamp": "2025-08-02T10:43:06.474748",
       "markers": [
         "categories",
         "comprehensive",
@@ -235,8 +235,8 @@
     {
       "test_name": "test_team_management_api",
       "outcome": true,
-      "duration": 0.0026201760047115386,
-      "timestamp": "2025-08-02T11:44:09.016460",
+      "duration": 0.0017725759971654043,
+      "timestamp": "2025-08-02T10:43:06.478141",
       "markers": [
         "teams",
         "comprehensive",
@@ -246,8 +246,8 @@
     {
       "test_name": "test_health_check_endpoints",
       "outcome": true,
-      "duration": 0.0010940470092464238,
-      "timestamp": "2025-08-02T11:44:09.019544",
+      "duration": 0.0008905260037863627,
+      "timestamp": "2025-08-02T10:43:06.480717",
       "markers": [
         "health",
         "comprehensive",
@@ -257,8 +257,8 @@
     {
       "test_name": "test_search_api_endpoints",
       "outcome": true,
-      "duration": 0.0011017889919457957,
-      "timestamp": "2025-08-02T11:44:09.022488",
+      "duration": 0.0009783120040083304,
+      "timestamp": "2025-08-02T10:43:06.483309",
       "markers": [
         "search",
         "comprehensive",
@@ -268,8 +268,8 @@
     {
       "test_name": "test_incident_creation_performance",
       "outcome": true,
-      "duration": 1.7333162760041887,
-      "timestamp": "2025-08-02T11:44:10.758365",
+      "duration": 1.8752734860026976,
+      "timestamp": "2025-08-02T10:43:08.360991",
       "markers": [
         "benchmark",
         "performance",
@@ -279,8 +279,8 @@
     {
       "test_name": "test_incident_list_performance",
       "outcome": true,
-      "duration": 0.8961125880014151,
-      "timestamp": "2025-08-02T11:44:11.656631",
+      "duration": 1.0975136900087819,
+      "timestamp": "2025-08-02T10:43:09.460657",
       "markers": [
         "benchmark",
         "performance",
@@ -289,402 +289,19 @@
     },
     {
       "test_name": "test_concurrent_api_requests",
-      "outcome": true,
-      "duration": 0.01926806200935971,
-      "timestamp": "2025-08-02T11:44:11.677857",
+      "outcome": false,
+      "duration": 3862.938121676998,
+      "timestamp": "2025-08-02T11:47:32.400873",
       "markers": [
         "slow",
         "performance",
         "api"
-      ]
-    },
-    {
-      "test_name": "test_api_rate_limiting",
-      "outcome": true,
-      "duration": 0.001967228003195487,
-      "timestamp": "2025-08-02T11:44:11.681747",
-      "markers": [
-        "load",
-        "performance",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_unauthorized_access",
-      "outcome": true,
-      "duration": 0.0011963889992330223,
-      "timestamp": "2025-08-02T11:44:11.684647",
-      "markers": [
-        "security",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_invalid_token_access",
-      "outcome": true,
-      "duration": 0.00112207600614056,
-      "timestamp": "2025-08-02T11:44:11.687532",
-      "markers": [
-        "security",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_sql_injection_protection",
-      "outcome": true,
-      "duration": 0.0014005459961481392,
-      "timestamp": "2025-08-02T11:44:11.691039",
-      "markers": [
-        "security",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_xss_protection",
-      "outcome": true,
-      "duration": 0.0009968250087695196,
-      "timestamp": "2025-08-02T11:44:11.694729",
-      "markers": [
-        "security",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_health_endpoint_success",
-      "outcome": true,
-      "duration": 0.0013012760027777404,
-      "timestamp": "2025-08-02T11:44:11.698449",
-      "markers": [
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_version_endpoint_success",
-      "outcome": true,
-      "duration": 0.0010912430007010698,
-      "timestamp": "2025-08-02T11:44:11.701577",
-      "markers": [
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_health_endpoint_performance",
-      "outcome": true,
-      "duration": 2.3839997869945364,
-      "timestamp": "2025-08-02T11:44:14.087589",
-      "markers": [
-        "benchmark",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_concurrent_health_requests",
-      "outcome": true,
-      "duration": 0.008638988001621328,
-      "timestamp": "2025-08-02T11:44:14.098322",
-      "markers": [
-        "benchmark",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_create_incident_success",
-      "outcome": true,
-      "duration": 0.0010133579926332459,
-      "timestamp": "2025-08-02T11:44:14.102458",
-      "markers": [
-        "critical",
-        "incidents",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_create_incident_validation_error",
-      "outcome": true,
-      "duration": 0.0010786769998958334,
-      "timestamp": "2025-08-02T11:44:14.105281",
-      "markers": [
-        "critical",
-        "incidents",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_get_incident_by_id_success",
-      "outcome": true,
-      "duration": 0.0010372190008638427,
-      "timestamp": "2025-08-02T11:44:14.107995",
-      "markers": [
-        "critical",
-        "incidents",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_get_incident_not_found",
-      "outcome": true,
-      "duration": 0.0013710219936911017,
-      "timestamp": "2025-08-02T11:44:14.111556",
-      "markers": [
-        "critical",
-        "incidents",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_update_incident_success",
-      "outcome": true,
-      "duration": 0.0010226169979432598,
-      "timestamp": "2025-08-02T11:44:14.114528",
-      "markers": [
-        "critical",
-        "incidents",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_update_incident_invalid_status_transition",
-      "outcome": true,
-      "duration": 0.0013094030000502244,
-      "timestamp": "2025-08-02T11:44:14.117681",
-      "markers": [
-        "critical",
-        "incidents",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_list_incidents_with_pagination",
-      "outcome": true,
-      "duration": 0.0012078580039087683,
-      "timestamp": "2025-08-02T11:44:14.120997",
-      "markers": [
-        "critical",
-        "incidents",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_list_incidents_with_filters",
-      "outcome": true,
-      "duration": 0.0013219600077718496,
-      "timestamp": "2025-08-02T11:44:14.124697",
-      "markers": [
-        "critical",
-        "incidents",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_delete_incident_success",
-      "outcome": true,
-      "duration": 0.0007765180052956566,
-      "timestamp": "2025-08-02T11:44:14.127383",
-      "markers": [
-        "critical",
-        "incidents",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_delete_incident_not_found",
-      "outcome": true,
-      "duration": 0.0009536959987599403,
-      "timestamp": "2025-08-02T11:44:14.130061",
-      "markers": [
-        "critical",
-        "incidents",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_bulk_incident_operations",
-      "outcome": true,
-      "duration": 0.0010910389974014834,
-      "timestamp": "2025-08-02T11:44:14.132948",
-      "markers": [
-        "slow",
-        "critical",
-        "incidents",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_get_incident_history_success",
-      "outcome": true,
-      "duration": 0.0009909769869409502,
-      "timestamp": "2025-08-02T11:44:14.136323",
-      "markers": [
-        "incidents",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_get_incident_history_with_filters",
-      "outcome": true,
-      "duration": 0.0014285439974628389,
-      "timestamp": "2025-08-02T11:44:14.139486",
-      "markers": [
-        "incidents",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_add_work_note_success",
-      "outcome": true,
-      "duration": 0.0011514430079841986,
-      "timestamp": "2025-08-02T11:44:14.142869",
-      "markers": [
-        "incidents",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_add_work_note_validation_error",
-      "outcome": true,
-      "duration": 0.001249938999535516,
-      "timestamp": "2025-08-02T11:44:14.146302",
-      "markers": [
-        "incidents",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_get_work_notes_list",
-      "outcome": true,
-      "duration": 0.00110722599492874,
-      "timestamp": "2025-08-02T11:44:14.149450",
-      "markers": [
-        "incidents",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_incident_assignment_workflow",
-      "outcome": true,
-      "duration": 0.0016745559987612069,
-      "timestamp": "2025-08-02T11:44:14.152932",
-      "markers": [
-        "incidents",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_incident_escalation_workflow",
-      "outcome": true,
-      "duration": 0.0010181270044995472,
-      "timestamp": "2025-08-02T11:44:14.155728",
-      "markers": [
-        "incidents",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_incident_resolution_workflow",
-      "outcome": true,
-      "duration": 0.0010801949974847957,
-      "timestamp": "2025-08-02T11:44:14.158571",
-      "markers": [
-        "incidents",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_incident_closure_workflow",
-      "outcome": true,
-      "duration": 0.0010306149924872443,
-      "timestamp": "2025-08-02T11:44:14.161385",
-      "markers": [
-        "incidents",
-        "api"
-      ]
-    },
-    {
-      "test_name": "test_homepage_loads",
-      "outcome": true,
-      "duration": 0.0013246089947642758,
-      "timestamp": "2025-08-02T11:44:14.165545",
-      "markers": [
-        "e2e"
-      ]
-    },
-    {
-      "test_name": "test_navigation_menu",
-      "outcome": true,
-      "duration": 0.00118869700236246,
-      "timestamp": "2025-08-02T11:44:14.168399",
-      "markers": [
-        "e2e"
-      ]
-    },
-    {
-      "test_name": "test_incident_creation_form",
-      "outcome": true,
-      "duration": 0.001820240999222733,
-      "timestamp": "2025-08-02T11:44:14.171890",
-      "markers": [
-        "e2e"
-      ]
-    },
-    {
-      "test_name": "test_search_functionality",
-      "outcome": true,
-      "duration": 0.0022921060008229688,
-      "timestamp": "2025-08-02T11:44:14.176505",
-      "markers": [
-        "e2e"
-      ]
-    },
-    {
-      "test_name": "test_responsive_design",
-      "outcome": true,
-      "duration": 0.0012095650017727166,
-      "timestamp": "2025-08-02T11:44:14.179626",
-      "markers": [
-        "e2e"
-      ]
-    },
-    {
-      "test_name": "test_form_validation",
-      "outcome": true,
-      "duration": 0.0014873780019115657,
-      "timestamp": "2025-08-02T11:44:14.182769",
-      "markers": [
-        "slow",
-        "e2e"
-      ]
-    },
-    {
-      "test_name": "test_accessibility_features",
-      "outcome": true,
-      "duration": 0.001062623006873764,
-      "timestamp": "2025-08-02T11:44:14.185438",
-      "markers": [
-        "e2e"
-      ]
-    },
-    {
-      "test_name": "test_error_handling",
-      "outcome": true,
-      "duration": 0.0012160339974798262,
-      "timestamp": "2025-08-02T11:44:14.188266",
-      "markers": [
-        "e2e"
-      ]
-    },
-    {
-      "test_name": "test_console_error_monitoring",
-      "outcome": true,
-      "duration": 88.17179672401107,
-      "timestamp": "2025-08-02T11:45:42.363210",
-      "markers": [
-        "asyncio"
       ]
     }
   ],
   "coverage": {},
   "performance": {},
-  "end_time": "2025-08-02 11:45:42.462666",
-  "duration": 94.418638,
+  "end_time": "2025-08-02 11:47:33.253041",
+  "duration": 3867.496492,
   "exit_status": 3
 }

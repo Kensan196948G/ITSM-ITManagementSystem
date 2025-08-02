@@ -131,42 +131,122 @@ check_webui_server() {
     done
 }
 
-# メイン監視実行関数
-run_monitoring() {
+# MCP Playwright監視実行関数
+run_mcp_monitoring() {
     local mode="$1"
     local interval="$2"
     
-    log_step "WebUIエラー監視・修復システムを実行中..."
+    log_step "MCP Playwright WebUIエラー監視・修復システムを実行中..."
     
     # ログファイル設定
     local timestamp=$(date +"%Y%m%d_%H%M%S")
-    local log_file="logs/comprehensive_monitor_${timestamp}.log"
+    local log_file="logs/mcp_comprehensive_monitor_${timestamp}.log"
     
-    # 実行コマンドの構築
-    local cmd="node comprehensive-webui-monitor.js"
-    
+    # 実行モードに応じた処理
     if [ "$mode" == "once" ]; then
-        cmd="$cmd --once"
-        log_info "一回のみの監視を実行します"
+        log_info "🔍 一回のみの包括的監視・修復を実行します"
+        
+        # Phase 1: メインWebUI監視
+        log_step "Phase 1: メインWebUI監視 (MCP Playwright)"
+        npx ts-node mcp-webui-error-monitor.ts 2>&1 | tee -a "$log_file" || log_warn "メインWebUI監視で警告が発生しました"
+        
+        # Phase 2: 管理者ダッシュボード監視
+        log_step "Phase 2: 管理者ダッシュボード監視"
+        npx ts-node admin-dashboard-monitor.ts 2>&1 | tee -a "$log_file" || log_warn "管理者ダッシュボード監視で警告が発生しました"
+        
+        # Phase 3: 包括的分析・修復
+        log_step "Phase 3: 包括的分析・修復実行"
+        npx ts-node comprehensive-webui-monitor.ts run 2>&1 | tee -a "$log_file" || log_warn "包括的分析で警告が発生しました"
+        
+        log_success "✅ 一回のみの監視・修復が完了しました"
     else
+        log_info "🔄 継続監視を開始します"
         if [ -n "$interval" ]; then
-            cmd="$cmd --interval=$interval"
-            log_info "継続監視を開始します (間隔: ${interval}分)"
+            log_info "監視間隔: ${interval}分"
+            npx ts-node comprehensive-webui-monitor.ts continuous "$interval" 2>&1 | tee -a "$log_file"
         else
-            log_info "継続監視を開始します (デフォルト間隔: 30分)"
+            log_info "監視間隔: 30分（デフォルト）"
+            npx ts-node comprehensive-webui-monitor.ts continuous 2>&1 | tee -a "$log_file"
         fi
         log_info "停止するには Ctrl+C を押してください"
     fi
     
-    # 監視実行
-    log_info "実行コマンド: $cmd"
-    echo "$(date): 監視開始" >> "$log_file"
-    
-    # 実行 (ログファイルにも出力)
-    $cmd 2>&1 | tee -a "$log_file"
-    
     echo "$(date): 監視終了" >> "$log_file"
-    log_info "ログファイル: $log_file"
+    log_info "📋 ログファイル: $log_file"
+}
+
+# 管理者専用監視関数
+run_admin_only_monitoring() {
+    log_step "🔐 管理者ダッシュボード専用監視を実行中..."
+    
+    local timestamp=$(date +"%Y%m%d_%H%M%S")
+    local log_file="logs/admin_monitor_${timestamp}.log"
+    
+    npx ts-node admin-dashboard-monitor.ts 2>&1 | tee -a "$log_file"
+    
+    log_success "✅ 管理者ダッシュボード監視が完了しました"
+    log_info "📋 ログファイル: $log_file"
+}
+
+# 修復のみ実行関数
+run_repair_only() {
+    local report_file="$1"
+    
+    log_step "🔧 エラー修復のみを実行中..."
+    
+    if [ -z "$report_file" ]; then
+        log_error "修復用のレポートファイルを指定してください"
+        echo "使用方法: $0 --repair-only <report_file.json>"
+        return 1
+    fi
+    
+    if [ ! -f "$report_file" ]; then
+        log_error "指定されたレポートファイルが見つかりません: $report_file"
+        return 1
+    fi
+    
+    local timestamp=$(date +"%Y%m%d_%H%M%S")
+    local log_file="logs/repair_only_${timestamp}.log"
+    
+    log_info "📁 使用するレポート: $report_file"
+    
+    # 修復スクリプトを実行
+    npx ts-node -e "
+        import { WebUIAutoRepair } from './webui-auto-repair';
+        import * as fs from 'fs';
+        
+        async function runRepair() {
+            try {
+                const report = JSON.parse(fs.readFileSync('$report_file', 'utf8'));
+                const repair = new WebUIAutoRepair();
+                
+                if (report.errors && Array.isArray(report.errors)) {
+                    console.log('🔧 修復を開始します...');
+                    const actions = await repair.repairMultipleErrors(report.errors);
+                    const repairReport = repair.getRepairReport();
+                    
+                    console.log('✅ 修復完了:');
+                    console.log('  - 成功:', actions.filter(a => a.success).length, '件');
+                    console.log('  - 失敗:', actions.filter(a => !a.success).length, '件');
+                    
+                    // 修復レポートを保存
+                    const reportPath = 'repair-only-report-' + Date.now() + '.json';
+                    fs.writeFileSync(reportPath, JSON.stringify(repairReport, null, 2));
+                    console.log('📋 修復レポート:', reportPath);
+                } else {
+                    console.log('⚠️ レポートにエラー情報が見つかりません');
+                }
+            } catch (error) {
+                console.error('❌ 修復エラー:', error);
+                process.exit(1);
+            }
+        }
+        
+        runRepair();
+    " 2>&1 | tee -a "$log_file"
+    
+    log_success "✅ 修復処理が完了しました"
+    log_info "📋 ログファイル: $log_file"
 }
 
 # レポート表示関数
@@ -231,7 +311,7 @@ main() {
     local skip_deps=false
     local cleanup_only=false
     
-    # コマンドライン引数の解析
+    # コマンドライン引数の解析（MCP Playwright拡張版）
     while [[ $# -gt 0 ]]; do
         case $1 in
             --once)
@@ -240,6 +320,24 @@ main() {
                 ;;
             --interval=*)
                 interval="${1#*=}"
+                shift
+                ;;
+            --admin-only)
+                mode="admin-only"
+                shift
+                ;;
+            --repair-only)
+                mode="repair-only"
+                shift
+                repair_file="$1"
+                shift
+                ;;
+            --monitor-only)
+                mode="monitor-only"
+                shift
+                ;;
+            --status)
+                mode="status"
                 shift
                 ;;
             --skip-deps)
@@ -251,30 +349,48 @@ main() {
                 shift
                 ;;
             --help)
-                echo "使用方法: $0 [オプション]"
+                echo "MCP Playwright WebUI 包括的監視・修復システム"
+                echo "使用方法: $0 [オプション] [引数]"
                 echo ""
-                echo "オプション:"
-                echo "  --once              一回のみ監視を実行"
-                echo "  --interval=MINUTES  継続監視の間隔（分、デフォルト: 30）"
-                echo "  --skip-deps         依存関係のインストールをスキップ"
-                echo "  --cleanup           クリーンアップのみ実行"
-                echo "  --help              このヘルプを表示"
+                echo "🎯 実行モード:"
+                echo "  --once                      一回のみ完全監視・修復を実行（デフォルト）"
+                echo "  --admin-only                管理者ダッシュボードのみ監視"
+                echo "  --monitor-only              監視のみ実行（修復なし）"
+                echo "  --repair-only <report.json> 指定レポートに基づく修復のみ"
+                echo "  --status                    最新の監視状況を表示"
+                echo "  (引数なし)                  30分間隔で継続監視"
                 echo ""
-                echo "例:"
-                echo "  $0                           # 30分間隔で継続監視"
-                echo "  $0 --once                    # 一回のみ実行"
-                echo "  $0 --interval=60             # 60分間隔で継続監視"
-                echo "  $0 --once --skip-deps        # 依存関係チェックをスキップして一回実行"
+                echo "⚙️  オプション:"
+                echo "  --interval=MINUTES          継続監視の間隔（分、デフォルト: 30）"
+                echo "  --skip-deps                 依存関係のインストールをスキップ"
+                echo "  --cleanup                   クリーンアップのみ実行"
+                echo "  --help                      このヘルプを表示"
                 echo ""
-                echo "監視対象URL:"
-                echo "  - http://192.168.3.135:3000"
-                echo "  - http://192.168.3.135:3000/admin"
+                echo "📝 実行例:"
+                echo "  $0                                    # 30分間隔で継続監視"
+                echo "  $0 --once                             # 完全な監視・修復を1回実行"
+                echo "  $0 --admin-only                       # 管理者ダッシュボードのみ監視"
+                echo "  $0 --monitor-only                     # 監視のみ（修復なし）"
+                echo "  $0 --repair-only report.json          # 指定レポートで修復のみ"
+                echo "  $0 --interval=60                      # 60分間隔で継続監視"
+                echo "  $0 --status                           # 最新の監視状況確認"
                 echo ""
-                echo "生成されるレポート:"
-                echo "  - 包括的監視レポート (HTML/JSON)"
-                echo "  - WebUIエラー監視レポート"
-                echo "  - コンポーネント修復レポート"
-                echo "  - UI/UXエラー検出レポート"
+                echo "🌐 監視対象URL:"
+                echo "  - メインWebUI: http://192.168.3.135:3000"
+                echo "  - 管理者ダッシュボード: http://192.168.3.135:3000/admin"
+                echo ""
+                echo "📊 生成されるレポート:"
+                echo "  - MCP Playwright WebUIエラー監視レポート"
+                echo "  - 管理者ダッシュボード専用レポート"
+                echo "  - 包括的監視・修復レポート (HTML/JSON)"
+                echo "  - 自動修復アクションレポート"
+                echo ""
+                echo "🔧 修復機能:"
+                echo "  - JavaScriptエラーの自動修復"
+                echo "  - ネットワークエラーの対応"
+                echo "  - アクセシビリティ問題の改善"
+                echo "  - UIコンポーネントエラーの修正"
+                echo "  - パフォーマンス最適化"
                 exit 0
                 ;;
             *)
@@ -313,11 +429,39 @@ main() {
     # 4. WebUIサーバー確認
     check_webui_server
     
-    # 5. 監視実行
-    run_monitoring "$mode" "$interval"
+    # 5. MCP Playwright監視実行
+    case "$mode" in
+        "once")
+            run_mcp_monitoring "once" "$interval"
+            ;;
+        "continuous")
+            run_mcp_monitoring "continuous" "$interval"
+            ;;
+        "admin-only")
+            run_admin_only_monitoring
+            ;;
+        "monitor-only")
+            log_info "🔍 監視のみを実行します（修復なし）"
+            npx ts-node mcp-webui-error-monitor.ts
+            npx ts-node admin-dashboard-monitor.ts
+            ;;
+        "repair-only")
+            run_repair_only "$repair_file"
+            ;;
+        "status")
+            log_info "📊 最新の監視状況を表示します"
+            npx ts-node comprehensive-webui-monitor.ts status
+            ;;
+        *)
+            log_error "不明な実行モード: $mode"
+            exit 1
+            ;;
+    esac
     
-    # 6. 結果表示
-    show_results
+    # 6. 結果表示（ステータス以外）
+    if [ "$mode" != "status" ]; then
+        show_results
+    fi
     
     echo ""
     echo "✅ 包括的WebUIエラー監視・修復システムが完了しました"
